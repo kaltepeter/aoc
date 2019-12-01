@@ -4,9 +4,10 @@
     "start": "tsc",
     "start:dev": "tsc --watch",
     "format:fix": "pretty-quick --staged",
-    "precommit": "run-s format:fix lint",
+    "precommit": "run-s format:fix lint test",
     "lint": "tslint --project ./tsconfig.json --fix",
-    "test": "jest --watch"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "rxjs": "6.5.3"

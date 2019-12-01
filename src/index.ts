@@ -1,1 +1,1 @@
-export * from './day_1';
+export * from './day-1/challenge';

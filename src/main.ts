@@ -1,4 +1,5 @@
-import { example as day1Example } from './day_1';
+import { example as day1Example, fuelCounterUpper } from './day-1/challenge';
+import { inputs } from './day-1/inputs';
 
 const day1Vals = [
   [0, 2],
@@ -8,4 +9,5 @@ const day1Vals = [
   [100756, 33583]
 ];
 
-day1Example(day1Vals);
+// day1Example(day1Vals);
+console.log(fuelCounterUpper(inputs));

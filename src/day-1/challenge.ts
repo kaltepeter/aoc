@@ -1,5 +1,6 @@
 import { concat, from, of, pipe, range } from 'rxjs';
 import { map, tap, toArray } from 'rxjs/operators';
+import { inputs } from './inputs';
 
 const fuelRequired = (mass: number) => {
   return Math.floor(mass / 3) - 2;
@@ -27,4 +28,8 @@ const example = (listOfNumsAndExpectedValues: number[][]) =>
     )
     .subscribe();
 
-export { example, fuelRequired };
+const fuelCounterUpper = (nums: number[]) => {
+  return nums.reduce((acc, cur) => (acc += fuelRequired(cur)), 0);
+};
+
+export { example, fuelRequired, fuelCounterUpper };

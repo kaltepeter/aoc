@@ -2,7 +2,7 @@ import { concat, from, of, pipe, range } from 'rxjs';
 import { map, tap, toArray } from 'rxjs/operators';
 import { inputs } from './inputs';
 
-const fuelRequired = (mass: number) => {
+const fuelNeededForMass = (mass: number) => {
   return Math.floor(mass / 3) - 2;
 };
 
@@ -17,7 +17,7 @@ const example = (listOfNumsAndExpectedValues: number[][]) =>
   from(listOfNumsAndExpectedValues)
     .pipe(
       map(([num, expected]) => {
-        const val = fuelRequired(num);
+        const val = fuelNeededForMass(num);
         const errorMsg = `${val} does NOT equal ${expected}`;
         console.log(`num: ${num}, value: ${val}, expected: ${expected}`);
         console.assert(val === expected, errorMsg, {
@@ -29,7 +29,7 @@ const example = (listOfNumsAndExpectedValues: number[][]) =>
     .subscribe();
 
 const fuelCounterUpper = (nums: number[]) => {
-  return nums.reduce((acc, cur) => (acc += fuelRequired(cur)), 0);
+  return nums.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
 };
 
-export { example, fuelRequired, fuelCounterUpper };
+export { example, fuelNeededForMass, fuelCounterUpper };

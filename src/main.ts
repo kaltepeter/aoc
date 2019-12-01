@@ -1,4 +1,8 @@
-import { example as day1Example, fuelCounterUpper } from './day-1/challenge';
+import {
+  doubleCheckedFuelCounterUpper$,
+  example$ as day1Example$,
+  fuelCounterUpper
+} from './day-1/challenge';
 import { inputs } from './day-1/inputs';
 
 const day1Vals = [
@@ -9,5 +13,8 @@ const day1Vals = [
   [100756, 33583]
 ];
 
-// day1Example(day1Vals);
-console.log(fuelCounterUpper(inputs));
+// day1Example$(day1Vals);
+console.log(`fuelCounterUpper: ${fuelCounterUpper(inputs)}`);
+doubleCheckedFuelCounterUpper$([14, 1969, 100756]).subscribe(v =>
+  console.log(`doubleCheckedFuelCounterUpper: ${v}`)
+);

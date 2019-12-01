@@ -1,9 +1,26 @@
-import { concat, from, of, pipe, range } from 'rxjs';
-import { map, tap, toArray } from 'rxjs/operators';
+import { concat, EMPTY, from, of, pipe, range } from 'rxjs';
+import {
+  expand,
+  filter,
+  flatMap,
+  map,
+  reduce,
+  takeWhile,
+  tap,
+  toArray
+} from 'rxjs/operators';
 import { inputs } from './inputs';
 
 const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
-// const totalFuelNeededByMass = (mass: number)
+const totalFuelNeededByMass$ = (mass: number) =>
+  of(mass).pipe(
+    map((m: number) => fuelNeededForMass(m)),
+    filter((m: number) => m > 0),
+    expand((m: number) =>
+      fuelNeededForMass(m) > 0 ? of(fuelNeededForMass(m)) : EMPTY
+    ),
+    reduce((acc: number, lastMass: number) => (acc += lastMass), 0)
+  );
 
 // const numbers = range(0, 40).pipe(
 //   concat(of(9.4)),
@@ -12,7 +29,7 @@ const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
 //   })
 // ).subscribe();
 
-const example = (listOfNumsAndExpectedValues: number[][]) =>
+const example$ = (listOfNumsAndExpectedValues: number[][]) =>
   from(listOfNumsAndExpectedValues)
     .pipe(
       map(([num, expected]) => {
@@ -31,4 +48,16 @@ const fuelCounterUpper = (masses: number[]) => {
   return masses.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
 };
 
-export { example, fuelNeededForMass, fuelCounterUpper };
+const doubleCheckedFuelCounterUpper$ = (masses: number[]) =>
+  from(masses).pipe(
+    flatMap(value => totalFuelNeededByMass$(value)),
+    reduce((acc: number, n: number) => (acc += n), 0)
+  );
+
+export {
+  example$,
+  fuelNeededForMass,
+  fuelCounterUpper,
+  totalFuelNeededByMass$,
+  doubleCheckedFuelCounterUpper$
+};

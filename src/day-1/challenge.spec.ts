@@ -1,4 +1,11 @@
-import { fuelCounterUpper, fuelNeededForMass } from './challenge';
+import { from, of } from 'rxjs';
+import { flatMap, map, reduce, tap, toArray } from 'rxjs/operators';
+import {
+  doubleCheckedFuelCounterUpper$,
+  fuelCounterUpper,
+  fuelNeededForMass,
+  totalFuelNeededByMass$
+} from './challenge';
 import { inputs } from './inputs';
 
 describe('1: fuelNeededForMass', () => {
@@ -35,8 +42,35 @@ describe('1: total for modules', () => {
   });
 });
 
-describe('1.2: fuel mass', () => {
-  test('should count for fuel', () => {
-    expect(2).toBe(2);
+describe('1.2: totalFuelNeededByMass$', () => {
+  describe.each([
+    [14, 2],
+    [1969, 966],
+    [100756, 50346],
+    [4, 0]
+  ])('totalFuelNeededByMass$(%i)', (value, expected) => {
+    test(`returns ${expected}`, async () => {
+      expect.assertions(1);
+      const val$ = await totalFuelNeededByMass$(value).toPromise();
+      expect(val$).toBe(expected);
+    });
+  });
+});
+
+describe('1.2: total for modules', () => {
+  test('total fuel required for [14,1969,100756] is 51314', async () => {
+    expect.assertions(1);
+    const val$ = await doubleCheckedFuelCounterUpper$([
+      14,
+      1969,
+      100756
+    ]).toPromise();
+    expect(val$).toBe(51314);
+  });
+
+  test('total from example', async () => {
+    expect.assertions(1);
+    const val$ = await doubleCheckedFuelCounterUpper$([...inputs]).toPromise();
+    expect(val$).toBe(4973628);
   });
 });

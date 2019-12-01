@@ -3,6 +3,7 @@ import { map, tap, toArray } from 'rxjs/operators';
 import { inputs } from './inputs';
 
 const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
+// const totalFuelNeededByMass = (mass: number)
 
 // const numbers = range(0, 40).pipe(
 //   concat(of(9.4)),
@@ -26,8 +27,8 @@ const example = (listOfNumsAndExpectedValues: number[][]) =>
     )
     .subscribe();
 
-const fuelCounterUpper = (nums: number[]) => {
-  return nums.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
+const fuelCounterUpper = (masses: number[]) => {
+  return masses.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
 };
 
 export { example, fuelNeededForMass, fuelCounterUpper };

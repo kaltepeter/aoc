@@ -2,9 +2,7 @@ import { concat, from, of, pipe, range } from 'rxjs';
 import { map, tap, toArray } from 'rxjs/operators';
 import { inputs } from './inputs';
 
-const fuelNeededForMass = (mass: number) => {
-  return Math.floor(mass / 3) - 2;
-};
+const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
 
 // const numbers = range(0, 40).pipe(
 //   concat(of(9.4)),

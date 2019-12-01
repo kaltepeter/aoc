@@ -9,6 +9,13 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    }
+  },
   "dependencies": {
     "rxjs": "6.5.3"
   },

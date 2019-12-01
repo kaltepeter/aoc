@@ -1,4 +1,5 @@
 {
     "jira-plugin.workingProject": "",
-    "eslint.enable": false
+    "eslint.enable": false,
+    "jest.coverageFormatter": "GutterFormatter"
 }

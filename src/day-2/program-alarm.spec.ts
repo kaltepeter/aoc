@@ -1,4 +1,5 @@
 import { EMPTY } from 'rxjs';
+import { inputs } from '../day-2/inputs';
 import {
   execGravityAssistProgram$,
   execOp,
@@ -78,5 +79,16 @@ describe('2: opcode', () => {
     test(`returns ${expected}`, () => {
       expect(execOp(value, [...program])).toBe(expected);
     });
+  });
+});
+
+describe('2: challenge', () => {
+  test('1202 program alarm', async () => {
+    expect.assertions(1);
+    const inputMod = [...inputs];
+    inputMod.splice(1, 1, 12);
+    inputMod.splice(2, 1, 2);
+    const val$ = await execGravityAssistProgram$(inputMod).toPromise();
+    expect(val$[0]).toBe(3765464);
   });
 });

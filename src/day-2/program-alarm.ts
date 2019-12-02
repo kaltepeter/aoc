@@ -1,5 +1,15 @@
 import { EMPTY, Observable, of } from 'rxjs';
-import { bufferCount, flatMap, groupBy, map, tap } from 'rxjs/operators';
+import {
+  bufferCount,
+  filter,
+  flatMap,
+  groupBy,
+  map,
+  switchMap,
+  takeWhile,
+  tap,
+  toArray
+} from 'rxjs/operators';
 
 const fns = {
   add: (x: number, y: number) => x + y,
@@ -32,22 +42,24 @@ const execOp = (intCode: number[], program: number[]): number | null => {
   return getOpFn(opCode)(inputs[0], inputs[1]);
 };
 
-const execGravityAssistProgram = (inputs: number[]): Observable<number[]> => {
+const execGravityAssistProgram$ = (inputs: number[]): Observable<number[]> => {
   const output = [...inputs];
-  return of(inputs).pipe(
+  return of(output).pipe(
     flatMap(n => n),
     bufferCount(4),
     map(intcode => {
-      const [opCode, input1Pos, input2Pos, outputPos] = intcode;
-      const calcOutput = execOp(intcode, output);
-      if (calcOutput) {
-        output.splice(outputPos, 1, calcOutput);
+      if (intcode.length === 4) {
+        const [opCode, input1Pos, input2Pos, outputPos] = intcode;
+        const calcOutput = execOp(intcode, output);
+        if (calcOutput) {
+          output.splice(outputPos, 1, calcOutput);
+        }
       }
-      // console.log('TCL: val', output, outputPos, calcOutput);
       return output;
-    }),
-    tap(console.log)
+    })
+    // toArray(),
+    // tap(console.log)
   );
 };
 
-export { execGravityAssistProgram, fns, getOpFn, execOp };
+export { execGravityAssistProgram$, fns, getOpFn, execOp };

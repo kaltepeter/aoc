@@ -1,3 +1,4 @@
+import { verify } from 'crypto';
 import { concatAll, last, toArray } from 'rxjs/operators';
 import {
   doubleCheckedFuelCounterUpper$,
@@ -27,3 +28,24 @@ execGravityAssistProgram$([...day2Inputs])
   .subscribe(v => {
     console.log(`execGravityAssistProgram$: ${v}`);
   });
+console.log('');
+const day2Vals = [...day2Inputs];
+const vars = [...Array(100).keys()];
+// console.log(vars);
+vars.forEach(noun => {
+  const testVals = [...day2Vals];
+  testVals.splice(1, 1, noun);
+  vars.forEach(verb => {
+    testVals.splice(2, 1, verb);
+    execGravityAssistProgram$([...testVals])
+      .pipe(last())
+      .subscribe(v => {
+        if (v[0] === 19690720) {
+          const val = 100 * noun + verb;
+          console.warn(
+            `part II to intcode : noun: ${noun} verb: ${verb} answer: ${val}`
+          );
+        }
+      });
+  });
+});

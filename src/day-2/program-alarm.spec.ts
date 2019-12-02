@@ -91,4 +91,21 @@ describe('2: challenge', () => {
     const val$ = await execGravityAssistProgram$(inputMod).toPromise();
     expect(val$[0]).toBe(3765464);
   });
+
+  test('1202 program alarm part II', async () => {
+    expect.assertions(1);
+    const inputMod = [...inputs];
+    inputMod.splice(1, 1, 76);
+    inputMod.splice(2, 1, 10);
+    const val$ = await execGravityAssistProgram$(inputMod).toPromise();
+    expect(val$[0]).toBe(19690720);
+  });
+  test('1202 program alarm part II answer', async () => {
+    expect.assertions(1);
+    const inputMod = [...inputs];
+    const noun = 76;
+    const verb = 10;
+    const val$ = await execGravityAssistProgram$(inputMod).toPromise();
+    expect(100 * noun + verb).toBe(7610);
+  });
 });

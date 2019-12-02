@@ -1,11 +1,10 @@
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { bufferCount, flatMap, groupBy, map, tap } from 'rxjs/operators';
 
 const fns = {
   add: (x: number, y: number) => x + y,
   multiply: (x: number, y: number) => x * y,
-  exit: (x: number, y: number) => 0,
-  error: (x: number, y: number) => 1
+  exit: (x: number, y: number) => null
 };
 
 const getOpFn = (opCode: number) => {
@@ -20,27 +19,32 @@ const getOpFn = (opCode: number) => {
       return fns.exit;
       break;
     default:
-      return fns.error;
+      return () => {
+        throw new Error(`unknown op code '${opCode}'`);
+      };
       break;
   }
 };
 
-const execOp = (
-  intCode: [number, number, number, number],
-  program: number[]
-): number => {
+const execOp = (intCode: number[], program: number[]): number | null => {
   const [opCode, inputPos1, inputPos2, outputPos] = intCode;
   const inputs = [program[inputPos1], program[inputPos2]];
   return getOpFn(opCode)(inputs[0], inputs[1]);
 };
 
 const execGravityAssistProgram = (inputs: number[]): Observable<number[]> => {
+  const output = [...inputs];
   return of(inputs).pipe(
     flatMap(n => n),
     bufferCount(4),
     map(intcode => {
-      const [opCode, input1, input2, output] = intcode;
-      return getOpFn(opCode);
+      const [opCode, input1Pos, input2Pos, outputPos] = intcode;
+      const calcOutput = execOp(intcode, output);
+      if (calcOutput) {
+        output.splice(outputPos, 1, calcOutput);
+      }
+      // console.log('TCL: val', output, outputPos, calcOutput);
+      return output;
     }),
     tap(console.log)
   );

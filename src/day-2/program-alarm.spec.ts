@@ -1,3 +1,4 @@
+import { EMPTY } from 'rxjs';
 import {
   execGravityAssistProgram,
   execOp,
@@ -5,10 +6,10 @@ import {
   getOpFn
 } from './program-alarm';
 
-describe('2: program alarm', () => {
-  describe.skip.each([
+describe.skip('2: program alarm', () => {
+  describe.each([
     [
-      [1, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50],
+      [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50],
       [3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50]
     ]
     // [
@@ -44,11 +45,10 @@ describe('2: opcode', () => {
   });
 
   describe.each`
-    value   | expected
-    ${1}    | ${fns.add}
-    ${2}    | ${fns.multiply}
-    ${99}   | ${fns.exit}
-    ${1202} | ${fns.error}
+    value | expected
+    ${1}  | ${fns.add}
+    ${2}  | ${fns.multiply}
+    ${99} | ${fns.exit}
   `('getOpFn($value)', ({ value, expected }) => {
     test(`returns ${expected}`, () => {
       expect(getOpFn(value)).toBe(expected);
@@ -63,17 +63,17 @@ describe('2: opcode', () => {
     expect(fns.multiply(1, 3)).toBe(3);
   });
   test('exit', () => {
-    expect(fns.exit(1, 3)).toBe(0);
+    expect(fns.exit(1, 3)).toBe(null);
   });
   test('error', () => {
-    expect(fns.error(1, 3)).toBe(1);
+    expect(getOpFn(1202)).toThrow(`unknown op code '1202'`);
   });
 
   describe.each`
     value               | expected
     ${[1, 9, 10, 3]}    | ${70}
     ${[2, 3, 11, 0]}    | ${3500}
-    ${[99, 30, 40, 50]} | ${0}
+    ${[99, 30, 40, 50]} | ${null}
   `('execOp($value)', ({ value, expected }) => {
     test(`returns ${expected}`, () => {
       expect(execOp(value, [...program])).toBe(expected);

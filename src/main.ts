@@ -8,6 +8,7 @@ import {
 import { inputs } from './day-1/inputs';
 import { inputs as day2Inputs } from './day-2/inputs';
 import { execGravityAssistProgram$ } from './day-2/program-alarm';
+import { checkCrossedWires } from './day-3/crossed-wires';
 
 const day1Vals = [
   [0, 2],
@@ -18,34 +19,36 @@ const day1Vals = [
 ];
 
 // day1Example$(day1Vals);
-console.log(`fuelCounterUpper: ${fuelCounterUpper(inputs)}`);
-doubleCheckedFuelCounterUpper$([14, 1969, 100756]).subscribe(v =>
-  console.log(`doubleCheckedFuelCounterUpper: ${v}`)
-);
+// console.log(`fuelCounterUpper: ${fuelCounterUpper(inputs)}`);
+// doubleCheckedFuelCounterUpper$([14, 1969, 100756]).subscribe(v =>
+//   console.log(`doubleCheckedFuelCounterUpper: ${v}`)
+// );
 console.log('');
-execGravityAssistProgram$([...day2Inputs])
-  .pipe(last())
-  .subscribe(v => {
-    console.log(`execGravityAssistProgram$: ${v}`);
-  });
+// execGravityAssistProgram$([...day2Inputs])
+//   .pipe(last())
+//   .subscribe(v => {
+//     console.log(`execGravityAssistProgram$: ${v}`);
+//   });
 console.log('');
 const day2Vals = [...day2Inputs];
 const vars = [...Array(100).keys()];
 // console.log(vars);
-vars.forEach(noun => {
-  const testVals = [...day2Vals];
-  testVals.splice(1, 1, noun);
-  vars.forEach(verb => {
-    testVals.splice(2, 1, verb);
-    execGravityAssistProgram$([...testVals])
-      .pipe(last())
-      .subscribe(v => {
-        if (v[0] === 19690720) {
-          const val = 100 * noun + verb;
-          console.warn(
-            `part II to intcode : noun: ${noun} verb: ${verb} answer: ${val}`
-          );
-        }
-      });
-  });
-});
+// vars.forEach(noun => {
+//   const testVals = [...day2Vals];
+//   testVals.splice(1, 1, noun);
+//   vars.forEach(verb => {
+//     testVals.splice(2, 1, verb);
+//     execGravityAssistProgram$([...testVals])
+//       .pipe(last())
+//       .subscribe(v => {
+//         if (v[0] === 19690720) {
+//           const val = 100 * noun + verb;
+//           console.warn(
+//             `part II to intcode : noun: ${noun} verb: ${verb} answer: ${val}`
+//           );
+//         }
+//       });
+//   });
+// });
+
+checkCrossedWires();

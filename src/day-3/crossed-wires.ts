@@ -90,7 +90,7 @@ const drawCol = (data: string[], val: number, char: string) => {
 
 const drawWires$ = of(testData).pipe(
   withLatestFrom(matrix$),
-  map(([ds, matrix]) => ds),
+  map(([ds, m]) => ds),
   tap(console.log),
   flatMap((command: string) => command),
   map(c => [c[0], +c[1]]),

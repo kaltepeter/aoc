@@ -47,9 +47,6 @@ const matrix$ = range(0, (max + matrixBuffer) * (max + matrixBuffer)).pipe(
   })
 );
 
-// const row = result[startX];
-// const newRow = row.splice(startY, 1, 'O');
-
 const drawRow = (r: string[], v: number, char: string) => {
   for (let i = 0; i < v; i++) {
     r.splice(startY + 1 + i, 1, char);
@@ -85,16 +82,35 @@ const drawCol = (data: string[], val: number, char: string) => {
 
 const drawWires$ = of(testData).pipe(
   withLatestFrom(matrix$),
-  map(([ds, m]) => ds),
-  tap(console.log),
-  flatMap((command: string) => command),
-  map(c => [c[0], +c[1]]),
-  // map(([c, v]) => {
-  //   return range(0, +v).pipe(map(iv => v));
-  // }),
-  flatMap(v => v),
-  toArray(),
-  tap(console.log)
+  map(([ds, m]) => {
+    const retM = [...m];
+    const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
+    const updateRow = [...retM[startX]];
+    const updateCol = [...retM].map((c, idx) => {
+      console.log(c, idx);
+      return idx > startX ? '|' : c[startX - idx];
+    });
+    console.log(updateCol);
+
+    for (let i = startY; i < commands[1][1] + startY; i++) {
+      updateRow[startY + i] = '-';
+    }
+
+    retM[startX] = updateRow;
+    return [retM, m];
+  }),
+  tap(([d, source]) => {
+    printMatrix(d, 'draw');
+    printMatrix(source, 'draws');
+  })
+  // flatMap((command: string) => command),
+  // map(c => [c[0], +c[1]]),
+  // // map(([c, v]) => {
+  // //   return range(0, +v).pipe(map(iv => v));
+  // // }),
+  // flatMap(v => v),
+  // toArray(),
+  // tap(console.log)
 );
 
 const printMatrix = (m: string[][], t: string = ' ') => {
@@ -115,8 +131,10 @@ const printMatrix = (m: string[][], t: string = ' ') => {
 
 const checkCrossedWires = () => {
   matrix$.subscribe(d => {
-    printMatrix(d, 'matrix$');
-    printMatrix(matrix, 'matrix');
+    // printMatrix(d, 'matrix$');
+    // printMatrix(matrix, 'matrix');
   });
+
+  drawWires$.subscribe(d => {});
 };
 export { checkCrossedWires };

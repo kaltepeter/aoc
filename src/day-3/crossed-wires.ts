@@ -33,22 +33,17 @@ const matrix$ = range(0, (max + matrixBuffer) * (max + matrixBuffer)).pipe(
   mergeAll(),
   toArray(),
   map(v => {
-    const newV = v[startX];
-    // v[startX][startY] = 'O';
-    // v[startX] = [];
-    // console.log(newV, v[startX]);
-    // v[startX] = [...newV];
-    return v;
-  }),
-  tap(m => {
-    matrix = [...m];
-    const startRow = [...matrix[startX]];
+    const startRow = [...v[startX]];
     const newRow = [
       ...startRow.slice(0, startY),
       'o',
       ...startRow.slice(startY + 1)
     ];
-    matrix[startX] = [...newRow];
+    v[startX] = [...newRow];
+    return v;
+  }),
+  tap(m => {
+    matrix = [...m];
   })
 );
 

@@ -91,32 +91,42 @@ const drawWires$ = of(testData).pipe(
   map(([ds, m]) => {
     console.log(ds);
     const retM = [...m];
-    // console.log(retM[startRowIndex]);
     const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
     const updateRow = [...retM[startRowIndex]];
-    // let updateCol;
-    // const updateCol = [...retM].map((c, idx) => {
-    //   console.log(c, idx);
-    //   return idx > startX ? '|' : c[startX - idx];
-    // });
-    // console.log(retM[4]);
-    // retM[4][2] = 'x';
-    // console.log(retM[2]);
-    for (let i = startRowIndex - 1; i >= matrixBuffer; i--) {
-      console.log(startColIndex, startRowIndex, comms[1][1], i);
-      // console.log(retM[i]);
+    let [rowCursor, colCursor] = [startRowIndex, startColIndex];
+    console.log(rowCursor, startRowIndex);
+
+    for (let i = rowCursor - 1; i >= rowCursor - comms[0][1]; i--) {
       const row = [...retM[i]];
-      row[startColIndex] = '|';
-      console.log(row);
+      row[colCursor] = i === rowCursor - comms[0][1] ? '+' : '|';
+      retM.splice(i, 1, row);
+    }
+    rowCursor -= comms[0][1];
+
+    // todo: pass in start row
+    for (let i = colCursor + 1; i <= comms[1][1] + colCursor; i++) {
+      // updateRow[startY + i] = '-';
+      const row = [...retM[rowCursor]];
+      row[i] = i === comms[1][1] + colCursor ? '+' : '-';
+      retM.splice(rowCursor, 1, row);
+    }
+    colCursor += comms[1][1];
+
+    for (let i = rowCursor + 1; i <= rowCursor + comms[2][1]; i++) {
+      const row = [...retM[i]];
+      row[colCursor] = i === rowCursor + comms[2][1] ? '+' : '|';
       retM.splice(i, 1, row);
     }
 
-    for (let i = startColIndex; i < comms[1][1] + startColIndex; i++) {
-      // console.log(updateRow, startY, startX, comms[1][1], i);
-      // updateRow[startY + i] = '-';
-    }
+    rowCursor += comms[2][1];
 
-    // retM[startX] = updateRow;
+    for (let i = colCursor - 1; i >= colCursor - comms[3][1]; i--) {
+      const row = [...retM[rowCursor]];
+      row[i] = i === comms[3][1] - colCursor ? '+' : '-';
+      retM.splice(rowCursor, 1, row);
+    }
+    colCursor -= comms[3][1];
+
     return [retM, m];
   }),
   tap(([d, source]) => {

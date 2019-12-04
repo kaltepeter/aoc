@@ -28,8 +28,6 @@ export interface MatrixMetrics {
 const getMaxMovement = (d: string[]): number =>
   Math.max(...d.map(p => +p.slice(1)));
 
-let mm: MatrixMetrics;
-
 const setupMatrix = (d: string[]) => {
   const max = getMaxMovement([...d]);
   // buffer for display purposes, round the grid
@@ -62,7 +60,7 @@ const commands: any = {
   L: (v: number): number => -v
 };
 
-mm = setupMatrix([...testData]);
+// mm = setupMatrix([...testData]);
 
 // rows of columns (x col, y row)
 let matrix: string[][] = [];
@@ -154,8 +152,8 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
       return [retM, m];
     }),
     tap(([d, source]) => {
-      printMatrix(d, 'draw');
-      printMatrix(source, 'draws');
+      printMatrix(d, 'draw', matrixMetrics);
+      printMatrix(source, 'draws', matrixMetrics);
     })
     // flatMap((command: string) => command),
     // map(c => [c[0], +c[1]]),
@@ -175,7 +173,12 @@ const printFn = (str: string) => {
   console.log(str);
 };
 
-const printMatrix = (m: string[][], t: string = ' ', print = printFn) => {
+const printMatrix = (
+  m: string[][],
+  t: string = ' ',
+  mm: MatrixMetrics,
+  print = printFn
+) => {
   const title = t.length % 2 === 0 ? t : t + '';
   // max + buffer + spaces for join
   const paddLength =
@@ -183,7 +186,6 @@ const printMatrix = (m: string[][], t: string = ' ', print = printFn) => {
   // title length minus space on each side
   const titleL = title.length + 2;
   const halfPad = Math.floor((paddLength - titleL) / 2);
-  const padding = new Array(halfPad).fill('-').join('');
   const titleStr: string = [''.padStart(halfPad, '-'), '', title, ''].join(' ');
   print(`${titleStr.padEnd(paddLength, '-')}`);
   m.map((i: string[]) => {

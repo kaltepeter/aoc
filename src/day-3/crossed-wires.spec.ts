@@ -118,7 +118,7 @@ describe('3: crossed wires', () => {
   test('printMatrix', () => {
     expect.assertions(5);
     const printerFn = jest.fn();
-    printMatrix(expectedMatrix3, 'matrix', printerFn);
+    printMatrix(expectedMatrix3, 'matrix', expectedMetrics3, printerFn);
     expect(printerFn).toHaveBeenCalled();
     expect(printerFn).toHaveBeenCalledTimes(12);
     expect(printerFn).nthCalledWith(1, '---  matrix ---');

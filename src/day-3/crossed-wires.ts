@@ -13,45 +13,82 @@ import {
 } from 'rxjs/operators';
 
 const testData = ['U7', 'R6', 'D4', 'L4'];
+
+// tslint:disable-next-line: interface-name
+export interface MatrixMetrics {
+  maxMovement: number;
+  buffer: number;
+  rowSize: number;
+  gridSize: number;
+  startRowIndex: number;
+  startColIndex: number;
+}
+
+// max places to move in matrix
+const getMaxMovement = (d: string[]): number =>
+  Math.max(...d.map(p => +p.slice(1)));
+
+let mm: MatrixMetrics;
+
+const setupMatrix = (d: string[]) => {
+  const max = getMaxMovement([...d]);
+  // buffer for display purposes, round the grid
+  const bufferSize = 1;
+  // rowsize = max + 1 for home item + (left buffer + right buffer)
+  const rowSize = max + 1 + bufferSize * 2;
+  const gridSize = rowSize * rowSize;
+
+  // starting position
+  const [sRowIndex, sColIndex] = [
+    max + bufferSize, // zero base, shift to bottom left in respect to buffer
+    bufferSize
+  ];
+
+  const metrics: MatrixMetrics = {
+    maxMovement: max,
+    buffer: bufferSize,
+    rowSize,
+    gridSize,
+    startRowIndex: sRowIndex,
+    startColIndex: sColIndex
+  };
+  return metrics;
+};
+
 const commands: any = {
   U: (v: number): number => v,
   D: (v: number): number => -v,
   R: (v: number): number => v,
   L: (v: number): number => -v
 };
-// max places to move in matrix
-const maxMovement = Math.max(...testData.map(p => +p[1]));
-// buffer for display purposes, round the grid
-const matrixBuffer = 1;
-// starting position
-const [startRowIndex, startColIndex] = [
-  maxMovement + matrixBuffer, // zero base, shift to bottom left in respect to buffer
-  matrixBuffer
-];
-// rowsize = maxMovement + 1 for home item + (left buffer + right buffer)
-const rowSize = maxMovement + 1 + matrixBuffer * 2;
-const gridSize = rowSize * rowSize;
-const initialRow = new Array(rowSize).fill('.');
+
+mm = setupMatrix([...testData]);
+
+const maxMovement = mm.maxMovement;
+const matrixBuffer = mm.buffer;
+const startRowIndex = mm.startRowIndex;
+const startColIndex = mm.startColIndex;
 
 // rows of columns (x col, y row)
 let matrix: string[][] = [];
 
-const matrix$ = range(0, gridSize).pipe(
-  bufferCount(rowSize),
-  map(v => initialRow),
-  toArray(),
-  mergeAll(),
-  toArray(),
-  map(v => {
-    const startRow = [...v[startRowIndex]];
-    startRow.splice(startColIndex, 1, 'o');
-    v[startRowIndex] = [...startRow];
-    return v;
-  }),
-  tap(m => {
-    matrix = [...m];
-  })
-);
+const matrix$ = (m: MatrixMetrics) =>
+  range(0, m.gridSize).pipe(
+    bufferCount(m.rowSize),
+    map(v => new Array(m.rowSize).fill('.')),
+    toArray(),
+    mergeAll(),
+    toArray(),
+    map(v => {
+      const startRow = [...v[m.startRowIndex]];
+      startRow.splice(m.startColIndex, 1, 'o');
+      v[m.startRowIndex] = [...startRow];
+      return v;
+    }),
+    tap(finalM => {
+      matrix = [...finalM];
+    })
+  );
 
 const drawRow = (r: string[], v: number, char: string) => {
   for (let i = 0; i < v; i++) {
@@ -87,14 +124,13 @@ const drawCol = (data: string[], val: number, char: string) => {
 // });
 
 const drawWires$ = of(testData).pipe(
-  withLatestFrom(matrix$),
+  withLatestFrom(matrix$(mm)),
   map(([ds, m]) => {
     console.log(ds);
     const retM = [...m];
     const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
     const updateRow = [...retM[startRowIndex]];
     let [rowCursor, colCursor] = [startRowIndex, startColIndex];
-    console.log(rowCursor, startRowIndex);
 
     for (let i = rowCursor - 1; i >= rowCursor - comms[0][1]; i--) {
       const row = [...retM[i]];
@@ -143,7 +179,15 @@ const drawWires$ = of(testData).pipe(
   // tap(console.log)
 );
 
-const printMatrix = (m: string[][], t: string = ' ') => {
+const printFn = (str: string) => {
+  const isJest = !!process.env['JEST_WORKER_ID'];
+  if (isJest) {
+    return;
+  }
+  console.log(str);
+};
+
+const printMatrix = (m: string[][], t: string = ' ', print = printFn) => {
   const title = t.length % 2 === 0 ? t : t + '';
   // max + buffer + spaces for join
   const paddLength =
@@ -153,11 +197,11 @@ const printMatrix = (m: string[][], t: string = ' ') => {
   const halfPad = Math.floor((paddLength - titleL) / 2);
   const padding = new Array(halfPad).fill('-').join('');
   const titleStr: string = [''.padStart(halfPad, '-'), '', title, ''].join(' ');
-  console.log(`${titleStr.padEnd(paddLength, '-')}`);
+  print(`${titleStr.padEnd(paddLength, '-')}`);
   m.map((i: string[]) => {
-    console.log(i.join(' '));
+    print(i.join(' '));
   });
-  console.log('');
+  print('');
 };
 
 const checkCrossedWires = () => {
@@ -168,4 +212,11 @@ const checkCrossedWires = () => {
 
   drawWires$.subscribe(d => {});
 };
-export { checkCrossedWires };
+export {
+  checkCrossedWires,
+  matrix$,
+  printMatrix,
+  getMaxMovement,
+  setupMatrix,
+  drawWires$
+};

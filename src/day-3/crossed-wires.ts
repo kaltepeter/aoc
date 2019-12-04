@@ -64,11 +64,6 @@ const commands: any = {
 
 mm = setupMatrix([...testData]);
 
-const maxMovement = mm.maxMovement;
-const matrixBuffer = mm.buffer;
-const startRowIndex = mm.startRowIndex;
-const startColIndex = mm.startColIndex;
-
 // rows of columns (x col, y row)
 let matrix: string[][] = [];
 
@@ -89,18 +84,6 @@ const matrix$ = (m: MatrixMetrics) =>
       matrix = [...finalM];
     })
   );
-
-const drawRow = (r: string[], v: number, char: string) => {
-  for (let i = 0; i < v; i++) {
-    r.splice(startColIndex + 1 + i, 1, char);
-  }
-};
-
-const drawCol = (data: string[], val: number, char: string) => {
-  for (let i = 0; i < val; i++) {
-    data.splice(startColIndex + 1 + i, 1, char);
-  }
-};
 
 // testData.map(([commandCode, v]) => {
 //   const commandValue = +v;
@@ -123,61 +106,66 @@ const drawCol = (data: string[], val: number, char: string) => {
 //   }
 // });
 
-const drawWires$ = of(testData).pipe(
-  withLatestFrom(matrix$(mm)),
-  map(([ds, m]) => {
-    console.log(ds);
-    const retM = [...m];
-    const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
-    const updateRow = [...retM[startRowIndex]];
-    let [rowCursor, colCursor] = [startRowIndex, startColIndex];
+const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
+  of(instructions).pipe(
+    withLatestFrom(matrix$(matrixMetrics)),
+    map(([ds, m]) => {
+      const retM = [...m];
+      const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
+      const updateRow = [...retM[matrixMetrics.startRowIndex]];
+      let [rowCursor, colCursor] = [
+        matrixMetrics.startRowIndex,
+        matrixMetrics.startColIndex
+      ];
 
-    for (let i = rowCursor - 1; i >= rowCursor - comms[0][1]; i--) {
-      const row = [...retM[i]];
-      row[colCursor] = i === rowCursor - comms[0][1] ? '+' : '|';
-      retM.splice(i, 1, row);
-    }
-    rowCursor -= comms[0][1];
+      for (let i = rowCursor - 1; i >= rowCursor - comms[0][1]; i--) {
+        const row = [...retM[i]];
+        row[colCursor] = i === rowCursor - comms[0][1] ? '+' : '|';
+        retM.splice(i, 1, row);
+      }
+      rowCursor -= comms[0][1];
 
-    // todo: pass in start row
-    for (let i = colCursor + 1; i <= comms[1][1] + colCursor; i++) {
-      // updateRow[startY + i] = '-';
-      const row = [...retM[rowCursor]];
-      row[i] = i === comms[1][1] + colCursor ? '+' : '-';
-      retM.splice(rowCursor, 1, row);
-    }
-    colCursor += comms[1][1];
+      // todo: pass in start row
+      for (let i = colCursor + 1; i <= comms[1][1] + colCursor; i++) {
+        // updateRow[startY + i] = '-';
+        const row = [...retM[rowCursor]];
+        row[i] = i === comms[1][1] + colCursor ? '+' : '-';
+        retM.splice(rowCursor, 1, row);
+      }
+      colCursor += comms[1][1];
 
-    for (let i = rowCursor + 1; i <= rowCursor + comms[2][1]; i++) {
-      const row = [...retM[i]];
-      row[colCursor] = i === rowCursor + comms[2][1] ? '+' : '|';
-      retM.splice(i, 1, row);
-    }
+      for (let i = rowCursor + 1; i <= rowCursor + comms[2][1]; i++) {
+        const row = [...retM[i]];
+        row[colCursor] = i === rowCursor + comms[2][1] ? '+' : '|';
+        retM.splice(i, 1, row);
+      }
 
-    rowCursor += comms[2][1];
+      rowCursor += comms[2][1];
 
-    for (let i = colCursor - 1; i >= colCursor - comms[3][1]; i--) {
-      const row = [...retM[rowCursor]];
-      row[i] = i === comms[3][1] - colCursor ? '+' : '-';
-      retM.splice(rowCursor, 1, row);
-    }
-    colCursor -= comms[3][1];
+      for (let i = colCursor - 1; i >= colCursor - comms[3][1]; i--) {
+        const row = [...retM[rowCursor]];
+        row[i] = i === comms[3][1] - colCursor ? '+' : '-';
+        retM.splice(rowCursor, 1, row);
+      }
+      colCursor -= comms[3][1];
 
-    return [retM, m];
-  }),
-  tap(([d, source]) => {
-    printMatrix(d, 'draw');
-    printMatrix(source, 'draws');
-  })
-  // flatMap((command: string) => command),
-  // map(c => [c[0], +c[1]]),
-  // // map(([c, v]) => {
-  // //   return range(0, +v).pipe(map(iv => v));
-  // // }),
-  // flatMap(v => v),
-  // toArray(),
-  // tap(console.log)
-);
+      // console.log(retM);
+
+      return [retM, m];
+    }),
+    tap(([d, source]) => {
+      printMatrix(d, 'draw');
+      printMatrix(source, 'draws');
+    })
+    // flatMap((command: string) => command),
+    // map(c => [c[0], +c[1]]),
+    // // map(([c, v]) => {
+    // //   return range(0, +v).pipe(map(iv => v));
+    // // }),
+    // flatMap(v => v),
+    // toArray(),
+    // tap(console.log)
+  );
 
 const printFn = (str: string) => {
   const isJest = !!process.env['JEST_WORKER_ID'];
@@ -191,7 +179,7 @@ const printMatrix = (m: string[][], t: string = ' ', print = printFn) => {
   const title = t.length % 2 === 0 ? t : t + '';
   // max + buffer + spaces for join
   const paddLength =
-    maxMovement + matrixBuffer + (maxMovement + matrixBuffer - 1);
+    mm.maxMovement + mm.buffer + (mm.maxMovement + mm.buffer - 1);
   // title length minus space on each side
   const titleL = title.length + 2;
   const halfPad = Math.floor((paddLength - titleL) / 2);
@@ -210,7 +198,7 @@ const checkCrossedWires = () => {
   // printMatrix(matrix, 'matrix');
   // });
 
-  drawWires$.subscribe(d => {});
+  drawWires$([...testData], setupMatrix([...testData])).subscribe(d => {});
 };
 export {
   checkCrossedWires,

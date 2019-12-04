@@ -39,6 +39,28 @@ const expectedMatrix3 = [
   ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.']
 ];
 
+const expectedMatrixWithWire3 = [
+  ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+  ['.', '+', '-', '-', '-', '-', '-', '+', '.', '.'],
+  ['.', '|', '.', '.', '.', '.', '.', '|', '.', '.'],
+  ['.', '|', '.', '.', '.', '.', '.', '|', '.', '.'],
+  ['.', '|', '.', '.', '.', '.', '.', '|', '.', '.'],
+  ['.', '|', '.', '-', '-', '-', '-', '+', '.', '.'],
+  ['.', '|', '.', '.', '.', '.', '.', '.', '.', '.'],
+  ['.', '|', '.', '.', '.', '.', '.', '.', '.', '.'],
+  ['.', 'o', '.', '.', '.', '.', '.', '.', '.', '.'],
+  ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.']
+];
+
+const expectedMetrics3 = {
+  maxMovement: 7,
+  buffer: 1,
+  rowSize: 10,
+  gridSize: 100,
+  startRowIndex: 8,
+  startColIndex: 1
+};
+
 describe('3: crossed wires', () => {
   let expectedMetrics: MatrixMetrics;
   let metrics: MatrixMetrics;
@@ -86,9 +108,10 @@ describe('3: crossed wires', () => {
 
   test('draws wire on matrix', async () => {
     expect.assertions(2);
-    const expectedOut = expectedWire3.split('\n').map(r => r.split(' '));
-    const val$ = await drawWires$.toPromise();
-    expect(val$[0]).toEqual(expectedOut);
+    const val$ = await drawWires$(wireTestData[2], {
+      ...expectedMetrics3
+    }).toPromise();
+    expect(val$[0]).toEqual(expectedMatrixWithWire3);
     expect(val$[1]).toEqual(expectedMatrix3);
   });
 

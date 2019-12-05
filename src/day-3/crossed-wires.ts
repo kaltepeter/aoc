@@ -39,8 +39,6 @@ type DrawFn = (
   curM: string[][]
 ) => DrawResult;
 
-// tslint:disable-next-line: interface-name
-
 // max places to move in matrix
 const getMaxMovement = (d: string[]): number =>
   Math.max(...d.map(p => +p.slice(1)));
@@ -69,16 +67,6 @@ const setupMatrix = (d: string[]) => {
   };
   return metrics;
 };
-
-const drawPath: any = {
-  U: (v: number): number => v,
-  D: (v: number): number => -v,
-  R: (v: number): number => v,
-  L: (v: number): number => -v
-};
-
-// mm = setupMatrix([...testData]);
-
 // rows of columns (x col, y row)
 let matrix: string[][] = [];
 
@@ -99,27 +87,6 @@ const matrix$ = (m: MatrixMetrics) =>
       matrix = [...finalM];
     })
   );
-
-// testData.map(([commandCode, v]) => {
-//   const commandValue = +v;
-//   const command = commands[commandCode];
-//   const val = command(commandValue);
-//   const row = result[startX];
-//   const col = result[startX][startY];
-
-//   switch (commandCode) {
-//     case 'U':
-//       drawCol(row, commandValue, '-');
-//       break;
-//     case 'R':
-//       drawRow(row, commandValue, '-');
-//       break;
-//     case 'D':
-//       break;
-//     case 'L':
-//       break;
-//   }
-// });
 
 const drawU: DrawFn = (dist, r, c, curM) => {
   const newM = [...curM];
@@ -192,6 +159,33 @@ const drawL: DrawFn = (dist, r, c, curM) => {
   };
 };
 
+const execCommand = (commandCode: string, ...args: Parameters<DrawFn>) => {
+  let drawResult: DrawResult;
+  switch (commandCode) {
+    case 'U':
+      drawResult = drawU(...args);
+      break;
+    case 'R':
+      drawResult = drawR(...args);
+      break;
+    case 'D':
+      drawResult = drawD(...args);
+      break;
+    case 'L':
+      drawResult = drawL(...args);
+      break;
+    default:
+      drawResult = {
+        rowCursor: args[1],
+        colCursor: args[2],
+        m: args[3],
+        prevM: args[3]
+      };
+      break;
+  }
+  return drawResult;
+};
+
 const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
   of(instructions).pipe(
     withLatestFrom(matrix$(matrixMetrics)),
@@ -207,23 +201,17 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
       paths.map(p => {
         const [command, distance] = p;
         console.log(`path: ${command} ${distance}`);
+        const commandResult = execCommand(
+          command,
+          distance,
+          rowCursor,
+          colCursor,
+          retM
+        );
+        rowCursor = commandResult.rowCursor;
+        colCursor = commandResult.colCursor;
+        retM = commandResult.m;
       });
-
-      const u = drawU(paths[0][1], rowCursor, colCursor, retM);
-      rowCursor = u.rowCursor;
-      retM = u.m;
-
-      const r = drawR(paths[1][1], rowCursor, colCursor, retM);
-      colCursor = r.colCursor;
-      retM = r.m;
-
-      const d = drawD(paths[2][1], rowCursor, colCursor, retM);
-      rowCursor = d.rowCursor;
-      retM = d.m;
-
-      const l = drawL(paths[3][1], rowCursor, colCursor, retM);
-      colCursor = l.colCursor;
-      retM = l.m;
 
       return [retM, m];
     }),
@@ -231,14 +219,6 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
       printMatrix(d, 'draw', matrixMetrics);
       printMatrix(source, 'draws', matrixMetrics);
     })
-    // flatMap((command: string) => command),
-    // map(c => [c[0], +c[1]]),
-    // // map(([c, v]) => {
-    // //   return range(0, +v).pipe(map(iv => v));
-    // // }),
-    // flatMap(v => v),
-    // toArray(),
-    // tap(console.log)
   );
 
 const printFn = (str: string) => {

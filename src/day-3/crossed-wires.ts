@@ -13,6 +13,7 @@ import {
 } from 'rxjs/operators';
 
 const testData = ['U7', 'R6', 'D4', 'L4'];
+// const testData = ['R75', 'D30', 'R83', 'U83', 'L12', 'D49', 'R71', 'U7', 'L72'];
 
 // tslint:disable-next-line: interface-name
 export interface MatrixMetrics {
@@ -65,6 +66,7 @@ const setupMatrix = (d: string[]) => {
     startRowIndex: sRowIndex,
     startColIndex: sColIndex
   };
+  console.log(metrics);
   return metrics;
 };
 // rows of columns (x col, y row)
@@ -77,12 +79,12 @@ const matrix$ = (m: MatrixMetrics) =>
     toArray(),
     mergeAll(),
     toArray(),
-    map(v => {
-      const startRow = [...v[m.startRowIndex]];
-      startRow.splice(m.startColIndex, 1, 'o');
-      v[m.startRowIndex] = [...startRow];
-      return v;
-    }),
+    // map(v => {
+    //   const startRow = [...v[m.startRowIndex]];
+    //   startRow.splice(m.startColIndex, 1, 'o');
+    //   v[m.startRowIndex] = [...startRow];
+    //   return v;
+    // }),
     tap(finalM => {
       matrix = [...finalM];
     })
@@ -186,13 +188,45 @@ const execCommand = (commandCode: string, ...args: Parameters<DrawFn>) => {
   return drawResult;
 };
 
+const calcDirections = (paths: Array<[string, number]>) => {
+  const topIndex = paths.findIndex(path => path[0].match('U'));
+  const bottomIndex = paths.findIndex(path => path[0].match('D'));
+  const rightIndex = paths.findIndex(path => path[0].match('R'));
+  const leftIndex = paths.findIndex(path => path[0].match('L'));
+  const getVal = (pi: number) => (paths[pi] ? paths[pi][1] : 0);
+  return {
+    top: getVal(topIndex),
+    right: getVal(rightIndex),
+    bottom: getVal(bottomIndex),
+    left: getVal(leftIndex)
+  };
+};
+
 const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
   of(instructions).pipe(
+    // map(path => {
+    //   console.log(path);
+    //   return path;
+    // }),
     withLatestFrom(matrix$(matrixMetrics)),
     map(([ds, m]) => {
+      console.log(matrixMetrics);
+      const v = [...m];
+      const startRow = [...v[matrixMetrics.startRowIndex]];
+      startRow.splice(matrixMetrics.startColIndex, 1, 'o');
+      v[matrixMetrics.startRowIndex] = [...startRow];
+      return v;
+    }),
+    map(m => {
+      console.log(instructions);
       let retM = [...m];
-      const paths: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
-      const updateRow = [...retM[matrixMetrics.startRowIndex]];
+      const paths: Array<[string, number]> = instructions.map((c: string) => [
+        c[0],
+        +c.slice(1)
+      ]);
+      const firstMoveByDirection = calcDirections(paths);
+      console.log(firstMoveByDirection);
+      // const updateRow = [...retM[matrixMetrics.startRowIndex]];
       let [rowCursor, colCursor] = [
         matrixMetrics.startRowIndex,
         matrixMetrics.startColIndex
@@ -264,5 +298,6 @@ export {
   printMatrix,
   getMaxMovement,
   setupMatrix,
-  drawWires$
+  drawWires$,
+  calcDirections
 };

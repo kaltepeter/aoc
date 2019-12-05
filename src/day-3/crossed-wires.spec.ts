@@ -1,4 +1,5 @@
 import {
+  calcDirections,
   drawWires$,
   getMaxMovement,
   matrix$,
@@ -99,7 +100,6 @@ describe('3: crossed wires', () => {
     expect.assertions(3);
     const row = new Array(metrics.rowSize).fill('.');
     const homeRow = [...row];
-    homeRow.splice(1, 1, 'o');
     const val$ = await matrix$(metrics).toPromise();
     expect(val$.length).toBe(86);
     expect(val$[0]).toEqual(row);
@@ -124,5 +124,18 @@ describe('3: crossed wires', () => {
     expect(printerFn).nthCalledWith(1, '---  matrix ---');
     expect(printerFn).nthCalledWith(10, '. o . . . . . . . .');
     expect(printerFn).lastCalledWith('');
+  });
+
+  test('calcDirections', () => {
+    const paths: Array<[string, number]> = wireTestData[1].map(c => [
+      c[0],
+      +c.slice(1)
+    ]);
+    expect(calcDirections(paths)).toEqual({
+      top: 62,
+      right: 66,
+      bottom: 71,
+      left: 0
+    });
   });
 });

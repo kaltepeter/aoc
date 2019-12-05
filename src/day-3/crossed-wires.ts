@@ -24,6 +24,23 @@ export interface MatrixMetrics {
   startColIndex: number;
 }
 
+// tslint:disable-next-line: interface-name
+export interface DrawResult {
+  rowCursor: number;
+  colCursor: number;
+  m: string[][];
+  prevM: string[][];
+}
+
+type DrawFn = (
+  dist: number,
+  r: number,
+  c: number,
+  curM: string[][]
+) => DrawResult;
+
+// tslint:disable-next-line: interface-name
+
 // max places to move in matrix
 const getMaxMovement = (d: string[]): number =>
   Math.max(...d.map(p => +p.slice(1)));
@@ -53,7 +70,7 @@ const setupMatrix = (d: string[]) => {
   return metrics;
 };
 
-const commands: any = {
+const drawPath: any = {
   U: (v: number): number => v,
   D: (v: number): number => -v,
   R: (v: number): number => v,
@@ -104,50 +121,109 @@ const matrix$ = (m: MatrixMetrics) =>
 //   }
 // });
 
+const drawU: DrawFn = (dist, r, c, curM) => {
+  const newM = [...curM];
+  const total = r - dist;
+  for (let i = r - 1; i >= total; i--) {
+    const row = [...newM[i]];
+    row[c] = i === total ? '+' : '|';
+    newM.splice(i, 1, row);
+  }
+  r -= dist;
+  return {
+    rowCursor: r,
+    colCursor: c,
+    m: newM,
+    prevM: curM
+  };
+};
+
+const drawD: DrawFn = (dist, r, c, curM) => {
+  const newM = [...curM];
+  const total = r + dist;
+  for (let i = r + 1; i <= total; i++) {
+    const row = [...newM[i]];
+    row[c] = i === total ? '+' : '|';
+    newM.splice(i, 1, row);
+  }
+  r += dist;
+  return {
+    rowCursor: r,
+    colCursor: c,
+    m: newM,
+    prevM: curM
+  };
+};
+
+const drawR: DrawFn = (dist, r, c, curM) => {
+  const newM = [...curM];
+  const total = dist + c;
+  // todo: pass in start row
+  for (let i = c + 1; i <= total; i++) {
+    const row = [...newM[r]];
+    row[i] = i === total ? '+' : '-';
+    newM.splice(r, 1, row);
+  }
+  c += dist;
+  return {
+    rowCursor: r,
+    colCursor: c,
+    m: newM,
+    prevM: curM
+  };
+};
+
+const drawL: DrawFn = (dist, r, c, curM) => {
+  const newM = [...curM];
+  const total = c - dist;
+
+  for (let i = c - 1; i >= total; i--) {
+    const row = [...newM[r]];
+    row[i] = i === total ? '+' : '-';
+    newM.splice(r, 1, row);
+  }
+
+  c -= dist;
+  return {
+    rowCursor: r,
+    colCursor: c,
+    m: newM,
+    prevM: curM
+  };
+};
+
 const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
   of(instructions).pipe(
     withLatestFrom(matrix$(matrixMetrics)),
     map(([ds, m]) => {
-      const retM = [...m];
-      const comms: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
+      let retM = [...m];
+      const paths: Array<[string, number]> = ds.map(c => [c[0], +c[1]]);
       const updateRow = [...retM[matrixMetrics.startRowIndex]];
       let [rowCursor, colCursor] = [
         matrixMetrics.startRowIndex,
         matrixMetrics.startColIndex
       ];
 
-      for (let i = rowCursor - 1; i >= rowCursor - comms[0][1]; i--) {
-        const row = [...retM[i]];
-        row[colCursor] = i === rowCursor - comms[0][1] ? '+' : '|';
-        retM.splice(i, 1, row);
-      }
-      rowCursor -= comms[0][1];
+      paths.map(p => {
+        const [command, distance] = p;
+        console.log(`path: ${command} ${distance}`);
+      });
 
-      // todo: pass in start row
-      for (let i = colCursor + 1; i <= comms[1][1] + colCursor; i++) {
-        // updateRow[startY + i] = '-';
-        const row = [...retM[rowCursor]];
-        row[i] = i === comms[1][1] + colCursor ? '+' : '-';
-        retM.splice(rowCursor, 1, row);
-      }
-      colCursor += comms[1][1];
+      const u = drawU(paths[0][1], rowCursor, colCursor, retM);
+      rowCursor = u.rowCursor;
+      retM = u.m;
 
-      for (let i = rowCursor + 1; i <= rowCursor + comms[2][1]; i++) {
-        const row = [...retM[i]];
-        row[colCursor] = i === rowCursor + comms[2][1] ? '+' : '|';
-        retM.splice(i, 1, row);
-      }
+      const r = drawR(paths[1][1], rowCursor, colCursor, retM);
+      colCursor = r.colCursor;
+      retM = r.m;
 
-      rowCursor += comms[2][1];
+      const d = drawD(paths[2][1], rowCursor, colCursor, retM);
+      rowCursor = d.rowCursor;
+      retM = d.m;
 
-      for (let i = colCursor - 1; i >= colCursor - comms[3][1]; i--) {
-        const row = [...retM[rowCursor]];
-        row[i] = i === comms[3][1] - colCursor ? '+' : '-';
-        retM.splice(rowCursor, 1, row);
-      }
-      colCursor -= comms[3][1];
-
-      // console.log(retM);
+      const l = drawL(paths[3][1], rowCursor, colCursor, retM);
+      colCursor = l.colCursor;
+      retM = l.m;
 
       return [retM, m];
     }),

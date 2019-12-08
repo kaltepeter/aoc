@@ -7,6 +7,7 @@ import {
   flatMap,
   map,
   mergeAll,
+  reduce,
   tap,
   toArray,
   withLatestFrom
@@ -15,14 +16,27 @@ import {
 const testData = ['U7', 'R6', 'D4', 'L4'];
 // const testData = ['R75', 'D30', 'R83', 'U83', 'L12', 'D49', 'R71', 'U7', 'L72'];
 
+export type StartMetrics = [number, number];
+
 // tslint:disable-next-line: interface-name
 export interface MatrixMetrics {
   maxMovement: number;
   buffer: number;
   rowSize: number;
+  colSize: number;
   gridSize: number;
   startRowIndex: number;
   startColIndex: number;
+  xMove: number;
+  startX: number;
+  yMove: number;
+  startY: number;
+  firstMoves: {
+    up: StartMetrics;
+    right: StartMetrics;
+    down: StartMetrics;
+    left: StartMetrics;
+  };
 }
 
 // tslint:disable-next-line: interface-name
@@ -44,13 +58,56 @@ type DrawFn = (
 const getMaxMovement = (d: string[]): number =>
   Math.max(...d.map(p => +p.slice(1)));
 
-const setupMatrix = (d: string[]) => {
+/**
+ * takes commands and converts to array of command, distance
+ * @param commands ['D7,'R4','U2','L2']
+ * @returns [['D', 7], ['R', 4], ['U', 2], ['L', 2]]
+ */
+const getPaths = (commands: string[]): Array<[string, number]> =>
+  commands.map(val => [val[0], +val.slice(1)]);
+
+const setupMatrix = (d: string[]): MatrixMetrics => {
   const max = getMaxMovement([...d]);
   // buffer for display purposes, round the grid
   const bufferSize = 1;
+
+  const paths = getPaths(d);
+  const firstMoves = calcDirections(paths);
+
+  const getMoveDistance = (dirs: string[]) => {
+    const dist = [...paths]
+      .filter(([command, _]) => dirs.includes(command))
+      .reduce((acc, [command, distance]) => {
+        // start = command === dirs[0] ? start + distance : start - distance;
+        acc += distance;
+        return acc;
+      }, 0);
+    return [dist];
+  };
+
+  const getStart = (
+    first: StartMetrics,
+    second: StartMetrics,
+    size: number,
+    buffer: number
+  ) => {
+    return first[0] < second[0] ? size - buffer : buffer;
+  };
+
+  const [xMove] = getMoveDistance(['L', 'R']);
+  const [yMove] = getMoveDistance(['U', 'D']);
   // rowsize = max + 1 for home item + (left buffer + right buffer)
-  const rowSize = max + 1 + bufferSize * 2;
-  const gridSize = rowSize * rowSize;
+  // const rowSize = max + 1 + bufferSize * 2;
+  const rowSize = xMove;
+  const colSize = yMove;
+  const gridSize = rowSize * colSize;
+  const startX = getStart(
+    firstMoves.left,
+    firstMoves.right,
+    colSize,
+    bufferSize
+  );
+  const startY = getStart(firstMoves.up, firstMoves.down, rowSize, bufferSize);
 
   // starting position
   const [sRowIndex, sColIndex] = [
@@ -58,15 +115,21 @@ const setupMatrix = (d: string[]) => {
     bufferSize
   ];
 
-  const metrics: MatrixMetrics = {
+  const metrics = {
     maxMovement: max,
     buffer: bufferSize,
     rowSize,
+    colSize,
     gridSize,
     startRowIndex: sRowIndex,
-    startColIndex: sColIndex
+    startColIndex: sColIndex,
+    xMove,
+    startX,
+    yMove,
+    startY,
+    firstMoves
   };
-  console.log(metrics);
+  // console.log(metrics);
   return metrics;
 };
 // rows of columns (x col, y row)
@@ -106,6 +169,26 @@ const drawU: DrawFn = (dist, r, c, curM) => {
     prevM: curM
   };
 };
+// const drawU: DrawFn = (dist, r, c, curM) => {
+//   const newM = [...curM];
+//   // const total = r - dist;
+//   for (let i = 0; i < dist; i++) {
+//     newM.unshift(['|']);
+//   }
+//   // for (let i = r - 1; i >= total; i--) {
+//   //   const row = [...newM[i]];
+//   //   row[c] = i === total ? '+' : '|';
+//   //   newM.splice(i, 1, row);
+//   // }
+//   r = 0;
+//   // console.log(newM);
+//   return {
+//     rowCursor: r,
+//     colCursor: c,
+//     m: newM,
+//     prevM: curM
+//   };
+// };
 
 const drawD: DrawFn = (dist, r, c, curM) => {
   const newM = [...curM];
@@ -123,6 +206,23 @@ const drawD: DrawFn = (dist, r, c, curM) => {
     prevM: curM
   };
 };
+
+// const drawD: DrawFn = (dist, r, c, curM) => {
+//   const newM = [...curM];
+//   const total = r + dist;
+//   const draw = new Array(dist).fill('|');
+//   for (let i = 1; i < dist; i++) {
+//     console.log('1', newM[r + i], draw, c);
+//     newM[r + i].concat(draw);
+//   }
+//   r = total;
+//   return {
+//     rowCursor: r,
+//     colCursor: c,
+//     m: newM,
+//     prevM: curM
+//   };
+// };
 
 const drawR: DrawFn = (dist, r, c, curM) => {
   const newM = [...curM];
@@ -142,6 +242,29 @@ const drawR: DrawFn = (dist, r, c, curM) => {
   };
 };
 
+// const drawR: DrawFn = (dist, r, c, curM) => {
+//   console.log(curM);
+//   const newM = [...curM];
+//   const total = dist + c;
+//   // todo: pass in start row
+//   // for (let i = c + 1; i <= total; i++) {
+//   //   const row = [...newM[r]];
+//   //   row[i] = i === total ? '+' : '-';
+//   //   newM.splice(r, 1, row);
+//   // }
+//   for (let i = 0; i < dist; i++) {
+//     newM[r].push('-');
+//   }
+//   c = total;
+//   console.log(newM);
+//   return {
+//     rowCursor: r,
+//     colCursor: c,
+//     m: newM,
+//     prevM: curM
+//   };
+// };
+
 const drawL: DrawFn = (dist, r, c, curM) => {
   const newM = [...curM];
   const total = c - dist;
@@ -160,6 +283,25 @@ const drawL: DrawFn = (dist, r, c, curM) => {
     prevM: curM
   };
 };
+
+// const drawL: DrawFn = (dist, r, c, curM) => {
+//   const newM = [...curM];
+//   const total = c - dist;
+
+//   for (let i = c - 1; i >= total; i--) {
+//     // const row = [...newM[r]];
+//     // row[i] = i === total ? '+' : '-';
+//     // newM.splice(r, 1, row);
+//   }
+
+//   c -= dist;
+//   return {
+//     rowCursor: r,
+//     colCursor: c,
+//     m: newM,
+//     prevM: curM
+//   };
+// };
 
 const execCommand = (commandCode: string, ...args: Parameters<DrawFn>) => {
   let drawResult: DrawResult;
@@ -188,18 +330,62 @@ const execCommand = (commandCode: string, ...args: Parameters<DrawFn>) => {
   return drawResult;
 };
 
-const calcDirections = (paths: Array<[string, number]>) => {
-  const topIndex = paths.findIndex(path => path[0].match('U'));
-  const bottomIndex = paths.findIndex(path => path[0].match('D'));
+const calcDirections = (
+  paths: Array<[string, number]>
+): MatrixMetrics['firstMoves'] => {
+  const upIndex = paths.findIndex(path => path[0].match('U'));
+  const downIndex = paths.findIndex(path => path[0].match('D'));
   const rightIndex = paths.findIndex(path => path[0].match('R'));
   const leftIndex = paths.findIndex(path => path[0].match('L'));
   const getVal = (pi: number) => (paths[pi] ? paths[pi][1] : 0);
   return {
-    top: getVal(topIndex),
-    right: getVal(rightIndex),
-    bottom: getVal(bottomIndex),
-    left: getVal(leftIndex)
+    up: [upIndex, getVal(upIndex)],
+    right: [rightIndex, getVal(rightIndex)],
+    down: [downIndex, getVal(downIndex)],
+    left: [leftIndex, getVal(leftIndex)]
   };
+};
+
+const drawWires2$ = (instructions: string[], matrixMetrics: MatrixMetrics) => {
+  const retMatrix: string[][] = [['o']];
+  console.log(matrixMetrics);
+  return of(instructions).pipe(
+    flatMap(c => getPaths(c)),
+    reduce(
+      (acc, c) => {
+        const command = c[0];
+        const distance = c[1];
+        console.log('TCL: command, distance', command, distance);
+        const retM = [...acc];
+        let rowCursor = 0;
+        let colCursor = 0;
+        const commandResult = execCommand(
+          command,
+          distance,
+          rowCursor,
+          colCursor,
+          retM
+        );
+        rowCursor = commandResult.rowCursor;
+        colCursor = commandResult.colCursor;
+        acc = commandResult.m;
+
+        return acc;
+      },
+      [...retMatrix]
+    ),
+    tap(d => {
+      console.log(d);
+      // console.log(matrixMetrics);
+      printMatrix(d, 'draw', matrixMetrics);
+    }),
+    // tap(console.log),
+    withLatestFrom(matrix$(matrixMetrics))
+    // map(([ds, m]) => {
+    //   // console.log('TCL: ds', ds);
+    // }),
+    // map(d => retMatrix),
+  );
 };
 
 const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
@@ -212,20 +398,16 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
     map(([ds, m]) => {
       console.log(matrixMetrics);
       const v = [...m];
-      const startRow = [...v[matrixMetrics.startRowIndex]];
-      startRow.splice(matrixMetrics.startColIndex, 1, 'o');
-      v[matrixMetrics.startRowIndex] = [...startRow];
+      const startRow = [...v[matrixMetrics.startY]];
+      startRow.splice(matrixMetrics.startX, 1, 'o');
+      v[matrixMetrics.startY] = [...startRow];
       return v;
     }),
     map(m => {
       console.log(instructions);
       let retM = [...m];
-      const paths: Array<[string, number]> = instructions.map((c: string) => [
-        c[0],
-        +c.slice(1)
-      ]);
-      const firstMoveByDirection = calcDirections(paths);
-      console.log(firstMoveByDirection);
+      const paths = getPaths(instructions);
+      console.log(matrixMetrics.firstMoves);
       // const updateRow = [...retM[matrixMetrics.startRowIndex]];
       let [rowCursor, colCursor] = [
         matrixMetrics.startRowIndex,
@@ -251,7 +433,7 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
     }),
     tap(([d, source]) => {
       printMatrix(d, 'draw', matrixMetrics);
-      printMatrix(source, 'draws', matrixMetrics);
+      // printMatrix(source, 'draws', matrixMetrics);
     })
   );
 
@@ -291,6 +473,7 @@ const checkCrossedWires = () => {
   // });
 
   drawWires$([...testData], setupMatrix([...testData])).subscribe(d => {});
+  // drawWires2$([...testData], setupMatrix([...testData])).subscribe(d => {});
 };
 export {
   checkCrossedWires,

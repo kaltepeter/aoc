@@ -1,5 +1,8 @@
 {
     "jira-plugin.workingProject": "",
     "eslint.enable": false,
-    "jest.coverageFormatter": "GutterFormatter"
+    "jest.coverageFormatter": "GutterFormatter",
+    "cSpell.words": [
+        "nums"
+    ]
 }

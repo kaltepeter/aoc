@@ -30,4 +30,23 @@ const getExpensesTo2020 = (expenses: number[]): number[] => {
   return results;
 };
 
-export { getExpensesTo2020 };
+const getThreeExpensesTotal2020 = (expenses: number[], sum: number) => {
+  const nums = sortNumbers(expenses);
+  for (let i = 0; i < nums.length - 2; i++) {
+    let l = i + 1
+    let r = nums.length - 1
+    while (l < r) {
+      if (nums[i] + nums[l] + nums[r] === sum) {
+        console.log("🚀 ~ triplet found", nums[i], nums[l], nums[r]);
+        return [nums[i], nums[l], nums[r]];
+      } else if(nums[i] + nums[l] + nums[r] < sum) {
+        l += 1;
+      } else {
+        r -= 1
+      }
+    }
+  }
+  return []
+};
+
+export { getExpensesTo2020, getThreeExpensesTotal2020 };

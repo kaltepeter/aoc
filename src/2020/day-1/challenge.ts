@@ -37,7 +37,6 @@ const getThreeExpensesTotal2020 = (expenses: number[], sum: number) => {
     let r = nums.length - 1
     while (l < r) {
       if (nums[i] + nums[l] + nums[r] === sum) {
-        console.log("🚀 ~ triplet found", nums[i], nums[l], nums[r]);
         return [nums[i], nums[l], nums[r]];
       } else if(nums[i] + nums[l] + nums[r] < sum) {
         l += 1;

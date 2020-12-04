@@ -1,13 +1,13 @@
 import { filter, flatten } from 'ramda';
 
-interface IPathCoords {
+export interface IPathCoords {
   right: number;
   left: number;
   down: number;
   up: number;
 }
 
-const mapCount = (right: number, down: number) => down / right;
+const mapCount = (right: number, down: number) => Math.ceil(down / right) + 4; // 4 is buffer, could get fancy with wide results
 
 const processRows = (rows: string[][], numOfMaps: number): string[][] =>
   rows.map((r) => r[0].repeat(numOfMaps).split(''));
@@ -33,11 +33,15 @@ const traverse = (map: string[][], path: Partial<IPathCoords>): string[][] => {
         } else if (val === '#') {
           retMap[curRow][curCol] = 'X';
         } else {
-          console.log('reached the end');
+          // console.log(
+          //   `reached the end: curRow: ${curRow}, curCol: ${curCol}, rowCount: ${map.length}, colCount: ${map[0].length}`
+          // );
           break;
         }
       } else {
-        console.log('reached the end');
+        // console.log(
+        //   `reached the end: curRow: ${curRow}, curCol: ${curCol}, rowCount: ${map.length}, colCount: ${map[0].length}`
+        // );
         break;
       }
     }

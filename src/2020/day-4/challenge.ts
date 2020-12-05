@@ -6,16 +6,13 @@ import {
   KeyValuePair,
   lte,
   match,
-  propIs,
-  propSatisfies,
   where,
-  __,
 } from 'ramda';
 
 export interface IPassport {
   byr: number;
-  iyr: string;
-  eyr: string;
+  iyr: number;
+  eyr: number;
   hgt: string;
   hcl: string;
   ecl: string;
@@ -44,21 +41,42 @@ const processPassports = (batchFile: string): IPassport[] =>
           .trim()
           .split(/\s/)
           .filter((field: string) => field.includes(':'))
-          .map((field) => field.split(':'))
+          .map((field) => {
+            const [key, val] = field.split(':');
+            const v = key === 'pid' ? val : +val;
+            const retVal = v ? v : val;
+            return [key, retVal];
+          })
           .filter((pair) => pair.length === 2) as Array<
-          KeyValuePair<string, string>
+          KeyValuePair<string, string | number>
         >
     )
     .map((pairs) => fromPairs(pairs)) as unknown) as IPassport[];
 
+const validateHeightInInches = (hgt: number) => gte(hgt, 59) && lte(hgt, 76);
+const validateHeightInCm = (hgt: number) => gte(hgt, 150) && lte(hgt, 193);
+
+const processHeight = (hgt: string) => {
+  if (typeof hgt !== 'string') {
+    return false;
+  }
+  const h = parseInt(hgt, 10);
+  if (hgt.includes('in')) {
+    return validateHeightInInches(h);
+  } else if (hgt.includes('cm')) {
+    return validateHeightInCm(h);
+  }
+};
+
 const isPassportValid = where({
-  byr: propIs(Number) && gte(__, 1920) && lte(__, 2002),
-  iyr: propIs(Number) && gte(__, 2010) && lte(__, 2020),
-  eyr: propIs(Number) && gte(__, 2020) && lte(__, 2030),
-  // hgt: propIs(String) && propSatisfies((x) => x.contains('in')),
+  byr: (byr: number) => gte(byr, 1920) && lte(byr, 2002),
+  iyr: (iyr: number) => gte(iyr, 2010) && lte(iyr, 2020),
+  eyr: (eyr: number) => gte(eyr, 2020) && lte(eyr, 2030),
+  hgt: (hgt: string) => processHeight(hgt),
   hcl: (hcl: string) =>
     is(String, hcl) && match(/#[0-9a-f]{6}/, hcl).length > 0,
-  ecl: propIs(String) && propSatisfies((x: string) => eyeColor.includes(x)),
+  ecl: (ecl: string) => is(String, ecl) && eyeColor.includes(ecl),
+  pid: (pid: string) => is(String, pid) && match(/^[0-9]{9}$/, pid).length > 0,
 });
 
 const hasAllRequiredFields = (passport: IPassport) =>

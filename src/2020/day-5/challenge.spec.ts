@@ -1,4 +1,6 @@
+import { difference } from 'ramda';
 import {
+  calcAvailableSeatIds,
   calcMaxSeatId,
   calcSeatId,
   calcSeatIdsForListOfSeats,
@@ -25,6 +27,22 @@ describe(`5: Plane boarding`, () => {
     expect(seatList.length).toBe(761);
     expect(seatIds.length).toBe(761);
     expect(calcMaxSeatId(seatIds)).toBe(861);
+  });
+
+  test(`get list of Available seatIds`, () => {
+    const availableSeats = calcAvailableSeatIds();
+    const seatList = [...inputs];
+    const seats = parseListOfSeats(seatList);
+    const seatIds = calcSeatIdsForListOfSeats(seats);
+    const delta = difference(availableSeats, seatIds);
+    const max = Math.max(...seatIds);
+    const min = Math.min(...seatIds);
+    const midSection = difference(availableSeats.slice(min, max), seatIds);
+    expect(seatIds.includes(midSection[0])).toBe(false);
+    expect(seatIds.includes(midSection[0] + 1)).toBe(true);
+    expect(seatIds.includes(midSection[0] - 1)).toBe(true);
+    expect(midSection[0]).toBe(633);
+    expect(delta.length).toBe(263);
   });
 
   describe.each([

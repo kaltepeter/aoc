@@ -1,3 +1,5 @@
+import { flatten } from 'ramda';
+
 const totalRows = 128;
 const totalSeatsPerRow = 8;
 
@@ -62,6 +64,13 @@ const parseListOfSeats = (listOfSeats: string[]) =>
 
 const generateSeats = () => new Array(128).fill(new Array(8).fill('.'));
 
+const calcAvailableSeatIds = (): number[] =>
+  flatten(
+    generateSeats().map((row: string[], idx: number) =>
+      row.map((_, pos) => calcSeatId({ row: idx, seat: pos }))
+    )
+  );
+
 const printSeats = (seats: string[][]): string =>
   seats.map((r) => r.join('')).join('\n');
 
@@ -77,4 +86,5 @@ export {
   parseListOfSeats,
   calcSeatIdsForListOfSeats,
   calcMaxSeatId,
+  calcAvailableSeatIds,
 };

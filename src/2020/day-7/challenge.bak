@@ -1,0 +1,126 @@
+import { match } from 'ramda';
+
+export interface IRule {
+  [key: string]: string[];
+}
+
+export type Rule = [string, string];
+
+/**
+ * Filter list of rules to bags that hold a certain color
+ * @param rules List of rules
+ * @param bagToFind string of bag name
+ */
+const findBagsThatHoldAColor = (rules: Rule[], bagToFind: string) =>
+  rules.filter((r) => match(new RegExp(bagToFind), r[1]).length > 0);
+
+/**
+ * Take a list of rules and return a lookup object with bags
+ * @param rules Object with bag name as key and list of bags as value
+ */
+const mapBags = (rules: Rule[]): { [key: string]: string[] } => {
+  const lookupBags: { [key: string]: string[] } = {};
+  rules.map((r: Rule) => {
+    return (lookupBags[r[0]] = r[1]
+      .split(',')
+      .map((b) => b.trim().replace(/[0-9]+ ([a-zA-Z\s]+) bags?,?/, '$1')));
+  });
+  return lookupBags;
+};
+
+/**
+ * Filter rulesList to get bags that contain no bags
+ * @param rules List of rules
+ */
+const stopBags = (rules: Rule[]) =>
+  rules.filter((r: Rule) => match(/no other bags/, r[1]).length > 0);
+
+/**
+ * Get list of bag names from lookup object
+ * @param lookupBags Object with bag name as key and list of bags as value
+ */
+const getListOfBags = (lookupBags: { [key: string]: string[] }): string[] =>
+  Array.from(Object.entries(lookupBags))
+    .map((b) => b[1])
+    .flat(1);
+
+/**
+ * Get List of remaining bags, remove endBags and already processed bags
+ * @param lookupBags Object with bag name as key and list of bags as value
+ * @param endBags List of bags that contain no bags
+ * #param targetBag string name of bag that is the search
+ */
+const getListOfRemainingBags = (
+  lookupBags: { [key: string]: string[] },
+  endBags: string[],
+  targetBag: string
+): string[] =>
+  Array.from(new Set(getListOfBags(lookupBags))).filter(
+    (b) => !lookupBags[b] && !endBags.includes(b) && b !== targetBag
+  );
+
+const findAllBagsThatHoldAColor = (
+  rules: Rule[],
+  bagToFind: string
+): Set<Rule> => {
+  // tracking object
+  let lookupBags: { [key: string]: string[] } = {};
+  // get list of bags that contain no bags
+  const endBags = stopBags(rules).map((b) => b[0]);
+
+  // initial list of bags
+  // const firstPass = findBagsThatHoldAColor(rules, bagToFind);
+  // console.log('🚀 ~ file: challenge.ts ~ line 73 ~ firstPass', firstPass);
+  // const vals = new Set(
+  //   firstPass.map((r: Rule) => findBagsThatHoldAColor(rules, r[0])).flat(1)
+  // );
+
+  // let prevBags: Set<Rule> = new Set(
+  //   firstPass.map((r: Rule) => findBagsThatHoldAColor(rules, r[0])).flat(1)
+  // );
+  // let prevBags: Set<Rule>;
+  // lookupBags = {
+  //   ...mapBags(firstPass),
+  //   // ...mapBags(Array.from(prevBags)),
+  // };
+
+  let prevBags: Set<Rule>;
+  let remainingBags: string[] = []; // = getListOfRemainingBags(lookupBags, endBags, bagToFind);
+  console.log(
+    '🚀 ~ file: challenge.ts ~ line 87 ~ lookupBags',
+    lookupBags
+    // prevBags
+  );
+  do {
+    const newVals = new Set(
+      Array.from(prevBags)
+        .map((r: Rule) => findBagsThatHoldAColor(rules, r[0]))
+        .flat(1)
+    );
+    console.log('🚀 ~ file: challenge.ts ~ line 94 ~ newVals', newVals);
+
+    const newValList = Array.from(newVals);
+
+    lookupBags = {
+      ...lookupBags,
+      ...mapBags(newValList),
+    };
+
+    remainingBags = newValList
+      .map((b) => getListOfRemainingBags(lookupBags, endBags, b[0]))
+      .flat(1);
+    // remainingBags = getListOfRemainingBags(lookupBags, endBags, bagToFind);
+
+    const bags = [...remainingBags];
+    console.log(
+      '🚀 ~ file: challenge.ts ~ line 67 ~ remainingBags',
+      bags.length,
+      bags,
+      endBags
+    );
+    prevBags = newVals;
+  } while (remainingBags.length > 0);
+  return new Set([...firstPass]);
+};
+
+export { findBagsThatHoldAColor, findAllBagsThatHoldAColor, stopBags };

@@ -24,11 +24,16 @@ const execProgram = {
   },
 };
 
-const runProgram = (program: Program) => {
+const runProgram = (program: Program): [number, boolean] => {
   const seenIds: Set<number> = new Set();
   let acc = 0;
   let pos = 0;
+  let isFixed = false;
   do {
+    if (pos >= program.length) {
+      isFixed = true;
+      break;
+    }
     const { command, value } = program[pos];
     seenIds.add(pos);
     switch (command) {
@@ -47,8 +52,60 @@ const runProgram = (program: Program) => {
     }
   } while (seenIds.has(pos) === false);
 
-  console.log(`FOUND: ${acc} at ${pos}`);
+  // console.log(`FOUND: ${acc} at ${pos}`);
+  return [acc, isFixed];
+};
+
+const fixProgram = (program: Program) => {
+  let acc = 0;
+  let nops: number[] = [];
+  let isFixed = false;
+
+  program.forEach((l, i) => {
+    if (l.command === Instruction.NOP) {
+      nops = [...nops, i];
+    }
+  });
+
+  let jmps: number[] = [];
+  program.forEach((l, i) => {
+    if (l.command === Instruction.JMP) {
+      jmps = [...jmps, i];
+    }
+  });
+
+  while (isFixed === false) {
+    nops.forEach((n) => {
+      let data = [...program];
+      data[n] = { ...data[n], command: Instruction.JMP };
+      const res = runProgram(data);
+      isFixed = res[1];
+      if (isFixed === true) {
+        acc = res[0];
+        return;
+      }
+    });
+
+    jmps.forEach((n) => {
+      let data = [...program];
+      data[n] = { ...data[n], command: Instruction.NOP };
+      const res = runProgram(data);
+      isFixed = res[1];
+      if (isFixed === true) {
+        acc = res[0];
+        return;
+      }
+    });
+  }
+
   return acc;
 };
 
-export { Instruction, runProgram, execProgram, Program, ProgramLine };
+export {
+  Instruction,
+  runProgram,
+  execProgram,
+  Program,
+  ProgramLine,
+  fixProgram,
+};

@@ -7,7 +7,8 @@
     "precommit": "run-s format:fix lint test",
     "lint": "tslint --project ./tsconfig.json --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "tsnode": "ts-node"
   },
   "jest": {
     "globals": {
@@ -33,7 +34,7 @@
     "ramda": "^0.27.1",
     "rxjs-tslint-rules": "^4.34.7",
     "ts-jest": "^26.4.4",
-    "ts-node": "^9.0.0",
+    "ts-node": "^9.1.1",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",

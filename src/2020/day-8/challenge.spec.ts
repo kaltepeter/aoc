@@ -1,4 +1,4 @@
-import { execProgram, Instruction, runProgram } from './challenge';
+import { execProgram, fixProgram, Instruction, runProgram } from './challenge';
 import { inputs, sampleData } from './inputs';
 describe(`day 8: Handheld Halting`, () => {
   test(`processSample`, () => {
@@ -44,10 +44,18 @@ describe(`day 8: Handheld Halting`, () => {
   });
 
   test(`sampleData`, () => {
-    expect(runProgram(sampleData)).toBe(5);
+    expect(runProgram(sampleData)).toEqual([5, false]);
+  });
+
+  test(`fixProgram(sampleData)`, () => {
+    expect(fixProgram(sampleData)).toEqual(8);
   });
 
   test(`inputs`, () => {
-    expect(runProgram(inputs)).toBe(1317);
+    expect(runProgram(inputs)).toEqual([1317, false]);
   });
+
+  // test(`inputs`, () => {
+  //   expect(fixProgram(inputs)).toBe(1317);
+  // });
 });

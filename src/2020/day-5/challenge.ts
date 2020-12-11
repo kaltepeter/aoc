@@ -59,8 +59,8 @@ const calcMaxSeatId = (seatIds: number[]) => Math.max(...seatIds);
 const calcSeatIdsForListOfSeats = (seats: ISeat[]) =>
   seats.map((s) => calcSeatId(s));
 
-const parseListOfSeats = (listOfSeats: string[]) =>
-  listOfSeats.map((seatPath) => parseSeat(seatPath));
+const parseListOfSeats = (listOfSeats: string[]): ISeat[] =>
+  listOfSeats.map((seatPath) => parseSeat(seatPath) as ISeat);
 
 const generateSeats = () => new Array(128).fill(new Array(8).fill('.'));
 

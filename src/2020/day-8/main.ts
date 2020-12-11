@@ -1,5 +1,5 @@
 import { fork } from 'child_process';
-import { exit } from 'process';
+import * as cliProgress from 'cli-progress';
 import { Instruction, Program } from './challenge';
 import { inputs as program } from './inputs';
 
@@ -20,17 +20,6 @@ program.forEach((l, i) => {
   }
 });
 
-const run = (data: Program) => {
-  const compute = fork('run-program.ts');
-  compute.send(data);
-  compute.on('message', (sum: [number, boolean]) => {
-    if (sum[1] === true) {
-      console.log(`ACC is ${sum[0]}, ${sum[1]}`);
-      exit(0);
-    }
-  });
-};
-
 nops.forEach((n) => {
   let data = [...program];
   data[n] = { ...data[n], command: Instruction.JMP };
@@ -43,11 +32,29 @@ jmps.forEach((n) => {
   tasks.push(data);
 });
 
+// const formatter = (options, params, payload) => {
+
+// }
+
+const totalTasks = nops.length + jmps.length;
+const pBar = new cliProgress.SingleBar(
+  {
+    format: `Run Programs | {bar} | {value}/{total} Programs || ETA: {eta_formatted} || duration: {duration_formatted} || result: {acc}, {success}`,
+    hideCursor: true,
+  },
+  cliProgress.Presets.rect
+);
+pBar.start(totalTasks, 0);
+
 const defferred = (data: Program) =>
   new Promise((res, rej) => {
     const compute = fork('run-program.ts');
     compute.send(data);
     compute.on('message', (sum: [number, boolean]) => {
+      pBar.increment({
+        acc: sum[0],
+        success: sum[1],
+      });
       if (sum[1] === true) {
         console.log(`ACC is ${sum[0]}, ${sum[1]}`);
         res(sum);
@@ -82,12 +89,16 @@ const process = async () => {
   }
 
   const wait = [];
+  // kick off initial wait
+  // heavily referenced from: https://github.com/nrwl/nx/blob/2824794a92913624e59d00201ef5dfa936f842fe/packages/workspace/src/tasks-runner/task-orchestrator.ts
   for (let i = 0; i < maxProcess; ++i) {
     wait.push(takeFromQueue());
   }
   try {
     const result = await Promise.race(wait);
+    pBar.stop();
     console.log('🚀 ~ file: main.ts ~ line 90 ~ process ~ result', result);
+    return result;
   } catch (e) {
     console.error(`Infinite loop detected. `, e.message);
   }

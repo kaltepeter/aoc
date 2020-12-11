@@ -148,7 +148,6 @@ describe(`7: Handy Haversacks`, () => {
           {
             name: 'muted yellow',
             counted: false,
-            amount: 0,
             children: [],
           },
         ],

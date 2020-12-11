@@ -52,8 +52,7 @@ const runProgram = (program: Program): [number, boolean] => {
     }
   } while (seenIds.has(pos) === false);
 
-  // console.log(`FOUND: ${acc} at ${pos}`);
-  return [acc, isFixed];
+  return [acc, !!isFixed];
 };
 
 const fixProgram = (program: Program) => {

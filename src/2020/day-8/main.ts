@@ -1,11 +1,20 @@
-import { fork } from 'child_process';
+import { ChildProcess, fork } from 'child_process';
 import * as cliProgress from 'cli-progress';
+import { exit } from 'process';
 import { Instruction, Program } from './challenge';
 import { inputs as program } from './inputs';
+// tslint:disable-next-line: no-var-requires
+const PromiseAny = require('promise.any');
+PromiseAny.shim();
 
 let nops: number[] = [];
 let tasks: Program[] = [];
 const maxProcess = 3;
+
+interface IResultRun {
+  acc: number;
+  success: boolean;
+}
 
 program.forEach((l, i) => {
   if (l.command === Instruction.NOP) {
@@ -32,10 +41,6 @@ jmps.forEach((n) => {
   tasks.push(data);
 });
 
-// const formatter = (options, params, payload) => {
-
-// }
-
 const totalTasks = nops.length + jmps.length;
 const pBar = new cliProgress.SingleBar(
   {
@@ -45,10 +50,15 @@ const pBar = new cliProgress.SingleBar(
   cliProgress.Presets.rect
 );
 pBar.start(totalTasks, 0);
+let processes: ChildProcess[] = [];
 
-const defferred = (data: Program) =>
+const defferred = (data: Program): Promise<[number, boolean]> =>
   new Promise((res, rej) => {
-    const compute = fork('run-program.ts');
+    const compute = fork('run-program.ts', {
+      stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      detached: true,
+    });
+    processes.push(compute);
     compute.send(data);
     compute.on('message', (sum: [number, boolean]) => {
       pBar.increment({
@@ -56,35 +66,55 @@ const defferred = (data: Program) =>
         success: sum[1],
       });
       if (sum[1] === true) {
-        console.log(`ACC is ${sum[0]}, ${sum[1]}`);
-        res(sum);
+        return res(sum);
       } else {
-        rej(sum);
+        return rej(sum);
+      }
+    });
+
+    compute.on('exit', (code, signal) => {
+      if (code !== 0) {
+        console.error(`Exit code ${code} for ${compute.pid}`);
+        exit(1);
       }
     });
   });
 
-const process = async () => {
-  const left = [...tasks];
-  const res = [];
+const run = async () => {
+  let left = [...tasks];
+  const res: Array<{ acc: number; success: boolean }> = [];
 
-  async function takeFromQueue(): Promise<any> {
+  async function takeFromQueue(): Promise<IResultRun> {
     if (left.length > 0) {
       const task = left.pop();
       if (task) {
         const p = defferred(task);
         return p
-          .then((code) => {
+          .then(([acc, success]) => {
             res.push({
-              task,
-              success: code === 0,
+              acc,
+              success,
             });
+            return Promise.resolve({ acc, success });
           })
-          .then(takeFromQueue)
-          .catch(takeFromQueue);
+          .then((res: IResultRun) => {
+            processes = [];
+            left = []; // need to short circuit
+            return Promise.resolve(res);
+          })
+          .catch(([acc, success]) => {
+            res.push({
+              acc,
+              success,
+            });
+            return takeFromQueue();
+          });
+      } else {
+        return Promise.reject(`Task is undefined.`);
       }
     } else {
-      return Promise.resolve(null);
+      const lastItem = res[-1];
+      return Promise.resolve(lastItem);
     }
   }
 
@@ -92,16 +122,24 @@ const process = async () => {
   // kick off initial wait
   // heavily referenced from: https://github.com/nrwl/nx/blob/2824794a92913624e59d00201ef5dfa936f842fe/packages/workspace/src/tasks-runner/task-orchestrator.ts
   for (let i = 0; i < maxProcess; ++i) {
-    wait.push(takeFromQueue());
+    const t = takeFromQueue();
+    wait.push(t);
   }
   try {
-    const result = await Promise.race(wait);
+    const result = await Promise.any(wait);
     pBar.stop();
-    console.log('🚀 ~ file: main.ts ~ line 90 ~ process ~ result', result);
+    console.log(`Found result: `, result);
     return result;
   } catch (e) {
     console.error(`Infinite loop detected. `, e.message);
   }
 };
 
-process();
+process.addListener('SIGINT', () => {
+  processes.forEach((p) => {
+    p.kill('SIGINT');
+  });
+  process.exit();
+});
+
+run();

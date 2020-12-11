@@ -9,11 +9,16 @@ export type Rule = [string, string];
 export interface BNode {
   name: string;
   counted: boolean;
-  children: BNode[];
+  children: BNodeAndCount[];
 }
 
 export interface BNodeList {
   [key: string]: BNode;
+}
+
+export interface BNodeAndCount {
+  count: number;
+  node: BNode;
 }
 
 /**
@@ -34,9 +39,12 @@ const stopBags = (rules: Rule[]) =>
 const getBagsForChildren = (bagList: string) =>
   bagList
     .split(',')
-    .map((b) => b.trim().replace(/[0-9]+ ([a-zA-Z\s]+) bags?[,\.]?/, '$1'));
+    .map((b) => b.trim().replace(/([0-9]+ [a-zA-Z\s]+) bags?[,\.]?/, '$1'));
 
-const getNode = (listOfBags: BNodeList, name: string): BNode => {
+const getNode = (listOfBags: BNodeList, bag: string): BNode => {
+  const name = match(/[a-zA-Z\s]+/, bag)
+    .join(' ')
+    .trim();
   if (!listOfBags[name]) {
     listOfBags[name] = {
       counted: false,
@@ -44,6 +52,7 @@ const getNode = (listOfBags: BNodeList, name: string): BNode => {
       children: [],
     };
   }
+
   return listOfBags[name];
 };
 
@@ -59,7 +68,9 @@ const walkListOfBags = (rules: Rule[]): BNodeList => {
     do {
       const bag = childBags.pop();
       if (bag) {
-        node.children.push(getNode(bagTree, bag));
+        const amt = match(/[0-9]+/, bag)[0];
+        const count = +amt || 1;
+        node.children.push({ count, node: getNode(bagTree, bag) });
       }
     } while (childBags.length > 0);
   });
@@ -84,7 +95,10 @@ const getListOfBagsThatHoldAColor = (bagName: string, bagTree: BNodeList) => {
       return total;
     }
     bagList.push(node);
-    node.children.reduce((acc, n) => (acc = acc + walkBags(n, bagList)), total);
+    node.children.reduce(
+      (acc, n) => (acc = acc + walkBags(n.node, bagList)),
+      total
+    );
     bagList.pop();
     return total;
   };
@@ -95,11 +109,42 @@ const getListOfBagsThatHoldAColor = (bagName: string, bagTree: BNodeList) => {
   return total;
 };
 
+const getCountsOfBagsThatHoldAColor = (bagName: string, bagTree: BNodeList) => {
+  const topBag = getNode(bagTree, bagName);
+
+  const findChildrenBags = (
+    node: BNodeAndCount,
+    foundBags: Set<BNode>,
+    c: number = 1
+  ): number => {
+    foundBags.add(node.node);
+    if (node.node.children.length === 0) {
+      return c * node.count;
+    }
+    c *= node.count;
+    let total = c;
+    node.node.children.forEach((child: BNodeAndCount) => {
+      total += findChildrenBags(child, foundBags, c);
+    });
+    c /= node.count;
+
+    return total;
+  };
+
+  const found = new Set<BNode>();
+  const foundCount = topBag.children.reduce((acc: number, c: BNodeAndCount) => {
+    return acc + findChildrenBags(c, found);
+  }, 0);
+  return foundCount;
+};
+
 export {
   findBagsThatHoldAColor,
   getListOfBagsThatHoldAColor,
+  getCountsOfBagsThatHoldAColor,
   getBagsForChildren,
   walkListOfBags,
   stopBags,
   countBags,
+  getNode,
 };

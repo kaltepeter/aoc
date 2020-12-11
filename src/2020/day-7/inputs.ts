@@ -9,6 +9,10 @@ const sampleDataText = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
+const sampleDataText2 = fs
+  .readFileSync(path.join(__dirname, 'sample-data-2.txt'))
+  .toString('utf-8');
+
 const processGroups = (t: string) =>
   t
     .split('\n')
@@ -20,4 +24,6 @@ const inputs = processGroups(text);
 
 const sampleData = processGroups(sampleDataText);
 
-export { inputs, sampleData };
+const sampleData2 = processGroups(sampleDataText2);
+
+export { inputs, sampleData, sampleData2 };

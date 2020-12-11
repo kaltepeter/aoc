@@ -2,11 +2,13 @@ import {
   countBags,
   findBagsThatHoldAColor,
   getBagsForChildren,
+  getCountsOfBagsThatHoldAColor,
   getListOfBagsThatHoldAColor,
+  getNode,
   stopBags,
   walkListOfBags,
 } from './challenge';
-import { inputs, sampleData } from './inputs';
+import { inputs, sampleData, sampleData2 } from './inputs';
 
 describe(`7: Handy Haversacks`, () => {
   test(`sampleData has 9 rules`, () => {
@@ -63,6 +65,82 @@ describe(`7: Handy Haversacks`, () => {
     }
   );
 
+  test(`getNode()`, () => {
+    const bagList = walkListOfBags(sampleData);
+    const expectedData = {
+      name: 'shiny gold',
+      counted: false,
+      children: [
+        {
+          count: 2,
+          node: {
+            name: 'vibrant plum',
+            counted: false,
+            children: [
+              {
+                count: 6,
+                node: {
+                  name: 'dotted black',
+                  counted: false,
+                  children: [],
+                },
+              },
+              {
+                count: 5,
+                node: {
+                  name: 'faded blue',
+                  counted: false,
+                  children: [],
+                },
+              },
+            ],
+          },
+        },
+        {
+          count: 1,
+          node: {
+            name: 'dark olive',
+            counted: false,
+            children: [
+              {
+                count: 4,
+                node: {
+                  name: 'dotted black',
+                  children: [],
+                  counted: false,
+                },
+              },
+              {
+                count: 3,
+                node: {
+                  name: 'faded blue',
+                  children: [],
+                  counted: false,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+    expect(getNode(bagList, 'shiny gold')).toEqual(expectedData);
+  });
+
+  test(`getCountsOfBagsThatHoldAColor() should return 32 for shiny gold`, () => {
+    const bagList = walkListOfBags(sampleData);
+    expect(getCountsOfBagsThatHoldAColor('shiny gold', bagList)).toEqual(32);
+  });
+
+  test(`getCountsOfBagsThatHoldAColor() for sampleData2 should return 126 for shiny gold`, () => {
+    const bagList = walkListOfBags(sampleData2);
+    expect(getCountsOfBagsThatHoldAColor('shiny gold', bagList)).toEqual(126);
+  });
+
+  test(`getCountsOfBagsThatHoldAColor() for input should return 126 for shiny gold`, () => {
+    const bagList = walkListOfBags(inputs);
+    expect(getCountsOfBagsThatHoldAColor('shiny gold', bagList)).toBe(54803); // 13271,39783
+  });
+
   test(`countBags()`, () => {
     expect(
       countBags(
@@ -70,6 +148,7 @@ describe(`7: Handy Haversacks`, () => {
           {
             name: 'muted yellow',
             counted: false,
+            amount: 0,
             children: [],
           },
         ],
@@ -78,10 +157,10 @@ describe(`7: Handy Haversacks`, () => {
     ).toBe(1);
   });
 
-  test(`inputs has 20 rules`, () => {
-    const bagList = walkListOfBags(inputs);
-    expect(getListOfBagsThatHoldAColor('shiny gold', bagList)).toEqual(155);
-  });
+  // test(`inputs has 20 rules`, () => {
+  //   const bagList = walkListOfBags(inputs);
+  //   expect(getListOfBagsThatHoldAColor('shiny gold', bagList)).toEqual(155);
+  // });
 
   test(`stopBags(rules)`, () => {
     expect(stopBags(inputs).length).toBe(10);
@@ -90,6 +169,6 @@ describe(`7: Handy Haversacks`, () => {
   test(`getBagsForChildren(' 5 faded blue bags, 6 dotted black bags.')`, () => {
     expect(
       getBagsForChildren(' 5 faded blue bags, 6 dotted black bags.')
-    ).toEqual(['faded blue', 'dotted black']);
+    ).toEqual(['5 faded blue', '6 dotted black']);
   });
 });

@@ -3,6 +3,7 @@
     "eslint.enable": false,
     "jest.coverageFormatter": "GutterFormatter",
     "cSpell.words": [
+        "joltage",
         "nums"
     ]
 }

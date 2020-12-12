@@ -72,6 +72,22 @@ IF cur === prev: NOPE
 IF cur - prev < 0: NOPE
 IF cur - prev IN prevNums: YES
 
-// SORT list and split to optimize ???
-ex. 62, [20, 15, 25, 47, 40]
-[15, 20, 25, 40, 47] (take half?)
+Sliding window:
+
+Find contiguous numbers that equal 127.
+
+35 + 20 = 55
+55 + 15 = 70
+70 + 25 = 95
+95 + 47 = 142
+142 + 40 = 182 // BUST
+
+20 + 15 = 35
+35 + 25 = 60
+60 + 47 = 107
+107 + 40 = 147
+147 + 62 = 209 // BUST
+
+15 + 25 = 40
+40 + 47 = 87
+87 + 40 = 127 // FOUND

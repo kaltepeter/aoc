@@ -1,4 +1,9 @@
-import { findInvalidNumber, getValidNumbers } from './challenge';
+import { sum } from 'ramda';
+import {
+  findContiguousSet,
+  findInvalidNumber,
+  getValidNumbers,
+} from './challenge';
 import { inputs, sample } from './inputs';
 
 describe(`day 9: Encoding Error`, () => {
@@ -29,8 +34,27 @@ describe(`day 9: Encoding Error`, () => {
     expect(findInvalidNumber(sample)).toEqual([127]);
   });
 
+  test(`findContiguousSet(num, data)`, () => {
+    const res = findContiguousSet(127, sample);
+    expect(findContiguousSet(127, sample)).toEqual([15, 25, 47, 40]);
+    expect(res.length).toBe(4);
+    expect(sum(res)).toBe(127);
+    expect(Math.min(...res)).toBe(15);
+    expect(Math.max(...res)).toBe(47);
+    expect(15 + 47).toBe(62);
+  });
+
   test(`findInvalidNumber(data)`, () => {
     expect(findInvalidNumber(inputs)).toEqual([138879426]);
+  });
+
+  test(`findContiguousSet(num, data)`, () => {
+    const res = findContiguousSet(138879426, inputs);
+    expect(res.length).toBe(17);
+    expect(sum(res)).toBe(138879426);
+    expect(Math.min(...res)).toBe(5984187);
+    expect(Math.max(...res)).toBe(17777507);
+    expect(5984187 + 17777507).toBe(23761694);
   });
 
   describe.each([

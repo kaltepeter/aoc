@@ -2,6 +2,7 @@ import {
   findAdapterListByPossibleCount,
   getAdapterHash,
   getBuiltInDeviceJoltage,
+  getCombinations,
   getDeltasOfAdapters,
   getRangeOfJoltage,
   IAdapterHash,
@@ -156,5 +157,19 @@ describe(`day 10: Adapter Array`, () => {
       '49': [46, 48, 47],
     };
     expect(adapterHash).toEqual(expectedAdapterHash);
+  });
+
+  describe(`part II`, () => {
+    test(`getCombinations(sample)`, () => {
+      expect(getCombinations(sample)).toBe(8);
+    });
+
+    test(`getCombinations(sample2)`, () => {
+      expect(getCombinations(sample2)).toBe(19208);
+    });
+
+    test(`getCombinations(inputs)`, () => {
+      expect(getCombinations(inputs)).toBe(7086739046912);
+    });
   });
 });

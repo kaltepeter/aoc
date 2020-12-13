@@ -1,4 +1,4 @@
-import { difference, fromPairs, gte, lte } from 'ramda';
+import { difference, findIndex, fromPairs, gte, lte } from 'ramda';
 
 export interface IAdapterHash {
   [key: string]: number[];
@@ -19,7 +19,7 @@ const getAdapterHash = (adapters: number[]): IAdapterHash => {
   return trackAdapters;
 };
 
-const printChain = (adapters: number[]) => {
+const printChain = (adapters: number[] | string[]) => {
   console.log(adapters.join(' > '));
 };
 
@@ -53,6 +53,50 @@ const removeOptionFromAdapterList = (
     ])
   );
 
+const printDeltas = (adapters: number[]) => {
+  const deviceJoltage = getBuiltInDeviceJoltage(adapters);
+  console.log(adapters.length);
+  const aList = [...sortAdapters(adapters), deviceJoltage];
+  let possibleRemovals: number[] = [];
+  printChain(aList);
+  const deltaList: number[] = [];
+  const listStart = findIndex((n) => gte(n, 3), aList) - 1;
+  for (let i = aList.length - 1; i > listStart; i--) {
+    const delta = i === 0 ? aList[i] - 0 : aList[i] - aList[i - 1];
+    deltaList.push(delta);
+    const twoBefore = i >= 2 ? aList[i - 2] : 0;
+    const prev = i >= 1 ? aList[i - 1] : 0;
+    const cur = aList[i];
+    if (cur - twoBefore >= 3) {
+      continue;
+    } else {
+      // console.log(`cur: ${cur}, prev: ${prev}, twoBefore: ${twoBefore}`);
+      possibleRemovals = [...possibleRemovals, prev];
+    }
+  }
+  console.log(possibleRemovals);
+};
+
+const getCombinations = (adapters: number[]): number => {
+  const deviceJoltage = getBuiltInDeviceJoltage(adapters);
+  const aList = [0, ...sortAdapters(adapters), deviceJoltage];
+  const counts = new Array(aList.length);
+  counts[0] = 1;
+
+  for (let i = 1; i < aList.length; i++) {
+    let backIdx = i;
+    let curValue = aList[i];
+    counts[i] = 0;
+
+    while (backIdx >= 0 && curValue - aList[backIdx] <= 3) {
+      counts[i] += counts[backIdx];
+      backIdx--;
+    }
+  }
+
+  return counts.pop();
+};
+
 const getDeltasOfAdapters = (adapters: number[]): { [key: string]: number } => {
   const deltaCounts: { [key: string]: number } = {};
   const deviceJoltage = getBuiltInDeviceJoltage(adapters);
@@ -78,4 +122,7 @@ export {
   printChain,
   findAdapterListByPossibleCount,
   removeOptionFromAdapterList,
+  sortAdapters,
+  printDeltas,
+  getCombinations,
 };

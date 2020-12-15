@@ -1,12 +1,23 @@
+import { flatten } from 'ramda';
 import {
   changeSeats,
+  changeSeatsNewRules,
   getAdjacentSeats,
+  getOccupiedSeats,
+  getOccupiedVisibleSeats,
   getSeatCounts,
   runSeatChanges,
+  runSeatChangesNewRules,
   Seat,
   SeatMap,
 } from './challenge';
-import { inputs, sample, sampleRound1 } from './inputs';
+import {
+  inputs,
+  sample,
+  samplePartII,
+  samplePartIIRound2,
+  sampleRound1,
+} from './inputs';
 describe(`Day 11: Seating System`, () => {
   test(`processSeatMap()`, () => {
     expect(sample.length).toBe(10);
@@ -51,5 +62,34 @@ describe(`Day 11: Seating System`, () => {
   test.skip(`runSeatChanges(inputs)`, () => {
     const seatChanges = runSeatChanges(inputs);
     expect(seatChanges.counts[Seat.OCCUPIED]).toBe(2386);
+  });
+
+  describe(`part II`, () => {
+    test(`getOccupiedSeats`, () => {
+      expect(getOccupiedSeats(samplePartII).rows[4]).toEqual([2, 8]);
+    });
+
+    test(`getOccupiedVisibleSeats`, () => {
+      const foundSeats = getOccupiedVisibleSeats(samplePartII, [4, 3]);
+      const foundSeatValues = flatten(Object.values(foundSeats.rows));
+      expect(foundSeatValues.length).toBe(8);
+      expect(Object.keys(foundSeats.rows).length).toBe(7);
+    });
+
+    test(`changeSeatsNewRules()`, () => {
+      const round1Seats = changeSeatsNewRules(sampleRound1).seatMap[0].join('');
+      const expectedRound1Seats = samplePartIIRound2[0].join('');
+      expect(round1Seats).toEqual(expectedRound1Seats);
+    });
+
+    test(`runSeatChangesNewRules(sample)`, () => {
+      const seatChanges = runSeatChangesNewRules(sample);
+      expect(seatChanges.counts[Seat.OCCUPIED]).toBe(26);
+    });
+
+    test(`runSeatChangesNewRules(inputs)`, () => {
+      const seatChanges = runSeatChangesNewRules(inputs);
+      expect(seatChanges.counts[Seat.OCCUPIED]).toBe(2091);
+    });
   });
 });

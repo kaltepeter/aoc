@@ -1,3 +1,5 @@
+import { mergeDeepRight } from 'ramda';
+
 export const enum Action {
   NORTH = 'N',
   SOUTH = 'S',
@@ -13,6 +15,12 @@ export enum Direction {
   E = 90,
   S = 180,
   W = 270,
+}
+
+export interface IShipCoords {
+  waypoint: { x: number; y: number };
+  ship: { x: number; y: number };
+  dir: Direction;
 }
 
 const calcDirs = (startDir: Direction, val: number) => {
@@ -132,4 +140,84 @@ const getManhattanDistance = (trackPath: ITrackPath) => {
   return x + y;
 };
 
-export { calcShipPath, calcDirs, getManhattanDistance };
+const rotateWaypoint = (
+  coords: IShipCoords,
+  count: number,
+  rotDir: 'R' | 'L'
+) => {
+  const { x, y } = coords.waypoint;
+  const newCoords = { waypoint: { x, y }, dir: coords.dir };
+
+  if (rotDir === 'L') {
+    for (let i = 0; i < count; i++) {
+      newCoords.waypoint = { x: newCoords.waypoint.y, y: newCoords.waypoint.x };
+      newCoords.waypoint.y *= -1;
+    }
+    newCoords.dir = calcDirs(coords.dir, -(count * 90));
+  } else {
+    for (let i = 0; i < count; i++) {
+      newCoords.waypoint = { x: newCoords.waypoint.y, y: newCoords.waypoint.x };
+      newCoords.waypoint.x *= -1;
+    }
+    newCoords.dir = calcDirs(coords.dir, count * 90);
+  }
+  // console.log(
+  //   `${rotDir}: ${count}, ${coords.dir}: ${newCoords.dir} : `,
+  //   coords.waypoint,
+  //   newCoords.waypoint
+  // );
+  return mergeDeepRight(coords, newCoords);
+};
+
+const getWayPoints = (instructions: Instructions): number => {
+  console.log(`*****: ${instructions.length} :*****`);
+  let coords: IShipCoords = {
+    waypoint: { x: 10, y: -1 },
+    ship: { x: 0, y: 0 },
+    dir: Direction.E,
+  };
+  let count = Direction.E;
+  console.log(coords);
+  instructions.forEach(([action, value]) => {
+    switch (action) {
+      case Action.FORWARD:
+        coords.ship.y += value * coords.waypoint.y;
+        coords.ship.x += value * coords.waypoint.x;
+        break;
+      case Action.NORTH:
+        coords.waypoint.y -= value;
+        break;
+      case Action.SOUTH:
+        coords.waypoint.y += value;
+        break;
+      case Action.EAST:
+        coords.waypoint.x += value;
+        break;
+      case Action.WEST:
+        coords.waypoint.x -= value;
+        break;
+      case Action.RIGHT:
+        count = value / 90;
+        coords = mergeDeepRight(coords, rotateWaypoint(coords, count, 'R'));
+        break;
+      case Action.LEFT:
+        count = value / 90;
+        coords = mergeDeepRight(coords, rotateWaypoint(coords, count, 'L'));
+        break;
+      default:
+        console.log('no action');
+        break;
+    }
+    // console.log(`action: ${action}, value: ${value}`, coords);
+  });
+  console.log(coords);
+  return Math.abs(coords.ship.x) + Math.abs(coords.ship.y);
+};
+
+export {
+  calcShipPath,
+  calcDirs,
+  getManhattanDistance,
+  getWayPoints,
+  rotateWaypoint,
+};

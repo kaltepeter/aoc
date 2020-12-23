@@ -10,6 +10,10 @@ const sampleDataText = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
+const sampleData2Text = fs
+  .readFileSync(path.join(__dirname, 'sample-data-2.txt'))
+  .toString('utf-8');
+
 const processDockingData = (t: string): IDockData[] =>
   t
     .split(/^mask/m)
@@ -32,5 +36,6 @@ const processDockingData = (t: string): IDockData[] =>
 
 const inputs = processDockingData(text);
 const sample = processDockingData(sampleDataText);
+const sample2 = processDockingData(sampleData2Text);
 
-export { inputs, sample };
+export { inputs, sample, sample2 };

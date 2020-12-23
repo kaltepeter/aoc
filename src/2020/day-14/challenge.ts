@@ -1,3 +1,4 @@
+import { writeFileSync } from 'fs';
 export interface IDockData {
   mask: string;
   memory: Array<{ loc: string; value: number }>;
@@ -41,7 +42,7 @@ const clearBit = (n: bigint, bitIndex: bigint): bigint => {
 const processDockingData = (data: IDockData[]) => {
   const programMemory: { [key: string]: bigint } = {};
   data.map((d) => {
-    let mVal = getMask(d.mask, BigInt(0));
+    const mVal = getMask(d.mask, BigInt(0));
     d.memory.map(({ loc, value }) => {
       let res = BigInt(value) | BigInt(parseInt(mVal, 2));
       d.mask
@@ -58,4 +59,124 @@ const processDockingData = (data: IDockData[]) => {
   return Number(getSumOfProgram(programMemory).valueOf());
 };
 
-export { processDockingData, getSumOfProgram, convertToBinaryString };
+const getMaskFromSeed = (address: string, mask: string): string => {
+  const maskVal = address.split('');
+  mask.split('').forEach((maskBit, pos) => {
+    if (maskBit === '0') {
+      maskVal[pos] = address[pos];
+    } else {
+      maskVal[pos] = maskBit;
+    }
+  });
+  // console.log(`mask: ${m}, maskVal: ${maskVal.join('')}, ${prevB}`);
+  return maskVal.join('');
+};
+
+// missing combos
+const getMasksFromMaskString = (mask: string): Set<string> => {
+  const masks: Set<string> = new Set();
+  const xPos: number[] = mask
+    .split('')
+    .map((v, i) => {
+      if (v === 'X') {
+        return +i;
+      }
+    })
+    .filter(Boolean as any);
+  const xPosReversed = xPos.slice().reverse();
+  const startM = mask.replace(/X/g, '0');
+  masks.add(startM);
+  let newM = startM;
+  for (const i of xPos) {
+    newM = startM.slice(0, i) + '1' + startM.slice(i + 1, startM.length);
+    masks.add(newM);
+
+    let newJM = newM;
+    for (const j of xPosReversed) {
+      if (j === i) {
+        continue;
+      }
+      newJM = newM.slice(0, j) + '1' + newM.slice(j + 1, newM.length);
+      masks.add(newJM);
+    }
+  }
+  const ones = mask.replace(/X/g, '1');
+  masks.add(ones);
+  writeToLog(`${mask} : masks.size: ${masks.size} #getMasksFromMaskString`);
+  // writeToLog(`${Array.from(masks).join('\n')} #getMasksFromMaskString`);
+  return masks;
+};
+
+// https://dev.to/thibpat/comment/19729
+const combinations = (n: number) => {
+  const max = 2 ** n;
+  const result = [];
+  for (let i = 0; i < max; i++) {
+    result.push(i.toString(2).padStart(n, '0'));
+  }
+  return result;
+};
+
+const writeToLog = (msg: any) => {
+  if (process.env['DEBUG']) {
+    writeFileSync(`d14.log`, '\n' + msg, { flag: 'as' });
+  }
+};
+
+const programMemoryToString = (programMemory: { [key: string]: bigint }) =>
+  JSON.stringify(
+    programMemory,
+    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+  );
+
+const decodeDockDataV2 = (data: IDockData[]) => {
+  writeFileSync(`d14.log`, '');
+  writeFileSync(`d14.log`, `***** items: ${data.length} ******\n`);
+  const programMemory: { [key: string]: bigint } = {};
+  data.map((d) => {
+    d.memory.map(({ loc, value }) => {
+      const mVal = BigInt(loc);
+      const binaryAddress = convertToBinaryString(mVal);
+      writeToLog(`${binaryAddress} : loc: ${loc} #loc`);
+      writeToLog(`${d.mask} : #d.mask`);
+
+      const mask = getMaskFromSeed(binaryAddress, d.mask);
+      const combos = combinations(
+        mask.split('').filter((v) => v === 'X').length
+      );
+      writeToLog(`${mask} : #mask, ${combos.length} #combos`);
+      const mList = getMasksFromMaskString(mask);
+      const maskList = Array.from(mList).sort();
+      // maskList.forEach((m) => {
+      //   const key = parseInt(m, 2).toString();
+      //   writeToLog(`${m} : ${key} #m ${value} #value`);
+      //   if (!programMemory[key]) {
+      //     programMemory[key] = BigInt(0);
+      //   }
+      //   programMemory[key] = BigInt(value);
+      // });
+      combos.forEach((combo, idx) => {
+        let xPos = 0;
+        let a = mask.split('').map((v, i) => {
+          if (v === 'X') {
+            return combo[xPos++];
+          }
+          return +v | +mask;
+        });
+        programMemory[a.join('')] = BigInt(value);
+      });
+      writeToLog(programMemoryToString(programMemory));
+    });
+  });
+  // console.log(programMemory);
+  return Number(getSumOfProgram(programMemory).valueOf());
+};
+
+export {
+  processDockingData,
+  getSumOfProgram,
+  convertToBinaryString,
+  getMasksFromMaskString,
+  decodeDockDataV2,
+  getMaskFromSeed,
+};

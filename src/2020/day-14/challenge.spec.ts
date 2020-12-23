@@ -1,5 +1,11 @@
-import { convertToBinaryString, processDockingData } from './challenge';
-import { inputs, sample } from './inputs';
+import {
+  convertToBinaryString,
+  decodeDockDataV2,
+  getMaskFromSeed,
+  getMasksFromMaskString,
+  processDockingData,
+} from './challenge';
+import { inputs, sample, sample2 } from './inputs';
 
 describe(`Day 14: Docking Data`, () => {
   test(`processDockData`, () => {
@@ -49,4 +55,80 @@ describe(`Day 14: Docking Data`, () => {
       });
     }
   );
+
+  describe(`Part II`, () => {
+    test(`bitmath test`, () => {
+      const val = 0b00100;
+      const mask = 0b00100;
+      expect(val).toBe(4);
+      expect(val | mask).toBe(4);
+      expect(val & mask).toBe(4);
+      expect(val ^ mask).toBe(0);
+      expect(~val).toBe(-5);
+    });
+
+    test(`decodeDockDataV2(sample2)`, () => {
+      expect(decodeDockDataV2(sample2)).toBe(208);
+    });
+
+    test(`decodeDockDataV2(inputs)`, () => {
+      const res = decodeDockDataV2(inputs);
+      expect(res).toBeGreaterThan(583466388456);
+      expect(res).toBe(3296185383161);
+    });
+
+    test(`getMasksFromMaskString('000000000000000000000000000000X1101X)`, () => {
+      const result = getMasksFromMaskString(
+        '000000000000000000000000000000X1101X'
+      );
+      expect(result.size).toBe(4);
+
+      expect(result).toContain('000000000000000000000000000000011010');
+      expect(result).toContain('000000000000000000000000000000011011');
+      expect(result).toContain('000000000000000000000000000000111011');
+      expect(result).toContain('000000000000000000000000000000111010');
+    });
+
+    test(`getMasksFromMaskString('00000000000000000000000000000001X0XX)`, () => {
+      const result = getMasksFromMaskString(
+        '00000000000000000000000000000001X0XX'
+      );
+      expect(result).toContain('000000000000000000000000000000010000');
+      expect(result).toContain('000000000000000000000000000000010001');
+      expect(result).toContain('000000000000000000000000000000010010');
+      expect(result).toContain('000000000000000000000000000000010011');
+      expect(result).toContain('000000000000000000000000000000011000');
+      expect(result).toContain('000000000000000000000000000000011001');
+      expect(result).toContain('000000000000000000000000000000011010');
+      expect(result).toContain('000000000000000000000000000000011011');
+      expect(result.size).toBe(8);
+    });
+
+    test(`getMasksFromMaskString('00000000000000000000000000X00001X0XX)`, () => {
+      const result = getMasksFromMaskString(
+        '00000000000000000000000000X00001X0XX'
+      );
+      expect(result.size).toBe(12);
+    });
+
+    describe.each([
+      [
+        '000000000000000000000000000000101010',
+        '000000000000000000000000000000X1001X',
+        '000000000000000000000000000000X1101X',
+      ],
+      [
+        '000000000000000000000000000000011010',
+        '00000000000000000000000000000000X0XX',
+        '00000000000000000000000000000001X0XX',
+      ],
+    ])(
+      `getMaskSeed(%s,%s)`,
+      (address: string, mask: string, expectedBinaryString: string) => {
+        test(`should return ${expectedBinaryString}`, () => {
+          expect(getMaskFromSeed(address, mask)).toBe(expectedBinaryString);
+        });
+      }
+    );
+  });
 });

@@ -157,7 +157,7 @@ const decodeDockDataV2 = (data: IDockData[]) => {
       // });
       combos.forEach((combo, idx) => {
         let xPos = 0;
-        let a = mask.split('').map((v, i) => {
+        const a = mask.split('').map((v, i) => {
           if (v === 'X') {
             return combo[xPos++];
           }

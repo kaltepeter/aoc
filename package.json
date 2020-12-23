@@ -4,11 +4,15 @@
     "start": "tsc",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/main.ts",
     "format:fix": "pretty-quick --staged",
-    "precommit": "run-s format:fix lint test",
     "lint": "tslint --project ./tsconfig.json --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "tsnode": "ts-node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "run-s format:fix lint test"
+    }
   },
   "jest": {
     "globals": {

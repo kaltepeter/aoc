@@ -10,7 +10,7 @@ const getExpensesTo2020 = (expenses: number[]): number[] => {
   let results: number[] = [];
   const sortedRightHalf = rightHalf.reverse();
 
-  leftHalf.map(lv1 => {
+  leftHalf.map((lv1) => {
     for (const lv of leftHalf) {
       if (lv1 + lv === 2020) {
         results = [lv, lv1];
@@ -19,7 +19,7 @@ const getExpensesTo2020 = (expenses: number[]): number[] => {
     }
   });
 
-  sortedRightHalf.map(rv => {
+  sortedRightHalf.map((rv) => {
     for (const lv of leftHalf) {
       if (rv + lv === 2020) {
         results = [lv, rv];
@@ -33,19 +33,19 @@ const getExpensesTo2020 = (expenses: number[]): number[] => {
 const getThreeExpensesTotal2020 = (expenses: number[], sum: number) => {
   const nums = sortNumbers(expenses);
   for (let i = 0; i < nums.length - 2; i++) {
-    let l = i + 1
-    let r = nums.length - 1
+    let l = i + 1;
+    let r = nums.length - 1;
     while (l < r) {
       if (nums[i] + nums[l] + nums[r] === sum) {
         return [nums[i], nums[l], nums[r]];
-      } else if(nums[i] + nums[l] + nums[r] < sum) {
+      } else if (nums[i] + nums[l] + nums[r] < sum) {
         l += 1;
       } else {
-        r -= 1
+        r -= 1;
       }
     }
   }
-  return []
+  return [];
 };
 
 export { getExpensesTo2020, getThreeExpensesTotal2020 };

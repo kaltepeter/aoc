@@ -12,8 +12,8 @@ const getValidNumbers = (n: number, list: number[]) => {
   return val;
 };
 
-const findInvalidNumber = (d: IXmasData): number[] => {
-  const { data, preamble } = d;
+const findInvalidNumber = (xmasData: IXmasData): number[] => {
+  const { data, preamble } = xmasData;
   let prevVals = [...preamble];
   const invalidNums: number[] = [];
   data.forEach((d) => {

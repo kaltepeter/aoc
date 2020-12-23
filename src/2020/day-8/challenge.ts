@@ -75,7 +75,7 @@ const fixProgram = (program: Program) => {
 
   while (isFixed === false) {
     nops.forEach((n) => {
-      let data = [...program];
+      const data = [...program];
       data[n] = { ...data[n], command: Instruction.JMP };
       const res = runProgram(data);
       isFixed = res[1];
@@ -86,7 +86,7 @@ const fixProgram = (program: Program) => {
     });
 
     jmps.forEach((n) => {
-      let data = [...program];
+      const data = [...program];
       data[n] = { ...data[n], command: Instruction.NOP };
       const res = runProgram(data);
       isFixed = res[1];

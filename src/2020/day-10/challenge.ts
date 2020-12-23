@@ -85,7 +85,7 @@ const getCombinations = (adapters: number[]): number => {
 
   for (let i = 1; i < aList.length; i++) {
     let backIdx = i;
-    let curValue = aList[i];
+    const curValue = aList[i];
     counts[i] = 0;
 
     while (backIdx >= 0 && curValue - aList[backIdx] <= 3) {

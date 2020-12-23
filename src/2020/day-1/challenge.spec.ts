@@ -35,5 +35,4 @@ describe('1: expense report', () => {
     expect(expenseItems[0] + expenseItems[1] + expenseItems[2]).toBe(2020);
     expect(total).toBe(155806250);
   });
-
 });

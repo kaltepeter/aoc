@@ -8,7 +8,7 @@ const PromiseAny = require('promise.any');
 PromiseAny.shim();
 
 let nops: number[] = [];
-let tasks: Program[] = [];
+const tasks: Program[] = [];
 const maxProcess = 3;
 
 interface IResultRun {
@@ -30,13 +30,13 @@ program.forEach((l, i) => {
 });
 
 nops.forEach((n) => {
-  let data = [...program];
+  const data = [...program];
   data[n] = { ...data[n], command: Instruction.JMP };
   tasks.push(data);
 });
 
 jmps.forEach((n) => {
-  let data = [...program];
+  const data = [...program];
   data[n] = { ...data[n], command: Instruction.NOP };
   tasks.push(data);
 });
@@ -97,10 +97,10 @@ const run = async () => {
             });
             return Promise.resolve({ acc, success });
           })
-          .then((res: IResultRun) => {
+          .then((r: IResultRun) => {
             processes = [];
             left = []; // need to short circuit
-            return Promise.resolve(res);
+            return Promise.resolve(r);
           })
           .catch(([acc, success]) => {
             res.push({

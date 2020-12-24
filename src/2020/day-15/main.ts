@@ -1,9 +1,14 @@
-// import { playGame } from "./challenge";
-
 import { playGame } from './challenge';
+import { inputs } from './inputs';
 
-const startNums = process.argv?.slice(2).map((v) => +v);
+// const startNums = process.argv?.slice(2).map((v) => +v);
 
-console.log(`StartNums: ${startNums}`);
+// console.log(`StartNums: ${startNums}`);
 
-playGame(startNums, 3000000);
+const result = playGame(inputs[0], 30000000);
+
+if (result !== 689) {
+  console.error(`FAILED`);
+}
+
+console.log(`result: ${result}`);

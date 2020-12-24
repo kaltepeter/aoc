@@ -36,10 +36,7 @@ const playGame = (start: number[], iterationCount: number = 2020): number => {
       lastTurn,
       updateSpokenValue(i, spokenValues.get(lastTurn))
     );
-    // console.log(`it: ${i}`);
   }
-  // console.log(Object.keys(spokenValues).length)
-  // console.log(getHeapStatistics())
   return lastTurn;
 };
 

@@ -30,7 +30,12 @@ describe(`Day 15: Rambunctious Recitation`, () => {
   });
 
   describe(`Part II`, () => {
-    describe.each([
+    test(`playGame(inputs[0])`, () => {
+      const game = playGame(inputs[0], 30000000);
+      expect(game).toBe(689);
+    });
+    // too slow
+    describe.skip.each([
       [sample[0], 175594],
       [sample[1], 2578],
       [sample[2], 3544142],

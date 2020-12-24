@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { IDockData } from './challenge';
 
 const text = fs
   .readFileSync(path.join(__dirname, 'raw-input.txt'))

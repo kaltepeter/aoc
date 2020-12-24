@@ -28,4 +28,21 @@ describe(`Day 15: Rambunctious Recitation`, () => {
     const game = playGame(inputs[0]);
     expect(game).toBe(1259);
   });
+
+  describe(`Part II`, () => {
+    describe.each([
+      [sample[0], 175594],
+      [sample[1], 2578],
+      [sample[2], 3544142],
+      [sample[3], 261214],
+      [sample[4], 6895259],
+      [sample[5], 18],
+      // [sample[6], 362],
+    ])(`playGame(%j)`, (startNumbers: number[], expectedResult: number) => {
+      test(`should return ${expectedResult}`, () => {
+        const game = playGame(startNumbers, 30000000);
+        expect(game).toBe(expectedResult);
+      });
+    });
+  });
 });

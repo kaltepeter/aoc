@@ -4,6 +4,7 @@ import {
   flatMap,
   map,
   mergeAll,
+  mergeMap,
   reduce,
   tap,
   toArray,
@@ -347,7 +348,7 @@ const drawWires2$ = (instructions: string[], matrixMetrics: MatrixMetrics) => {
   const retMatrix: string[][] = [['o']];
   console.log(matrixMetrics);
   return of(instructions).pipe(
-    flatMap((c) => getPaths(c)),
+    mergeMap((c) => getPaths(c)),
     reduce(
       (acc, c) => {
         const command = c[0];

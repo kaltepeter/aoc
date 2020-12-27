@@ -4,10 +4,11 @@ import {
   filter,
   flatMap,
   map,
+  mergeMap,
   reduce,
   takeWhile,
   tap,
-  toArray
+  toArray,
 } from 'rxjs/operators';
 import { inputs } from './inputs';
 
@@ -38,7 +39,7 @@ const example$ = (listOfNumsAndExpectedValues: number[][]) =>
         console.log(`num: ${num}, value: ${val}, expected: ${expected}`);
         console.assert(val === expected, errorMsg, {
           val,
-          expected
+          expected,
         });
       })
     )
@@ -50,7 +51,7 @@ const fuelCounterUpper = (masses: number[]) => {
 
 const doubleCheckedFuelCounterUpper$ = (masses: number[]) =>
   from(masses).pipe(
-    flatMap(value => totalFuelNeededByMass$(value)),
+    mergeMap((value) => totalFuelNeededByMass$(value)),
     reduce((acc: number, n: number) => (acc += n), 0)
   );
 
@@ -59,5 +60,5 @@ export {
   fuelNeededForMass,
   fuelCounterUpper,
   totalFuelNeededByMass$,
-  doubleCheckedFuelCounterUpper$
+  doubleCheckedFuelCounterUpper$,
 };

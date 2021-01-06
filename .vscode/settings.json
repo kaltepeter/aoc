@@ -4,6 +4,7 @@
     "jest.coverageFormatter": "GutterFormatter",
     "cSpell.words": [
         "joltage",
-        "nums"
+        "nums",
+        "xprod"
     ]
 }

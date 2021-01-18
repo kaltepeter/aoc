@@ -1,8 +1,10 @@
 import {
   calcCoordsForActiveCubes,
+  calcCoordsForActiveCubes4D,
   calcNextGeneration,
   calcPocketDimension,
   calcPocketDimensionFast,
+  calcPocketDimensionFast4D,
   countResults,
   Flags,
   getCurrentCube,
@@ -10,8 +12,10 @@ import {
   getMaskForValue,
   getNeighborCount,
   getPermutationsOfCoords,
+  getPermutationsOfCoordsFor4D,
   isEmpty,
   point,
+  point4d,
   runCycle,
   States,
 } from './challenge';
@@ -186,10 +190,66 @@ describe(`Day 17: Conway Cubes`, () => {
     expect(calcPocketDimension(inputs).length).toBe(112);
   });
 
-  test(`calcPocketDimensionFast(inputs)`, () => {
+  test(`calcPocketDimensionFast(inputs, 6)`, () => {
     const res = calcPocketDimensionFast(inputs, 6);
     const nextGen = calcNextGeneration(res);
     expect(nextGen.size).not.toBe(64);
     expect(nextGen.size).toBe(276); // 1278ms to run
+  });
+
+  describe(`Part II`, () => {
+    test(`getPermutationsOfCoordsFor4D([0,1,2,3])`, () => {
+      const pos = [0, 1, 2, 3] as point4d;
+      const res = getPermutationsOfCoordsFor4D(pos);
+      expect(res.length).toBe(80);
+      expect(res).toEqual(
+        jasmine.arrayContaining([
+          [-1, 0, 1, 2],
+          [0, 1, 1, 2],
+          [0, 2, 2, 3],
+          [0, 1, 3, 4],
+        ])
+      );
+      expect(res.indexOf(pos)).toBe(-1);
+    });
+
+    test(`calcCoordsForActiveCubes4D([[sample]])`, () => {
+      expect(calcCoordsForActiveCubes4D([[sample]])).toEqual([
+        [0, 1, 0, 0],
+        [1, 2, 0, 0],
+        [2, 0, 0, 0],
+        [2, 1, 0, 0],
+        [2, 2, 0, 0],
+      ]);
+    });
+
+    test(`calcCoordsForActiveCubes4D([[[], sample, []]])`, () => {
+      expect(calcCoordsForActiveCubes4D([[[], sample, []]])).toEqual([
+        [0, 1, 0, 1],
+        [1, 2, 0, 1],
+        [2, 0, 0, 1],
+        [2, 1, 0, 1],
+        [2, 2, 0, 1],
+      ]);
+    });
+
+    describe.each([
+      [6, 848], // 26675 ms
+    ])(
+      `calcPocketDimensionFast4D(sample, %i)`,
+      (value: number, expectedResult: number) => {
+        test(`should return ${expectedResult}`, () => {
+          const res = calcPocketDimensionFast4D(sample, value);
+          const nextGen = calcNextGeneration(res);
+          expect(nextGen.size).toBe(expectedResult);
+        });
+      }
+    );
+
+    test.skip(`calcPocketDimensionFast4D(inputs, 6)`, () => {
+      const res = calcPocketDimensionFast4D(inputs, 6);
+      const nextGen = calcNextGeneration(res);
+      expect(nextGen.size).toBe(2136); // 70,323 ms
+    });
   });
 });

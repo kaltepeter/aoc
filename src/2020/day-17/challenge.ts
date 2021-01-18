@@ -1,6 +1,7 @@
 import { difference, intersection, range, uniq } from 'ramda';
 
 export type point = [number, number, number];
+export type point4d = [number, number, number, number];
 export type coordsList = point[];
 
 export const enum States {
@@ -73,6 +74,24 @@ const getPermutationsOfCoords = (coords: point): coordsList => {
   return difference(res, [coords]);
 };
 
+const getPermutationsOfCoordsFor4D = (coords: point4d): point4d[] => {
+  let res: point4d[] = [];
+  const [xRange, yRange, zRange, wRange] = coords.map((c) =>
+    range(c - 1, c + 2)
+  );
+
+  for (const x of xRange) {
+    for (const y of yRange) {
+      for (const z of zRange) {
+        for (const w of wRange) {
+          res = [...res, [x, y, z, w]];
+        }
+      }
+    }
+  }
+  return difference(res, [coords]);
+};
+
 const calcCoordsForActiveCubes = (boards: string[][][]) => {
   let activeCubes: coordsList = [];
   boards.forEach((b, zIndex) => {
@@ -81,6 +100,22 @@ const calcCoordsForActiveCubes = (boards: string[][][]) => {
         if (cube === States.ACTIVE) {
           activeCubes = [...activeCubes, [xIndex, yIndex, zIndex]];
         }
+      });
+    });
+  });
+  return activeCubes;
+};
+
+const calcCoordsForActiveCubes4D = (boards: string[][][][]): point4d[] => {
+  let activeCubes = [] as point4d[];
+  boards.forEach((b, zIndex) => {
+    b.forEach((w, wIndex) => {
+      w.forEach((row, xIndex) => {
+        row.forEach((cube, yIndex) => {
+          if (cube === States.ACTIVE) {
+            activeCubes = [...activeCubes, [xIndex, yIndex, zIndex, wIndex]];
+          }
+        });
       });
     });
   });
@@ -247,6 +282,68 @@ const calcPocketDimensionFast = (
   return pocketDimension;
 };
 
+const calcPocketDimensionFast4D = (
+  cs: string[][],
+  iterations: number = 1
+): Map<string, number> => {
+  const currentCubeState = [[[], cs, []]];
+  const pocketDimension = new Map<string, number>();
+
+  const runIteration = (ac: point4d[]) => {
+    let it = 0;
+    let activeCubes = [...ac];
+    let activeCubeLookupList = ac.map((v) => v.toString());
+    do {
+      pocketDimension.clear();
+      const processedCoord = new Set<string>();
+      for (const pos of activeCubes) {
+        const neighbors = getPermutationsOfCoordsFor4D(pos);
+        let selfNewVal = pocketDimension.get(pos.toString()) || 0b1;
+
+        // for each neighbor
+        for (const nPos of neighbors) {
+          if (processedCoord.has(nPos.toString())) {
+            continue;
+          }
+          let newVal = pocketDimension.get(nPos.toString()) || 0b0; // default EMPTY
+          //   // for self
+          // const cube = getCurrentCube(currentCubeState, nPos);
+          if (activeCubeLookupList.includes(nPos.toString())) {
+            newVal |= 1 << Flags.NONE;
+            // if neighbor is active, increment self counts
+            const maskForSelfNewValue = getMaskForValue(selfNewVal);
+            const idx = maskForSelfNewValue.toString(2).length;
+            const selfMask = maskForSelfNewValue | (1 << idx);
+            selfNewVal |= selfMask;
+          }
+
+          //   // // for the neighbors
+          const maskForNewValue = getMaskForValue(newVal);
+          const nIdx = maskForNewValue.toString(2).length;
+          const mask = maskForNewValue | (1 << nIdx);
+          newVal |= mask;
+
+          pocketDimension.set(nPos.toString(), newVal);
+          // processedCoord.add(nPos.toString());
+        }
+
+        pocketDimension.set(pos.toString(), selfNewVal);
+        processedCoord.add(pos.toString());
+      }
+      // set next gen, resets
+      const nextGen = calcNextGeneration(pocketDimension);
+      activeCubeLookupList = getCoordListFromMap(nextGen);
+      activeCubes = activeCubeLookupList.map((v) => {
+        const [x, y, z, w] = v.split(',');
+        return [+x, +y, +z, +w];
+      });
+      it++;
+    } while (it < iterations);
+  };
+  runIteration(calcCoordsForActiveCubes4D(currentCubeState));
+  return pocketDimension;
+};
+
 export {
   getPermutationsOfCoords,
   calcCoordsForActiveCubes,
@@ -261,4 +358,7 @@ export {
   getMaskForValue,
   countResults,
   calcNextGeneration,
+  getPermutationsOfCoordsFor4D,
+  calcPocketDimensionFast4D,
+  calcCoordsForActiveCubes4D,
 };

@@ -94,3 +94,55 @@ return if pos 1 = -1, all combos of other 2 possible values
 Run Cycles
 
 1. start with a slice, calc dimension
+
+https://www.youtube.com/watch?v=ndAfWKmKF34
+
+- Use binary: 1st bit is alive or dead, next bits are neighbor values
+- Start with active cells, for each active set true and set neighbor count +1
+- use pos as map lookup key
+
+parallel? the run could divide and conquer
+
+http://www.jagregory.com/abrash-black-book/#bringing-in-the-right-brain
+
+11001
+11110 // &
+11000
+
+01
+10
+
+point = x,y,z
+
+cube state = cs[z][x][y], z is the slice
+
+starting with 2d --> convert to 3d
+
+string[x][y] = string[z][x][y]
+
+z starts as zero in docs, but could be 1, the pos offset would be z - 1 or 0 for previous state
+
+mask : 1110
+val : 0
+increment neighbor
+
+1 << 0
+
+getBitMask
+
+getLastBitSet(v)
+num.toString(2).padStart(36, '0');
+
+get first bit
+get last bit set
+build a mask for this
+
+if v = 1110, mask is 1110
+if v = 0 mask is 0
+if v = 1 mask is 0
+if v is 111111, mask is 111110
+
+prevent changing first bit and all left shift
+
+TODO:
+if self has not been processed, it is assumed 0, there is conflict in neighbors and timing, self mask should override neighbors

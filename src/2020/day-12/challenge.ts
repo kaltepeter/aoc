@@ -67,7 +67,6 @@ export interface ITrackPath {
 const START_DIR = Direction.E;
 
 const calcShipPath = (instructions: Instructions) => {
-  console.log(`*****: ${instructions.length} :*****`);
   const trackPath: ITrackPath = {
     [Action.NORTH]: 0,
     [Action.SOUTH]: 0,
@@ -127,7 +126,7 @@ const calcShipPath = (instructions: Instructions) => {
         curDirection = calcDirs(curDirection, -value);
         break;
       default:
-        console.log('no action');
+        // console.log('no action');
         break;
     }
   });
@@ -161,23 +160,16 @@ const rotateWaypoint = (
     }
     newCoords.dir = calcDirs(coords.dir, count * 90);
   }
-  // console.log(
-  //   `${rotDir}: ${count}, ${coords.dir}: ${newCoords.dir} : `,
-  //   coords.waypoint,
-  //   newCoords.waypoint
-  // );
   return mergeDeepRight(coords, newCoords);
 };
 
 const getWayPoints = (instructions: Instructions): number => {
-  console.log(`*****: ${instructions.length} :*****`);
   let coords: IShipCoords = {
     waypoint: { x: 10, y: -1 },
     ship: { x: 0, y: 0 },
     dir: Direction.E,
   };
   let count = Direction.E;
-  console.log(coords);
   instructions.forEach(([action, value]) => {
     switch (action) {
       case Action.FORWARD:
@@ -205,12 +197,11 @@ const getWayPoints = (instructions: Instructions): number => {
         coords = mergeDeepRight(coords, rotateWaypoint(coords, count, 'L'));
         break;
       default:
-        console.log('no action');
+        // console.log('no action');
         break;
     }
     // console.log(`action: ${action}, value: ${value}`, coords);
   });
-  console.log(coords);
   return Math.abs(coords.ship.x) + Math.abs(coords.ship.y);
 };
 

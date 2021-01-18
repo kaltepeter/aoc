@@ -146,7 +146,7 @@ describe(`Day 17: Conway Cubes`, () => {
     }
   );
 
-  test(`calcPocketDimension(sample)`, () => {
+  test.skip(`calcPocketDimension(sample)`, () => {
     expect(calcPocketDimension(sample).length).toBe(112);
   });
 
@@ -164,11 +164,32 @@ describe(`Day 17: Conway Cubes`, () => {
     expect(firstGen.get('2,1,1')).toEqual(0b1);
     expect(firstGen.get('3,1,1')).toEqual(0b1);
     expect(firstGen.size).toBe(11);
-
-    // expect(calcPocketDimensionFast(sample)).toBe(112); // 6 iterations
   });
 
+  describe.each([
+    [1, 11],
+    [2, 21],
+    [6, 112],
+  ])(
+    `calcPocketDimensionFast(sample, %i)`,
+    (value: number, expectedResult: number) => {
+      test(`should return ${expectedResult}`, () => {
+        const res = calcPocketDimensionFast(sample, value);
+        const nextGen = calcNextGeneration(res);
+        expect(nextGen.size).toBe(expectedResult);
+      });
+    }
+  );
+
+  // too slow to run
   test.skip(`calcPocketDimension(inputs)`, () => {
     expect(calcPocketDimension(inputs).length).toBe(112);
+  });
+
+  test(`calcPocketDimensionFast(inputs)`, () => {
+    const res = calcPocketDimensionFast(inputs, 6);
+    const nextGen = calcNextGeneration(res);
+    expect(nextGen.size).not.toBe(64);
+    expect(nextGen.size).toBe(276); // 1278ms to run
   });
 });

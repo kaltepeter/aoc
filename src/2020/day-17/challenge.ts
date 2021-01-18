@@ -171,8 +171,12 @@ const calcNextGeneration = (
       }
     }
   }
+
   return nextDimension;
 };
+
+const getCoordListFromMap = (pocketDimension: Map<string, number>): string[] =>
+  Array.from(pocketDimension.keys());
 
 // count neighbors
 const countResults = (pocketDimension: Map<string, number>): number =>
@@ -181,47 +185,65 @@ const countResults = (pocketDimension: Map<string, number>): number =>
     0
   );
 
-const calcPocketDimensionFast = (cs: string[][]): Map<string, number> => {
+const calcPocketDimensionFast = (
+  cs: string[][],
+  iterations: number = 1
+): Map<string, number> => {
   const currentCubeState = [[], cs, []];
   const pocketDimension = new Map<string, number>();
-  const processedCoord = new Set<string>();
-  // console.time();
-  const activeCubes = calcCoordsForActiveCubes(currentCubeState);
-  for (const pos of activeCubes) {
-    const neighbors = getPermutationsOfCoords(pos);
-    let selfNewVal = pocketDimension.get(pos.toString()) || 0b1;
 
-    // for each neighbor
-    for (const nPos of neighbors) {
-      if (processedCoord.has(nPos.toString())) {
-        continue;
+  const runIteration = (ac: coordsList) => {
+    let it = 0;
+    let activeCubes = [...ac];
+    let activeCubeLookupList = ac.map((v) => v.toString());
+    do {
+      pocketDimension.clear();
+      const processedCoord = new Set<string>();
+      for (const pos of activeCubes) {
+        const neighbors = getPermutationsOfCoords(pos);
+        let selfNewVal = pocketDimension.get(pos.toString()) || 0b1;
+
+        // for each neighbor
+        for (const nPos of neighbors) {
+          if (processedCoord.has(nPos.toString())) {
+            continue;
+          }
+          let newVal = pocketDimension.get(nPos.toString()) || 0b0; // default EMPTY
+          //   // for self
+          // const cube = getCurrentCube(currentCubeState, nPos);
+          if (activeCubeLookupList.includes(nPos.toString())) {
+            newVal |= 1 << Flags.NONE;
+            // if neighbor is active, increment self counts
+            const maskForSelfNewValue = getMaskForValue(selfNewVal);
+            const idx = maskForSelfNewValue.toString(2).length;
+            const selfMask = maskForSelfNewValue | (1 << idx);
+            selfNewVal |= selfMask;
+          }
+
+          //   // // for the neighbors
+          const maskForNewValue = getMaskForValue(newVal);
+          const nIdx = maskForNewValue.toString(2).length;
+          const mask = maskForNewValue | (1 << nIdx);
+          newVal |= mask;
+
+          pocketDimension.set(nPos.toString(), newVal);
+          // processedCoord.add(nPos.toString());
+        }
+
+        pocketDimension.set(pos.toString(), selfNewVal);
+        processedCoord.add(pos.toString());
       }
-      let newVal = pocketDimension.get(nPos.toString()) || 0b0; // default EMPTY
-      //   // for self
-      const cube = getCurrentCube(currentCubeState, nPos);
-      if (cube === States.ACTIVE) {
-        newVal |= 1 << Flags.NONE;
-        // if neighbor is active, increment self counts
-        const maskForSelfNewValue = getMaskForValue(selfNewVal);
-        const idx = maskForSelfNewValue.toString(2).length;
-        const selfMask = maskForSelfNewValue | (1 << idx);
-        selfNewVal |= selfMask;
-      }
-
-      //   // // for the neighbors
-      const maskForNewValue = getMaskForValue(newVal);
-      const nIdx = maskForNewValue.toString(2).length;
-      const mask = maskForNewValue | (1 << nIdx);
-      newVal |= mask;
-
-      pocketDimension.set(nPos.toString(), newVal);
-      // processedCoord.add(nPos.toString());
-    }
-
-    pocketDimension.set(pos.toString(), selfNewVal);
-    processedCoord.add(pos.toString());
-  }
-  // console.timeEnd();
+      // set next gen, resets
+      const nextGen = calcNextGeneration(pocketDimension);
+      activeCubeLookupList = getCoordListFromMap(nextGen);
+      activeCubes = activeCubeLookupList.map((v) => {
+        const [x, y, z] = v.split(',');
+        return [+x, +y, +z];
+      });
+      it++;
+    } while (it < iterations);
+  };
+  runIteration(calcCoordsForActiveCubes(currentCubeState));
   return pocketDimension;
 };
 

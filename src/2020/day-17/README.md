@@ -143,6 +143,3 @@ if v = 1 mask is 0
 if v is 111111, mask is 111110
 
 prevent changing first bit and all left shift
-
-TODO:
-if self has not been processed, it is assumed 0, there is conflict in neighbors and timing, self mask should override neighbors

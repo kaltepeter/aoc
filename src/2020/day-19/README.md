@@ -50,3 +50,5 @@ b -> rule 5 = valid
 1: (?:(?:aa|bb)(?:ab|ba))?
 2: (?:aa|bb)
 3: (?:ab|ba)
+
+https://github.com/xiel/advent-of-code/blob/main/src/Day-19-Monster-Messages/MonsterMessages.test.ts

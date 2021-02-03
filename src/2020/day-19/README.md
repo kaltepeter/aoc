@@ -44,3 +44,9 @@ bb -> rule 5 = b remaining, so invalid
 aaaabb -> rule 4 = aaabb
 aaabb -> rule 1 -> rule 2,3 or 3,2 = b
 b -> rule 5 = valid
+
+## Regex
+
+1: (?:(?:aa|bb)(?:ab|ba))?
+2: (?:aa|bb)
+3: (?:ab|ba)

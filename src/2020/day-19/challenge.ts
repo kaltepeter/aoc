@@ -1,18 +1,4 @@
-import {
-  all,
-  any,
-  ap,
-  curry,
-  curryN,
-  equals,
-  flatten,
-  map,
-  mapAccum,
-  unless,
-  when,
-  zip,
-  __,
-} from 'ramda';
+import { all, curry, equals, fromPairs, map, zip } from 'ramda';
 
 export interface IMonsterMessages {
   rules: Map<number, string | number[][]>;
@@ -23,76 +9,63 @@ export type Rule = (v: string) => RuleResult;
 export type Rules = Map<number, Rule>;
 export type RuleResult = [boolean, string];
 
-// subRule: '4 4' or '3 4 5'
-const parseSubRuleString = (subRule: string): number[] =>
-  subRule.split(/\s/).map((v) => +v);
-const ruleLookup = curry((rId: number, rList: Rules) => rList.get(rId));
-const genEqualRule = curry((subRule: string, msg: string) => {
-  if (msg.length < subRule.length) {
-    return [false, ''] as RuleResult;
-  }
-  const m = msg.slice(0, subRule.length);
-  const res = equals(subRule, m);
-  return [res, msg.slice(subRule.length)];
-});
-const genSubRule = curry((sRuleList: number[], rList: Rules, msg: string) => {
-  if (msg.length < sRuleList.length) {
-    return [false, ''] as RuleResult;
-  }
-  const processSubRule = map<any, RuleResult>(
-    ([fn, v]) => fn(rList)(v),
-    zip(map(ruleLookup, sRuleList), msg.split(''))
+const createRulesV2 = (rawRules: Map<number, string>) => {
+  const stringRules = fromPairs(
+    [...rawRules.entries()].filter(([_, rule]) => rule.match(/[a-z]/i))
   );
-  const res = all((r) => r[0] === true, processSubRule);
-  return [res, msg.slice(sRuleList.length)] as RuleResult;
-});
-const genRule = curry((sRuleList: number[][], rList: Rules, msg: string) => {
-  const processRule = map((sRule) => genSubRule(sRule, rList, msg), sRuleList);
-  const valid = processRule.filter((r) => r[0] === true);
-  if (valid.length > 0) {
-    return valid[0];
-  } else {
-    return [false, ''];
-  }
-});
-
-const createRules = (rawRules: Map<number, string | number[][]>) => {
-  const rules = new Map<number, any>();
-  for (let [ruleId, subRules] of rawRules) {
-    if (typeof subRules === 'string') {
-      rules.set(ruleId, genEqualRule(subRules));
-    } else {
-      const rule = genRule(subRules)(rules); // TODO: need to combine rules as or
-      rules.set(ruleId, rule);
+  const newRules = new Map(rawRules);
+  for (const [k, v] of rawRules) {
+    if (v.includes('|')) {
+      const r = v.replace(/([\d\s]*)?[|]+([\d\s]*)?/g, '(?:$1|$2)?');
+      newRules.set(k, r);
     }
   }
-  return rules;
+  let pRules;
+  do {
+    for (const [rId, r] of newRules) {
+      let rule = r;
+      Object.entries(stringRules).forEach(([k, v]) => {
+        rule = rule.replace(/${k}/g, v);
+      });
+      if (!rule.match(/\d/)) {
+        rule = rule.replace(/ /g, '');
+      } else {
+        const nums = rule.match(/(\d+)/g);
+        nums?.forEach((n) => {
+          const nr = newRules.get(+n);
+          if (!nr?.match(/\d/)) {
+            rule = rule.replace(n, `${nr?.replace(/ /g, '')}`);
+          }
+        });
+      }
+      newRules.set(rId, rule);
+    }
+    pRules = Array.from(newRules.values()).filter(
+      (v) => v.match(/\d/) || v.match(/ /)
+    );
+  } while (pRules.length > 0);
+
+  return newRules;
 };
 
 const processRules = (
-  rules: Map<number, any>,
-  ruleToProcess: number[],
-  msg: string
+  rules: Map<number, string>,
+  ruleToProcess: number,
+  msgs: string[]
 ) => {
-  let m = msg.slice(0);
-  let res = false;
-  for (let n of ruleToProcess) {
-    [res, m] = rules.get(n)(m);
-    console.log(
-      '🚀 ~ file: challenge.ts ~ line 57 ~ processRules ~ res',
-      n,
-      res,
-      m
-    );
-  }
+  const messageResults: boolean[] = msgs.map((msg) => {
+    const m = msg.trim();
+    const rule = rules.get(ruleToProcess);
+    if (!rule) {
+      return false;
+    }
+    const r = new RegExp(`^${rule}$`, 'g');
+    const messageReplaced = r.exec(m);
+    return messageReplaced !== null;
+  });
+  const res = messageResults.filter((m) => m === true);
+
   return res;
 };
 
-export {
-  createRules,
-  ruleLookup,
-  genRule,
-  genSubRule,
-  genEqualRule,
-  processRules,
-};
+export { processRules, createRulesV2 };

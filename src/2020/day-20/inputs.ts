@@ -9,6 +9,10 @@ const sampleDataText = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
+const expectedSampleImageText = fs
+  .readFileSync(path.join(__dirname, 'expected-sample-image.txt'))
+  .toString('utf-8');
+
 const readData = (t: string): string[][] =>
   t
     .split('\n\n')
@@ -18,5 +22,6 @@ const readData = (t: string): string[][] =>
 
 const inputs = readData(text);
 const sample = readData(sampleDataText);
+const expectedSampleImage = expectedSampleImageText;
 
-export { inputs, sample };
+export { inputs, sample, expectedSampleImage };

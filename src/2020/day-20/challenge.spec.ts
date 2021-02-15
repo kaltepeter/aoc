@@ -1,11 +1,7 @@
-import { sample, inputs } from './inputs';
-import {
-  calcResult,
-  getCorners,
-  getEdgesForTile,
-  processTiles,
-  Tile,
-} from './challenge';
+import { calcResult } from './challenge';
+import { TileImage } from './tile-image';
+import { inputs, sample } from './inputs';
+import { Tile } from './tile2';
 
 describe(`Day 20: Jurassic Jigsaw`, () => {
   it(`should process data`, () => {
@@ -14,53 +10,27 @@ describe(`Day 20: Jurassic Jigsaw`, () => {
     expect(sample[0][1].split('\n')[0]).toBe('..##.#..#.');
   });
 
-  it(`getEdgesForTile(sample[0][1])`, () => {
-    expect(Array.from(getEdgesForTile(sample[0][1]))).toEqual(
-      jasmine.arrayContaining([
-        '..##.#..#.',
-        '..###..###',
-        '.#####..#.',
-        '...#.##..#',
-        '.#..#.##..',
-        '###..###..',
-        '.#..#####.',
-        '#..##.#...',
-      ])
-    );
-  });
-
-  it(`Tile.sharedEdges()`, () => {
-    const tile1 = new Tile(sample[0][1]);
-    const tile2 = new Tile(sample[1][1]);
-    expect(tile1.sharedEdges(tile2)).toEqual(
-      jasmine.arrayContaining(['.#####..#.', '.#####..#.'])
-    );
-  });
-
-  it(`Tile.neighborOf()`, () => {
-    const tile1 = new Tile(sample[0][1]);
-    const tile2 = new Tile(sample[1][1]);
-    expect(tile1.neighborOf(tile2)).toBe(true);
-  });
-
-  it(`processTiles(sample)`, () => {
-    expect(processTiles(sample).size).toBe(9);
-  });
-
-  it(`getCorners(sample)`, () => {
-    const tiles = processTiles(sample);
-    expect(getCorners(tiles)).toEqual(
-      jasmine.arrayContaining(['1951', '3079', '2971', '1171'])
-    );
-  });
-
   it(`calcResult('1951', '3079', '2971', '1171')`, () => {
     expect(calcResult(['1951', '3079', '2971', '1171'])).toBe(20899048083289);
   });
 
   it(`calcResult for inputs`, () => {
-    const tiles = processTiles(inputs);
-    const corners = getCorners(tiles);
+    const tiles = inputs.map((t) => new Tile(t[0], t[1].split('\n')));
+    const image = new TileImage(tiles);
+    const corners = image.corners();
     expect(calcResult(corners)).toBe(17250897231301);
+  });
+
+  describe(`part II`, () => {
+    // it(`buildImage(sample)`, () => {
+    //   const tiles = processTiles(sample);
+    //   const image = new TiledImage(tiles);
+    //   expect(image).toBe(9);
+    // });
+    // it(`processTiles(sample)`, () => {
+    //   const tiles = processTiles(sample);
+    //   // console.log("🚀 ~ file: challenge.spec.ts ~ line 70 ~ it ~ tiles", tiles)
+    //   expect(tiles.size).toBe(9);
+    // });
   });
 });

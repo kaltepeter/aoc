@@ -1,4 +1,4 @@
-import { calcResult } from './challenge';
+import { calcResult, findRoughness } from './challenge';
 import { TileImage } from './tile-image';
 import { inputs, sample } from './inputs';
 import { Tile } from './tile2';
@@ -22,15 +22,15 @@ describe(`Day 20: Jurassic Jigsaw`, () => {
   });
 
   describe(`part II`, () => {
-    // it(`buildImage(sample)`, () => {
-    //   const tiles = processTiles(sample);
-    //   const image = new TiledImage(tiles);
-    //   expect(image).toBe(9);
-    // });
-    // it(`processTiles(sample)`, () => {
-    //   const tiles = processTiles(sample);
-    //   // console.log("🚀 ~ file: challenge.spec.ts ~ line 70 ~ it ~ tiles", tiles)
-    //   expect(tiles.size).toBe(9);
-    // });
+    it(`findMonsters(sample)`, () => {
+      const tiles = sample.map((t) => new Tile(t[0], t[1].split('\n')));
+      expect(findRoughness(tiles)).toBe(273);
+    });
+
+    it(`findMonsters(inputs)`, () => {
+      const tiles = inputs.map((t) => new Tile(t[0], t[1].split('\n')));
+      expect(findRoughness(tiles)).toBeLessThan(1606);
+      expect(findRoughness(tiles)).toBe(1576);
+    });
   });
 });

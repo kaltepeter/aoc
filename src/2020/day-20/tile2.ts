@@ -104,6 +104,20 @@ class Tile {
     return dropEdges;
   }
 
+  length() {
+    return this.data[0].length;
+  }
+
+  width() {
+    return this.data.length;
+  }
+
+  count(char: string) {
+    return this.data
+      .map((row) => (row.match(new RegExp(char, 'g')) || []).length)
+      .reduce((acc, v) => (acc += v), 0);
+  }
+
   toString() {
     return this.data.join('\n');
   }

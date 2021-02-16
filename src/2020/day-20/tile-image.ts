@@ -84,14 +84,16 @@ class TileImage {
     this.placeTile(corner, 0, 0);
     // Step 4: solve the rest of the puzzle
     this.orient(corner, 0, 0);
-    this.exportImage();
+    return this.exportImage();
   }
 
   exportImage() {
     const tilesWithoutBorder = this.assembledImage.map((row) =>
       row.map((t) => t.removeBorders())
     );
-    return tilesWithoutBorder.map((t) => transpose(t)).map((t) => join(''));
+    return tilesWithoutBorder
+      .flatMap((t) => transpose(t))
+      .map((t) => t.join(''));
   }
 
   toString() {

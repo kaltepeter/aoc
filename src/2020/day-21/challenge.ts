@@ -37,7 +37,10 @@ const getAllergenList = (list: IFoodList[]) => {
   return aList;
 };
 
-const processAllergens = (list: IFoodList[], aList: allergenList) => {
+const processAllergens = (
+  list: IFoodList[],
+  aList: allergenList
+): Map<string, string> => {
   const badFoods = new Map<string, string>();
   list.forEach((fl, idx) => {
     const newList = [...list];
@@ -46,7 +49,6 @@ const processAllergens = (list: IFoodList[], aList: allergenList) => {
       const remainingIngredients = newList
         .filter((fi) => fi.allergens.includes(a))
         .map((i) => i.ingredients);
-      // .filter((i) => !badFoods.has(i));
 
       // if no compares, use filtered list
       const possibleAllergens =
@@ -62,7 +64,7 @@ const processAllergens = (list: IFoodList[], aList: allergenList) => {
       }
     });
   });
-  return uniq(Array.from(badFoods.keys()));
+  return badFoods;
 };
 
 const findIngredientsNotInAllergenList = (
@@ -70,7 +72,9 @@ const findIngredientsNotInAllergenList = (
   aList: allergenList
 ) => {
   const allIngredients = list.flatMap((f) => f.ingredients);
-  const processedAllergenList = processAllergens(list, aList);
+  const processedAllergenList = uniq(
+    Array.from(processAllergens(list, aList).keys())
+  );
   return difference(allIngredients, processedAllergenList);
 };
 
@@ -80,10 +84,18 @@ const countAllergens = (listOfSafeFoods: string[], foodList: IFoodList[]) => {
     .filter((i) => listOfSafeFoods.includes(i)).length;
 };
 
+const getCanonicalDangerousIngredientList = (badFoods: Map<string, string>) => {
+  return Array.from(badFoods.entries())
+    .sort(([aIng, aAlg], [bIng, bAlg]) => aAlg.localeCompare(bAlg))
+    .flatMap(([ing, alg]) => ing)
+    .join(',');
+};
+
 export {
   getFoodList,
   getAllergenList,
   findIngredientsNotInAllergenList,
   processAllergens,
   countAllergens,
+  getCanonicalDangerousIngredientList,
 };

@@ -1,7 +1,9 @@
+import { fromPairs } from 'ramda';
 import {
   countAllergens,
   findIngredientsNotInAllergenList,
   getAllergenList,
+  getCanonicalDangerousIngredientList,
   getFoodList,
   processAllergens,
 } from './challenge';
@@ -43,25 +45,31 @@ describe(`Day 21: Allergen Assessment`, () => {
   it(`processAllergens`, () => {
     const list = getFoodList(sample);
     const allergenList = getAllergenList(list);
-    expect(processAllergens(list, allergenList)).toEqual(
-      jasmine.arrayContaining(['mxmxvkd', 'sqjhc', 'fvjkl'])
+    const res = processAllergens(list, allergenList);
+    expect(fromPairs(Array.from(res.entries()))).toEqual(
+      jasmine.objectContaining({
+        mxmxvkd: 'dairy',
+        sqjhc: 'fish',
+        fvjkl: 'soy',
+      })
     );
   });
 
   it(`processAllergens for inputs`, () => {
     const list = getFoodList(inputs);
     const allergenList = getAllergenList(list);
-    expect(processAllergens(list, allergenList)).toEqual(
-      jasmine.arrayContaining([
-        'xpbxbv',
-        'jtjtrd',
-        'fvjkp',
-        'xlvrggj',
-        'gtqfrp',
-        'rlsr',
-        'fntg',
-        'zhszc',
-      ])
+    const res = processAllergens(list, allergenList);
+    expect(fromPairs(Array.from(res.entries()))).toEqual(
+      jasmine.objectContaining({
+        xpbxbv: 'sesame',
+        jtjtrd: 'shellfish',
+        fvjkp: 'soy',
+        xlvrggj: 'fish',
+        gtqfrp: 'eggs',
+        rlsr: 'peanuts',
+        fntg: 'dairy',
+        zhszc: 'wheat',
+      })
     );
   });
 
@@ -80,5 +88,25 @@ describe(`Day 21: Allergen Assessment`, () => {
     expect(countAllergens(badFoods, list)).toBeLessThan(2553);
     expect(countAllergens(badFoods, list)).toBeGreaterThan(480);
     expect(countAllergens(badFoods, list)).toBe(2287);
+  });
+
+  describe(`part II`, () => {
+    it(`getCanonicalDangerousIngredientList(sample)`, () => {
+      const list = getFoodList(sample);
+      const allergenList = getAllergenList(list);
+      const badFoods = processAllergens(list, allergenList);
+      expect(getCanonicalDangerousIngredientList(badFoods)).toEqual(
+        'mxmxvkd,sqjhc,fvjkl'
+      );
+    });
+
+    it(`getCanonicalDangerousIngredientList(inputs)`, () => {
+      const list = getFoodList(inputs);
+      const allergenList = getAllergenList(list);
+      const badFoods = processAllergens(list, allergenList);
+      expect(getCanonicalDangerousIngredientList(badFoods)).toEqual(
+        'fntg,gtqfrp,xlvrggj,rlsr,xpbxbv,jtjtrd,fvjkp,zhszc'
+      );
+    });
   });
 });

@@ -1,13 +1,4 @@
-import { verify } from 'crypto';
-import { concatAll, last, toArray } from 'rxjs/operators';
-import {
-  doubleCheckedFuelCounterUpper$,
-  example$ as day1Example$,
-  fuelCounterUpper
-} from './day-1/challenge';
-import { inputs } from './day-1/inputs';
 import { inputs as day2Inputs } from './day-2/inputs';
-import { execGravityAssistProgram$ } from './day-2/program-alarm';
 import { checkCrossedWires } from './day-3/crossed-wires';
 
 const day1Vals = [
@@ -15,7 +6,7 @@ const day1Vals = [
   [12, 2],
   [14, 2],
   [1969, 654],
-  [100756, 33583]
+  [100756, 33583],
 ];
 
 // day1Example$(day1Vals);

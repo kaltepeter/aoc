@@ -7,4 +7,10 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageReporters: ['html'],
   roots: ['<rootDir>/src/'],
+  moduleNameMapper: {
+    '^util/(.*)': '<rootDir>/src/util',
+    '^util/list/(.*)': '<rootDir>/src/util/list/$1',
+    '^testing/(.*)': '<rootDir>/src/testing',
+    '^testing/util/(.*)': '<rootDir>/src/testing/util/$1',
+  },
 };

@@ -1,16 +1,5 @@
-import { concat, EMPTY, from, of, pipe, range } from 'rxjs';
-import {
-  expand,
-  filter,
-  flatMap,
-  map,
-  mergeMap,
-  reduce,
-  takeWhile,
-  tap,
-  toArray,
-} from 'rxjs/operators';
-import { inputs } from './inputs';
+import { EMPTY, from, Observable, of } from 'rxjs';
+import { expand, filter, map, mergeMap, reduce, tap } from 'rxjs/operators';
 
 const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
 const totalFuelNeededByMass$ = (mass: number) =>

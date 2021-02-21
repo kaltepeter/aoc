@@ -1,16 +1,5 @@
-import { EMPTY, Observable, of } from 'rxjs';
-import {
-  bufferCount,
-  filter,
-  flatMap,
-  groupBy,
-  map,
-  mergeMap,
-  switchMap,
-  takeWhile,
-  tap,
-  toArray,
-} from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { bufferCount, map, mergeMap } from 'rxjs/operators';
 
 const fns = {
   add: (x: number, y: number) => x + y,

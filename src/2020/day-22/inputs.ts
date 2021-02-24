@@ -10,6 +10,10 @@ const sampleDataText = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
+const infiniteGameText = fs
+  .readFileSync(path.join(__dirname, 'infinite-game.txt'))
+  .toString('utf-8');
+
 const readData = (t: string): Array<[string, number[]]> =>
   t
     .split('\n\n')
@@ -27,5 +31,6 @@ const readData = (t: string): Array<[string, number[]]> =>
 
 const inputs = readData(text);
 const sample = readData(sampleDataText);
+const infiniteGame = readData(infiniteGameText);
 
-export { inputs, sample };
+export { inputs, sample, infiniteGame };

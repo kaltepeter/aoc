@@ -1,6 +1,7 @@
 import { infiniteGame, inputs, sample } from './inputs';
 import { Game } from './game';
 import { Player } from './player';
+import { calculateScore, recursiveGame } from './challenge';
 
 describe(`Day 22: Crab Combat`, () => {
   it(`should process data`, () => {
@@ -36,13 +37,13 @@ describe(`Day 22: Crab Combat`, () => {
       expect(newGame.winner.name).toBe('Player 2');
     });
 
-    it.skip(`play game`, () => {
-      const players = inputs.map((pData) => new Player(...pData));
-      const game = new Game(players);
-      game.isRecursive = true;
-      const gameResult = game.playGame();
+    it(`play recursive game for inputs`, () => {
+      const players = inputs.map((pData) => pData[1]);
+      const game = recursiveGame(players);
+      const gameResult = calculateScore(game[1]);
       expect(gameResult).toBeLessThan(32186);
       expect(gameResult).toBeLessThan(34640);
+      expect(gameResult).toBe(32018);
     });
   });
 });

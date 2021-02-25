@@ -12,5 +12,6 @@ module.exports = {
     '^util/list/(.*)': '<rootDir>/src/util/list/$1',
     '^testing/(.*)': '<rootDir>/src/testing',
     '^testing/util/(.*)': '<rootDir>/src/testing/util/$1',
+    '^model/(.*)': '<rootDir>/src/model',
   },
 };

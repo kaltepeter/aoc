@@ -19,7 +19,8 @@
       "util/list/*": ["src/util/list/*"],
       "util/*": ["src/util/*"],
       "testing/util/*": ["src/testing/util/*"],
-      "testing/*": ["src/testing/*"]
+      "testing/*": ["src/testing/*"],
+      "model/*": ["src/model/*"]
     }
   },
   "exclude": ["src/test-setup.ts", "**/*.spec.ts"]

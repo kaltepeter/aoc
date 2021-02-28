@@ -1,5 +1,9 @@
 import { writeFileSync } from 'fs';
+import { join } from 'path';
 import { any, gte, lte, pluck, transpose } from 'ramda';
+import { writeToLog } from 'util/debug';
+
+const LOG_FILE = join(__dirname, 'challenge.log');
 
 export type RuleRange = [number, number];
 export interface IRule {
@@ -117,12 +121,6 @@ const getValidTickets = (ticketList: ITicketData): ITicketData => {
   return { ...ticketList, nearbyTickets: validTickets };
 };
 
-const writeToLog = (msg: any) => {
-  if (process.env['DEBUG']) {
-    writeFileSync(`d16.log`, '\n' + msg, { flag: 'as' });
-  }
-};
-
 const validateColumn = (values: number[], rules: IRuleSet): Set<string> => {
   const results = new Set<string>();
   Object.entries(rules).forEach(([k, v]) => {
@@ -146,8 +144,8 @@ const getTicketFieldList = (
   rules: IRuleSet,
   ticketFieldValues: number[][]
 ): Array<Set<string>> => {
-  writeFileSync(`d16.log`, '');
   writeToLog(
+    LOG_FILE,
     `process fieldCount: ${ticketFieldValues.length}, itemCount: ${ticketFieldValues[0].length}`
   );
   const possibleVals = ticketFieldValues.map((cols: number[]) => {

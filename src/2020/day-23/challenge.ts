@@ -1,59 +1,68 @@
-// const playCups = (input: string) => {
-//   const cups = input.split('');
-//   const highest = Math.max(...cups.map((v) => +v));
-//   const lowest = Math.min(...cups.map((v) => +v));
-//   const newOrder = cups.slice(0);
-//   const maxMoves = 10;
-//   let currentCup: string;
-//   for (let i = 0; i < 10; i++) {
-//     console.log(newOrder);
-//     const curIdx = i >= input.length ? 0 : i;
-//     currentCup = newOrder[curIdx];
-//     let nextThree = newOrder.splice(curIdx + 1, 3);
-//     if (nextThree.length < 3) {
-//       nextThree = [...nextThree, ...newOrder.splice(0, 3 - nextThree.length)];
-//     }
-//     let destCup = +currentCup - 1;
-//     let destIdx = newOrder.findIndex((c) => c === destCup.toString());
+import { LinkedList, LinkedListItem } from 'model/index';
+import { join } from 'path';
+import { writeToLog } from 'util/debug';
 
-//     console.log(`(${currentCup}), ${destCup}, ${curIdx}, ${i}`);
-//     do {
-//       if (nextThree.includes(destCup.toString())) {
-//         destCup = +destCup - 1;
-//         // const destIdx = newOrder.findIndex(c => c === destCup.toString());
-//         // console.log(destIdx);
-//       } else if (destCup < lowest) {
-//         destCup = highest;
-//         // destIdx = newOrder.findIndex((c) => c === destCup.toString());
-//       }
-//     } while (nextThree.includes(destCup.toString()) || destCup < lowest);
-//     destIdx = newOrder.findIndex((c) => c === destCup.toString());
+const LOG_FILE = join(__dirname, 'challenge.log');
 
-//     if (newOrder.length < input.length && destIdx < curIdx) {
-//       const target = newOrder.splice(0, destIdx + 1);
-//       newOrder.splice(newOrder.length, 0, ...target);
-//       destIdx = newOrder.findIndex((c) => c === destCup.toString());
-//       newOrder.splice(
-//         destIdx + 1,
-//         0,
-//         ...nextThree.splice(0, 3 - target.length)
-//       );
-//       newOrder.splice(0, 0, ...nextThree);
-//     } else {
-//       newOrder.splice(destIdx + 1, 0, ...nextThree);
-//     }
+const playCups = (input: string, maxMoves = 10) => {
+  const cups = input.split('');
+  const highest = Math.max(...cups.map((v) => +v));
+  const lowest = Math.min(...cups.map((v) => +v));
+  const list = new LinkedList<string>();
+  cups.map((v) => list.insertLast(v));
+  let currentCup = list.getFirst();
+  // run game
+  for (let i = 0; i < maxMoves; i++) {
+    const nextCup = currentCup?.next ? currentCup.next : list.getFirst();
+    if (!nextCup || !nextCup.item) {
+      break;
+    }
+    // get next three cups
+    const nextThree: string[] = list.removeFrom(nextCup.item, 3);
 
-//     console.log(
-//       `nextThree: ${nextThree}, destCup: ${destCup}:${destIdx}, curCup: ${currentCup}`
-//     );
-//   }
-//   if (newOrder.length !== input.length) {
-//     console.error('Failed');
-//   }
-//   const res = newOrder.join('').split('1');
-//   return `${res[1]}${res[0]}`;
-// };
+    // handle end of list
+    if (nextThree.length < 3) {
+      while (nextThree.length < 3) {
+        const firstItem = list.removeFirst();
+        if (firstItem) {
+          nextThree.push(firstItem);
+        }
+      }
+    }
 
-const playCups = (input: string) => {};
+    let destCup: number;
+    if (currentCup?.item) {
+      // get destination cup
+      destCup = currentCup.item ? +currentCup.item - 1 : -1;
+      do {
+        if (nextThree.includes(destCup.toString())) {
+          destCup = +destCup - 1;
+        } else if (destCup < lowest) {
+          destCup = highest;
+        }
+      } while (nextThree.includes(destCup.toString()) || destCup < lowest);
+
+      writeToLog(
+        LOG_FILE,
+        `nextThree: ${nextThree}, current: ${currentCup.item}, dest: ${destCup}`
+      );
+
+      // place cups
+      let targetVal = destCup.toString();
+      while (nextThree.length > 0) {
+        const val = nextThree.shift();
+        if (val) {
+          list.insertAfterFirst(targetVal, val);
+          targetVal = val;
+        }
+      }
+
+      currentCup = currentCup.next?.item ? currentCup.next : list.getFirst();
+    }
+  }
+  // console.log(list.listContents())
+  const res = list.listContents().join('').split('1');
+  return `${res[1]}${res[0]}`;
+};
 
 export { playCups };

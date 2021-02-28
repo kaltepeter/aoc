@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { Player } from './player';
 
 const text = fs
   .readFileSync(path.join(__dirname, 'raw-input.txt'))

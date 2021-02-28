@@ -21,6 +21,26 @@ describe(`LinkedList`, () => {
     });
   });
 
+  describe(`findByItem('20')`, () => {
+    it('should throw if empty', () => {
+      try {
+        expect(list.findByItem('20')).toThrowError();
+      } catch (e) {
+        expect(e.message).toBe('List is empty.');
+      }
+    });
+  });
+
+  describe(`getLast()`, () => {
+    it('should throw if empty', () => {
+      try {
+        expect(list.getLast()).toThrowError();
+      } catch (e) {
+        expect(e.message).toBe('List is empty.');
+      }
+    });
+  });
+
   describe(`contains()`, () => {
     it('should throw if empty', () => {
       try {
@@ -51,6 +71,26 @@ describe(`LinkedList`, () => {
     });
   });
 
+  describe(`insertFirstBefore()`, () => {
+    it(`should throw error `, () => {
+      try {
+        expect(list.insertBeforeFirst('20', '11')).toThrowError();
+      } catch (e) {
+        expect(e.message).toBe('Item "20" not found.');
+      }
+    });
+  });
+
+  describe(`insertFirstAfter()`, () => {
+    it(`should throw error `, () => {
+      try {
+        expect(list.insertAfterFirst('20', '11')).toThrowError();
+      } catch (e) {
+        expect(e.message).toBe('Item "20" not found.');
+      }
+    });
+  });
+
   describe(`with values`, () => {
     const expectedBaseOrder = ['3', '8', '9', '1', '2', '5', '4', '6', '7'];
     beforeEach(() => {
@@ -69,14 +109,78 @@ describe(`LinkedList`, () => {
       expect(list.listContents()).toEqual(['11', ...expectedBaseOrder]);
     });
 
+    describe.each([
+      ['9', '11', ['3', '8', '11', '9', '1', '2', '5', '4', '6', '7']],
+      ['3', '11', ['11', '3', '8', '9', '1', '2', '5', '4', '6', '7']],
+      ['7', '11', ['3', '8', '9', '1', '2', '5', '4', '6', '11', '7']],
+    ])(
+      `insertBeforeFirst(%s, %s)`,
+      (searchItem: string, newItem: string, expectedResult: string[]) => {
+        it(`should return ${expectedResult}`, () => {
+          list.insertBeforeFirst(searchItem, newItem);
+          expect(list.listContents()).toEqual(expectedResult);
+        });
+      }
+    );
+
+    describe.each([
+      ['9', '11', ['3', '8', '9', '11', '1', '2', '5', '4', '6', '7']],
+      ['3', '11', ['3', '11', '8', '9', '1', '2', '5', '4', '6', '7']],
+      ['7', '11', ['3', '8', '9', '1', '2', '5', '4', '6', '7', '11']],
+    ])(
+      `insertAfterFirst(%s, %s)`,
+      (searchItem: string, newItem: string, expectedResult: string[]) => {
+        it(`should return ${expectedResult}`, () => {
+          list.insertAfterFirst(searchItem, newItem);
+          expect(list.listContents()).toEqual(expectedResult);
+        });
+      }
+    );
+
     it('should insert last', () => {
       list.insertLast('11');
       expect(list.listContents()).toEqual([...expectedBaseOrder, '11']);
     });
 
+    it('should splice items', () => {
+      const partialList = ['20', '21', '22'];
+      list.splice('2', partialList);
+      expect(list.listContents()).toEqual([
+        '3',
+        '8',
+        '9',
+        '1',
+        '2',
+        '20',
+        '21',
+        '22',
+        '5',
+        '4',
+        '6',
+        '7',
+      ]);
+    });
+
     describe(`getFirst()`, () => {
       it('should return first item', () => {
         expect(list.getFirst()?.item).toBe('3');
+      });
+    });
+
+    describe(`findByItem('2')`, () => {
+      it('should return first item', () => {
+        expect(list.findByItem('2')?.item).toBe('2');
+        expect(list.findByItem('2')?.next?.item).toBe('5');
+      });
+    });
+
+    describe(`getLast()`, () => {
+      it('should return last item', () => {
+        expect(list.getLast()?.item).toBe('7');
+      });
+
+      it('should return null', () => {
+        expect(list.getLast()?.next?.item).toBe(null);
       });
     });
 
@@ -147,6 +251,27 @@ describe(`LinkedList`, () => {
           '4',
           '6',
         ]);
+      });
+
+      it('should remove a string of items', () => {
+        // const targetCup = list.c
+        const res = list.removeFrom('8', 3);
+        expect(list.listContents()).toEqual(['3', '2', '5', '4', '6', '7']);
+        expect(res).toEqual(['8', '9', '1']);
+      });
+
+      it('should remove a string of items ast end of list', () => {
+        const res = list.removeFrom('6', 3);
+        expect(list.listContents()).toEqual([
+          '3',
+          '8',
+          '9',
+          '1',
+          '2',
+          '5',
+          '4',
+        ]);
+        expect(res).toEqual(['6', '7']);
       });
     });
   });

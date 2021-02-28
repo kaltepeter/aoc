@@ -1,4 +1,7 @@
-import { writeFileSync } from 'fs';
+import { join } from 'path';
+import { writeToLog } from 'util/debug';
+
+const LOG_FILE = join(__dirname, 'challenge.log');
 export interface IDockData {
   mask: string;
   memory: Array<{ loc: string; value: number }>;
@@ -102,8 +105,10 @@ const getMasksFromMaskString = (mask: string): Set<string> => {
   }
   const ones = mask.replace(/X/g, '1');
   masks.add(ones);
-  writeToLog(`${mask} : masks.size: ${masks.size} #getMasksFromMaskString`);
-  // writeToLog(`${Array.from(masks).join('\n')} #getMasksFromMaskString`);
+  writeToLog(
+    LOG_FILE,
+    `${mask} : masks.size: ${masks.size} #getMasksFromMaskString`
+  );
   return masks;
 };
 
@@ -117,12 +122,6 @@ const combinations = (n: number) => {
   return result;
 };
 
-const writeToLog = (msg: any) => {
-  if (process.env['DEBUG']) {
-    writeFileSync(`d14.log`, '\n' + msg, { flag: 'as' });
-  }
-};
-
 const programMemoryToString = (programMemory: { [key: string]: bigint }) =>
   JSON.stringify(
     programMemory,
@@ -130,31 +129,23 @@ const programMemoryToString = (programMemory: { [key: string]: bigint }) =>
   );
 
 const decodeDockDataV2 = (data: IDockData[]) => {
-  writeFileSync(`d14.log`, '');
-  writeFileSync(`d14.log`, `***** items: ${data.length} ******\n`);
+  writeToLog(LOG_FILE, `***** items: ${data.length} ******\n`);
   const programMemory: { [key: string]: bigint } = {};
   data.map((d) => {
     d.memory.map(({ loc, value }) => {
       const mVal = BigInt(loc);
       const binaryAddress = convertToBinaryString(mVal);
-      writeToLog(`${binaryAddress} : loc: ${loc} #loc`);
-      writeToLog(`${d.mask} : #d.mask`);
+      writeToLog(LOG_FILE, `${binaryAddress} : loc: ${loc} #loc`);
+      writeToLog(LOG_FILE, `${d.mask} : #d.mask`);
 
       const mask = getMaskFromSeed(binaryAddress, d.mask);
       const combos = combinations(
         mask.split('').filter((v) => v === 'X').length
       );
-      writeToLog(`${mask} : #mask, ${combos.length} #combos`);
+      writeToLog(LOG_FILE, `${mask} : #mask, ${combos.length} #combos`);
       const mList = getMasksFromMaskString(mask);
       const maskList = Array.from(mList).sort();
-      // maskList.forEach((m) => {
-      //   const key = parseInt(m, 2).toString();
-      //   writeToLog(`${m} : ${key} #m ${value} #value`);
-      //   if (!programMemory[key]) {
-      //     programMemory[key] = BigInt(0);
-      //   }
-      //   programMemory[key] = BigInt(value);
-      // });
+
       combos.forEach((combo, idx) => {
         let xPos = 0;
         const a = mask.split('').map((v, i) => {
@@ -165,7 +156,7 @@ const decodeDockDataV2 = (data: IDockData[]) => {
         });
         programMemory[a.join('')] = BigInt(value);
       });
-      writeToLog(programMemoryToString(programMemory));
+      writeToLog(LOG_FILE, programMemoryToString(programMemory));
     });
   });
   // console.log(programMemory);

@@ -1,3 +1,4 @@
+import { range } from 'ramda';
 import { LinkedList, ListEmptyError } from './linked-list';
 
 describe(`LinkedList`, () => {
@@ -107,6 +108,18 @@ describe(`LinkedList`, () => {
     it('should insert first', () => {
       list.insertFirst('11');
       expect(list.listContents()).toEqual(['11', ...expectedBaseOrder]);
+    });
+
+    it('should insert first multiple times', () => {
+      list.insertFirst('11');
+      list.insertFirst('21');
+      list.insertFirst('31');
+      expect(list.listContents()).toEqual([
+        '31',
+        '21',
+        '11',
+        ...expectedBaseOrder,
+      ]);
     });
 
     describe.each([
@@ -273,6 +286,42 @@ describe(`LinkedList`, () => {
         ]);
         expect(res).toEqual(['6', '7']);
       });
+    });
+
+    it(`combinesLists`, () => {
+      const list2 = new LinkedList<string>();
+      list2.addAllSync(['22', '23', '24']);
+      list.merge(list2);
+      expect(list.listContents()).toEqual([
+        '22',
+        '23',
+        '24',
+        ...expectedBaseOrder,
+      ]);
+    });
+  });
+
+  it(`addAllSync([])`, () => {
+    const expectedList = ['2', '3', '6', '1', '20', '10', '7'];
+    const newList = new LinkedList<string>();
+    newList.addAllSync([...expectedList]);
+    expect(newList.listContents()).toEqual([...expectedList]);
+  });
+
+  describe(`large lists: 1 million`, () => {
+    let largeList: LinkedList<number>;
+
+    beforeEach(async () => {
+      largeList = new LinkedList<number>();
+      const nums = range(1, 1000001);
+      await largeList.addAll(nums.slice(0, 200000));
+    });
+
+    it(`1 million number`, () => {
+      expect(largeList.getFirst()?.item).toBe(1);
+      const lastItem = largeList.getLast();
+      expect(lastItem?.item).toBe(200000);
+      // expect(lastItem?.item).toBe(1000000);
     });
   });
 });

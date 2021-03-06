@@ -1,8 +1,35 @@
+import { access } from 'fs';
+import { splitEvery } from 'ramda';
 import { LinkedListItem } from './linked-list-item';
 
 export const ListEmptyError = () => new Error('List is empty.');
 export const ItemNotFoundError = (item: any) =>
   new Error(`Item "${item}" not found.`);
+
+const processChunk = <T>(
+  list: T[],
+  processFn: (l: T[], v: T) => LinkedList<T>,
+  chunkSize = 500
+): Promise<Array<LinkedList<T>>> => {
+  const finalList: Array<LinkedList<T>> = [];
+  return new Promise((resolve, reject) => {
+    function help(subArr: T[]) {
+      if (subArr.length > 0) {
+        for (const item of subArr) {
+          finalList.push(processFn(subArr, item));
+        }
+      } else {
+        resolve(finalList);
+        return;
+      }
+      // "Asynchronous recursion".
+      // Schedule next operation asynchronously.
+      setImmediate(help.bind(null, list.splice(0, chunkSize)));
+    }
+
+    setImmediate(help.bind(null, list.splice(0, chunkSize)));
+  });
+};
 
 export class LinkedList<T> {
   protected head: LinkedListItem<T>;
@@ -226,5 +253,54 @@ export class LinkedList<T> {
       cur = cur.next;
     }
     return rv;
+  }
+
+  merge(otherList: LinkedList<T>): void {
+    const lastItem = otherList.getLast();
+    if (lastItem) {
+      lastItem.next = this.head.next;
+    }
+    this.head.next = otherList.getFirst();
+  }
+
+  addAllSync(items: T[]) {
+    const list = splitEvery(1000, [...items].reverse());
+
+    const processedLists = list
+      .map((subList) =>
+        subList.reduce((acc, v) => {
+          acc.insertFirst(v);
+          return acc;
+        }, new LinkedList<T>())
+      )
+      .reverse();
+
+    if (processedLists.length > 0) {
+      return processedLists.reduceRight((acc, l) => {
+        acc.merge(l);
+        return acc;
+      }, this);
+    }
+  }
+
+  async addAll(items: T[]): Promise<void> {
+    const list = [...items].reverse();
+
+    const processedLists = await processChunk<T>(
+      list,
+      (l, _: T) =>
+        l.reduce((acc, v) => {
+          acc.insertFirst(v);
+          return acc;
+        }, new LinkedList<T>()),
+      100
+    );
+
+    if (processedLists.length > 0) {
+      processedLists.reduce((acc, l) => {
+        acc.merge(l);
+        return acc;
+      }, this);
+    }
   }
 }

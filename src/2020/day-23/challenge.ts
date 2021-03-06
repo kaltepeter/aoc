@@ -1,15 +1,19 @@
 import { LinkedList, LinkedListItem } from 'model/index';
 import { join } from 'path';
+import { range } from 'ramda';
 import { writeToLog } from 'util/debug';
 
 const LOG_FILE = join(__dirname, 'challenge.log');
 
-const playCups = (input: string, maxMoves = 10) => {
-  const cups = input.split('');
-  const highest = Math.max(...cups.map((v) => +v));
-  const lowest = Math.min(...cups.map((v) => +v));
+const playCups = (cups: string[], maxMoves = 10, returnList = false) => {
+  // const highest = Math.max(...cups.map((v) => +v));
+  const highest =
+    cups.length < 1000000 ? Math.max(...cups.map((v) => +v)) : 1000000;
+  // const lowest = Math.min(...cups.map((v) => +v));
+  const lowest = 1;
   const list = new LinkedList<string>();
-  cups.map((v) => list.insertLast(v));
+  list.addAllSync(cups);
+  // cups.map((v) => list.insertLast(v));
   let currentCup = list.getFirst();
   // run game
   for (let i = 0; i < maxMoves; i++) {
@@ -44,7 +48,7 @@ const playCups = (input: string, maxMoves = 10) => {
 
       writeToLog(
         LOG_FILE,
-        `nextThree: ${nextThree}, current: ${currentCup.item}, dest: ${destCup}`
+        `i: ${i}: nextThree: ${nextThree}, current: ${currentCup.item}, dest: ${destCup}`
       );
 
       // place cups
@@ -60,9 +64,20 @@ const playCups = (input: string, maxMoves = 10) => {
       currentCup = currentCup.next?.item ? currentCup.next : list.getFirst();
     }
   }
-  // console.log(list.listContents())
-  const res = list.listContents().join('').split('1');
-  return `${res[1]}${res[0]}`;
+  if (returnList) {
+    const res = list.listContents();
+    const oneIdx = res.indexOf('1');
+    return res.slice(oneIdx + 1, oneIdx + 3);
+  } else {
+    const res = list.listContents().join('').split('1');
+    return `${res[1]}${res[0]}`;
+  }
 };
 
-export { playCups };
+const getInputForAMillionCups = (cups: string[]) => {
+  const inputNumbers = cups.map((v) => +v);
+  const highest = Math.max(...inputNumbers);
+  return [...inputNumbers, ...range(+highest + 1, 1000001)];
+};
+
+export { playCups, getInputForAMillionCups };

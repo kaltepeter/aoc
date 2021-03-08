@@ -31,6 +31,9 @@ const processChunk = <T>(
   });
 };
 
+/**
+ * Use a set instead. This is a slow implementation and the async is really slow too
+ */
 export class LinkedList<T> {
   protected head: LinkedListItem<T>;
   protected tail: LinkedListItem<T>;

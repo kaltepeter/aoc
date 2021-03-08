@@ -90,3 +90,52 @@ The crab is going to hide your stars - one each - under the two cups that will e
 In the above example (`389125467`), this would be `934001` and then `159792`; multiplying these together produces `149245887792`.
 
 Determine which two cups will end up immediately clockwise of cup 1. What do you get if you multiply their labels together?
+
+## Solution Details
+
+Part 1 is easy enough with a linked list.
+
+Part 2 needs performance improvements.
+
+Sample logs from part 2 after it passes the first set of cups.
+
+```bash
+i: 278: nextThree: 1111,1112,1113, current: 1110, dest: 1109
+i: 279: nextThree: 1115,1116,1117, current: 1114, dest: 1113
+i: 280: nextThree: 1119,1120,1121, current: 1118, dest: 1117
+i: 281: nextThree: 1123,1124,1125, current: 1122, dest: 1121
+i: 282: nextThree: 1127,1128,1129, current: 1126, dest: 1125
+i: 283: nextThree: 1131,1132,1133, current: 1130, dest: 1129
+i: 284: nextThree: 1135,1136,1137, current: 1134, dest: 1133
+i: 285: nextThree: 1139,1140,1141, current: 1138, dest: 1137
+i: 286: nextThree: 1143,1144,1145, current: 1142, dest: 1141
+i: 287: nextThree: 1147,1148,1149, current: 1146, dest: 1145
+i: 288: nextThree: 1151,1152,1153, current: 1150, dest: 1149
+i: 289: nextThree: 1155,1156,1157, current: 1154, dest: 1153
+i: 290: nextThree: 1159,1160,1161, current: 1158, dest: 1157
+i: 291: nextThree: 1163,1164,1165, current: 1162, dest: 1161
+i: 292: nextThree: 1167,1168,1169, current: 1166, dest: 1165
+i: 293: nextThree: 1171,1172,1173, current: 1170, dest: 1169
+i: 294: nextThree: 1175,1176,1177, current: 1174, dest: 1173
+i: 295: nextThree: 1179,1180,1181, current: 1178, dest: 1177
+i: 296: nextThree: 1183,1184,1185, current: 1182, dest: 1181
+i: 297: nextThree: 1187,1188,1189, current: 1186, dest: 1185
+i: 298: nextThree: 1191,1192,1193, current: 1190, dest: 1189
+i: 299: nextThree: 1195,1196,1197, current: 1194, dest: 1193
+```
+
+Possible pattern?
+
+current: `1110`
+`1109, 1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122` // 1110
+`1109, 1111, 1112, 1113, 1110, 1114, 1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122` // 1114
+`1109, 1111, 1112, 1113, 1115, 1116, 1117, 1110, 1114, 1118, 1119, 1120, 1121, 1122` // 1118
+`1109, 1111, 1112, 1113, 1115, 1116, 1117, 1119, 1120, 1121, 1110, 1114, 1118, 1122` // 1122
+
+https://github.com/oddbytes/adventofcode/blob/master/src/2020/Day%2023/crabCups.ts on the idea of using a set for a linked list is super efficient.
+
+debug is very slow.
+
+```bash
+NODE_OPTIONS="--max_old_space_size=8192" npm run start:2020:millions-of-cups
+```

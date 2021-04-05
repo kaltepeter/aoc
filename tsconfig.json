@@ -14,7 +14,14 @@
     "esModuleInterop": true,
     "inlineSources": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "util/list/*": ["src/util/list/*"],
+      "util/*": ["src/util/*"],
+      "testing/util/*": ["src/testing/util/*"],
+      "testing/*": ["src/testing/*"],
+      "model/*": ["src/model/*"]
+    }
   },
   "exclude": ["src/test-setup.ts", "**/*.spec.ts"]
 }

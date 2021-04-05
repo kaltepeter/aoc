@@ -3,11 +3,17 @@
   "scripts": {
     "start": "tsc",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/main.ts",
+    "start:2020:millions-of-cups": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' -r tsconfig-paths/register src/2020/day-23/play-millions-of-cups.ts",
     "format:fix": "pretty-quick --staged",
-    "precommit": "run-s format:fix lint test",
     "lint": "tslint --project ./tsconfig.json --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "tsnode": "ts-node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "run-s format:fix lint test"
+    }
   },
   "jest": {
     "globals": {
@@ -16,26 +22,35 @@
       }
     }
   },
+  "engines": {
+    "node": "^14.15.1"
+  },
   "dependencies": {
-    "rxjs": "6.5.3"
+    "cli-progress": "^3.8.2",
+    "promise.any": "^2.0.1",
+    "rxjs": "6.6.3"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.14",
-    "husky": "^3.1.0",
-    "jest": "^24.9.0",
-    "jest-preset-angular": "^8.0.0",
-    "nodemon": "^2.0.1",
+    "@types/cli-progress": "^3.8.0",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.12",
+    "@types/ramda": "^0.27.32",
+    "husky": "^4.3.5",
+    "jest": "^26.6.3",
+    "jest-preset-angular": "^8.3.2",
+    "nodemon": "^2.0.7",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.19.1",
-    "pretty-quick": "^2.0.1",
-    "rxjs-tslint-rules": "^4.27.1",
-    "ts-jest": "^24.2.0",
-    "ts-node": "^8.5.4",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "ramda": "^0.27.1",
+    "rxjs-tslint-rules": "^4.34.7",
+    "ts-jest": "^26.4.4",
+    "ts-node": "^9.1.1",
+    "tsconfig-paths": "^3.9.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.7.2"
+    "tslint-plugin-prettier": "^2.3.0",
+    "typescript": "^4.1.2"
   }
 }

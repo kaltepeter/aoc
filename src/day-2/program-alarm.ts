@@ -1,20 +1,10 @@
-import { EMPTY, Observable, of } from 'rxjs';
-import {
-  bufferCount,
-  filter,
-  flatMap,
-  groupBy,
-  map,
-  switchMap,
-  takeWhile,
-  tap,
-  toArray
-} from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { bufferCount, map, mergeMap } from 'rxjs/operators';
 
 const fns = {
   add: (x: number, y: number) => x + y,
   multiply: (x: number, y: number) => x * y,
-  exit: (x: number, y: number) => null
+  exit: (x: number, y: number) => null,
 };
 
 const getOpFn = (opCode: number) => {
@@ -45,9 +35,9 @@ const execOp = (intCode: number[], program: number[]): number | null => {
 const execGravityAssistProgram$ = (inputs: number[]): Observable<number[]> => {
   const output = [...inputs];
   return of(output).pipe(
-    flatMap(n => n),
+    mergeMap((n) => n),
     bufferCount(4),
-    map(intcode => {
+    map((intcode) => {
       if (intcode.length === 4) {
         const [opCode, input1Pos, input2Pos, outputPos] = intcode;
         const calcOutput = execOp(intcode, output);

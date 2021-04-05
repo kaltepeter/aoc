@@ -1,5 +1,3 @@
-import { getHeapStatistics } from 'v8';
-
 const updateSpokenValue = (pos: number, prevPos: number[] = []) => {
   let retVal = prevPos;
   // housekeeping, went from 12-15s to 1.5-3s for 300000 iterations (.slice(-2))

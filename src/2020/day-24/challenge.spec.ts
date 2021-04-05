@@ -1,5 +1,17 @@
 import { sample, inputs } from './inputs';
-import { Direction, flipTiles, moveTile, TileColor } from './challenge';
+import {
+  calcNextGeneration,
+  coord,
+  Direction,
+  flipTiles,
+  flipTilesConwayStyle,
+  getBlackTiles,
+  getNeighborCount,
+  getPermutationsOfCoords,
+  moveTile,
+  TileColor,
+  TileState,
+} from './challenge';
 
 describe(`Day 24: Lobby Layout`, () => {
   it(`should process data`, () => {
@@ -34,5 +46,47 @@ describe(`Day 24: Lobby Layout`, () => {
     const list = flipTiles(inputs);
     const result = [...list.values()].filter((v) => v === TileColor.BLACK);
     expect(result.length).toBe(523);
+  });
+
+  describe(`part II`, () => {
+    it(`should return list of black tiles`, () => {
+      const testData = new Map<string, number>([
+        ['0,0,0', 0b0],
+        ['-1,0,0', 0b1],
+        ['0,1,0', 0b1],
+        ['0,2,0', 0b1],
+      ]);
+      const result = getBlackTiles(testData);
+      expect(result.length).toBe(3);
+      expect(result[0].length).toBe(2);
+    });
+
+    it(`should return correct number of black tile neighbors`, () => {
+      expect(getNeighborCount(0b11110)).toBe(4);
+      expect(getNeighborCount(0b11111)).toBe(4);
+      expect(getNeighborCount(0b1)).toBe(0);
+      expect(getNeighborCount(1)).toBe(0);
+      expect(getNeighborCount(0)).toBe(0);
+    });
+
+    it(`should calculate the six neighbors`, () => {
+      expect(getPermutationsOfCoords([-3, 1, 2]).length).toBe(6);
+    });
+
+    it(`should run flipTilesConwayStyle(sample)`, () => {
+      const list = flipTiles(sample);
+
+      const res = flipTilesConwayStyle(list, 100);
+      const result = getBlackTiles(res);
+      expect(result.length).toBe(2208);
+    });
+
+    it(`should run flipTilesConwayStyle(input)`, () => {
+      const list = flipTiles(inputs);
+
+      const res = flipTilesConwayStyle(list, 100);
+      const result = getBlackTiles(res);
+      expect(result.length).toBe(4225);
+    });
   });
 });

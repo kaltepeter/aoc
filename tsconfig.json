@@ -17,6 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "util/list/*": ["src/util/list/*"],
+      "util/string/*": ["src/util/string/*"],
       "util/*": ["src/util/*"],
       "testing/util/*": ["src/testing/util/*"],
       "testing/*": ["src/testing/*"],

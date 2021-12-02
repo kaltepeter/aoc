@@ -104,6 +104,7 @@ dist
 .tern-port
 
 *.js.map
+**/hackerrank/tmp/**
 python/2022/day_1/readme.md
 
 # Byte-compiled / optimized / DLL files

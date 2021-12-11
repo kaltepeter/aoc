@@ -6,31 +6,12 @@ import (
 	"path/filepath"
 )
 
-func Sum(nums []int) int {
-	total := 0
-	for _, n := range nums {
-		total += n
-	}
-	return total
-}
-
-func GaussSum(num int) int {
-	return (num * (num + 1)) / 2
-}
-
-func Abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
 func Part1(data []int) int {
 	result := 0
 	resultMap := map[int]int{}
 	for i := 0; i < len(data); i++ {
 		for _, num := range data {
-			resultMap[i] += Abs(num - i)
+			resultMap[i] += util.Abs(num - i)
 		}
 		if resultMap[i] < result || result == 0 {
 			result = resultMap[i]
@@ -46,7 +27,7 @@ func Part2(data []int) int {
 	resultMap := map[int]int{}
 	for i := 0; i < len(data); i++ {
 		for _, num := range data {
-			resultMap[i] += GaussSum(Abs(num - i))
+			resultMap[i] += util.GaussSum(util.Abs(num - i))
 		}
 		if resultMap[i] < result || result == 0 {
 			result = resultMap[i]

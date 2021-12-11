@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,4 +38,16 @@ func StringToListOfStringWithSeparator(s string, sep string) []string {
 	regexDelim := regexp.MustCompile(sep)
 	data := regexDelim.Split(strings.Trim(s, " \n"), -1)
 	return data
+}
+
+func HasAllChars(str string, key string, exact bool) bool {
+	keyCountRegex := `{` + fmt.Sprint(len(key)) + `}?`
+	regex := regexp.MustCompile(`[` + key + `]` + keyCountRegex)
+	regex.Longest()
+	match := regex.FindString(str)
+	if exact {
+		return len(match) == len(str)
+	} else {
+		return len(match) >= len(key)
+	}
 }

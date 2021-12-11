@@ -9,3 +9,28 @@ func Filter(vs []string, f func(string) bool) []string {
 	}
 	return filtered
 }
+
+func DiffArrays(a1 []string, a2 []string) []string {
+	delta := []string{}
+	var arr1, arr2 []string
+	if len(a1) > len(a2) {
+		arr1 = a1
+		arr2 = a2
+	} else {
+		arr1 = a2
+		arr2 = a1
+	}
+	for _, x := range arr1 {
+		hasVal := false
+		for _, y := range arr2 {
+			if x == y {
+				hasVal = true
+				break
+			}
+		}
+		if !hasVal {
+			delta = append(delta, x)
+		}
+	}
+	return delta
+}

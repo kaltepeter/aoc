@@ -52,3 +52,21 @@ func TestDiffArraysShouldReturnDelta(t *testing.T) {
 		t.Errorf(`DiffArrays should return delta %v, got %v`, want, got)
 	}
 }
+
+func TestArrayContainsCoordIsTrue(t *testing.T) {
+	arr := [][2]int{{0, 0}, {2, 3}, {4, 5}}
+	got := ArrayContainsCoord(&arr, [2]int{4, 5})
+	want := true
+	if got != want {
+		t.Errorf("ArrayContainsCoord should return %v, got %v", want, got)
+	}
+}
+
+func TestArrayContainsCoordIsFalse(t *testing.T) {
+	arr := [][2]int{{0, 0}, {2, 3}, {4, 5}}
+	got := ArrayContainsCoord(&arr, [2]int{3, 6})
+	want := false
+	if got != want {
+		t.Errorf("ArrayContainsCoord should return %v, got %v", want, got)
+	}
+}

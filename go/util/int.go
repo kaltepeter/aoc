@@ -1,5 +1,13 @@
 package util
 
+func Add(acc int, v int) int {
+	return acc + v
+}
+
+func Multiply(acc int, v int) int {
+	return acc * v
+}
+
 func Sum(nums []int) int {
 	total := 0
 	for _, n := range nums {

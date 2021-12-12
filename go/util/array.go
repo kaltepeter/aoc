@@ -34,3 +34,12 @@ func DiffArrays(a1 []string, a2 []string) []string {
 	}
 	return delta
 }
+
+func ArrayContainsCoord(data *[][2]int, coord [2]int) bool {
+	for _, c := range *data {
+		if c == coord {
+			return true
+		}
+	}
+	return false
+}

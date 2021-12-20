@@ -7,3 +7,5 @@ func ReduceInt(nums []int, f func(int, int) int, start int) int {
 	}
 	return res
 }
+
+type Coord [2]int

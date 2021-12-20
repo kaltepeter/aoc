@@ -37,6 +37,11 @@ func GetNeighbors(coord [2]int, rowCount int, colCount int) [][2]int {
 	return neighbors
 }
 
+func HasAllFlashed(rows int, cols int, count int) bool {
+	total := rows * cols
+	return count == total
+}
+
 func FlashCells(data *[10][10]int, flashMap map[[2]int]int, cellsToFlash *util.CoordSet, hasFlashed *util.CoordSet) *util.CoordSet {
 	rows := len(data)
 	cols := len(data[0])
@@ -125,15 +130,32 @@ func BumpAllByOne(data *[10][10]int) *[10][10]int {
 func Part1(data [10][10]int) int {
 	flashes := 0
 	for i := 1; i <= 100; i++ {
-		fmt.Println("STEP ", i)
+		// fmt.Println("STEP ", i)
 		_, f := Step(&data)
-		PrintBoard(data)
-		fmt.Println("")
+		// PrintBoard(data)
+		// fmt.Println("")
 
 		flashes += f
 	}
 
 	return flashes
+}
+
+func Part2(data [10][10]int) int {
+	stepAllFlashed := 0
+	maxIt := 1000
+	for i := 1; i <= maxIt; i++ {
+		// fmt.Println("STEP ", i)
+		_, f := Step(&data)
+		if HasAllFlashed(10, 10, f) {
+			stepAllFlashed = i
+			break
+		}
+		// PrintBoard(data)
+		// fmt.Println("")
+	}
+
+	return stepAllFlashed
 }
 
 func main() {
@@ -142,4 +164,7 @@ func main() {
 	octopusMap := ProcessInput(inputData)
 	p1Result := Part1(octopusMap)
 	fmt.Printf("Part I: Octopus flashes is = %v\n", p1Result) // 1608
+
+	p2Result := Part2(octopusMap)
+	fmt.Printf("Part II: All octopus flashed on = %v\n", p2Result) // 214
 }

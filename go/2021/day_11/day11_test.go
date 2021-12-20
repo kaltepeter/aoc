@@ -68,6 +68,15 @@ func TestExamplePartI(t *testing.T) {
 	got := Part1(input)
 	want := 1656
 	if got != want {
-		t.Errorf(`Part I should return %d for score, got %d`, want, got)
+		t.Errorf(`Part I should return %d for count of octopus flashes, got %d`, want, got)
+	}
+}
+
+func TestExamplePartII(t *testing.T) {
+	input := setupTests()
+	got := Part2(input)
+	want := 195
+	if got != want {
+		t.Errorf(`Part II should return %d for step that all octopus flashed, got %d`, want, got)
 	}
 }

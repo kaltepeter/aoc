@@ -43,3 +43,12 @@ func ArrayContainsCoord(data *[][2]int, coord [2]int) bool {
 	}
 	return false
 }
+
+func ArrayContainsString(data *[]string, v string) bool {
+	for _, c := range *data {
+		if c == v {
+			return true
+		}
+	}
+	return false
+}

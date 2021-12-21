@@ -70,3 +70,21 @@ func TestArrayContainsCoordIsFalse(t *testing.T) {
 		t.Errorf("ArrayContainsCoord should return %v, got %v", want, got)
 	}
 }
+
+func TestArrayContainsStringIsTrue(t *testing.T) {
+	arr := []string{"h", "hello", "bye", "hi"}
+	got := ArrayContainsString(&arr, "hi")
+	want := true
+	if got != want {
+		t.Errorf("ArrayContainsString should return %v, got %v", want, got)
+	}
+}
+
+func TestArrayContainsStringIsFalse(t *testing.T) {
+	arr := []string{"h", "hello", "bye", "hi"}
+	got := ArrayContainsString(&arr, "hola")
+	want := false
+	if got != want {
+		t.Errorf("ArrayContainsString should return %v, got %v", want, got)
+	}
+}

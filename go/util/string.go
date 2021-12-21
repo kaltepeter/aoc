@@ -51,3 +51,7 @@ func HasAllChars(str string, key string, exact bool) bool {
 		return len(match) >= len(key)
 	}
 }
+
+func IsLowerCase(s string) bool {
+	return s == string(strings.ToLower(string(s)))
+}

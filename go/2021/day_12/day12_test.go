@@ -13,13 +13,13 @@ func setupTests(filePath string) *CaveGraph {
 	return caveMap
 }
 
-type part1TestCase struct {
+type caveTraverseTestCase struct {
 	inputFile string
 	expected  int
 }
 
 func TestExamplePartI(t *testing.T) {
-	cases := []part1TestCase{
+	cases := []caveTraverseTestCase{
 		{
 			inputFile: "example.txt",
 			expected:  10,
@@ -39,6 +39,31 @@ func TestExamplePartI(t *testing.T) {
 		want := c.expected
 		if got != want {
 			t.Errorf(`Part I should return %d for count of cave paths, got %d`, want, got)
+		}
+	}
+}
+
+func TestExamplePartII(t *testing.T) {
+	cases := []caveTraverseTestCase{
+		{
+			inputFile: "example.txt",
+			expected:  36,
+		},
+		{
+			inputFile: "example2.txt",
+			expected:  103,
+		},
+		{
+			inputFile: "example3.txt",
+			expected:  3509,
+		},
+	}
+	for _, c := range cases {
+		input := setupTests(c.inputFile)
+		got := Part2(input)
+		want := c.expected
+		if got != want {
+			t.Errorf(`Part II should return %d for count of cave paths, got %d`, want, got)
 		}
 	}
 }

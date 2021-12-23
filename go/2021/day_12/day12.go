@@ -83,12 +83,13 @@ func (c *CaveGraph) AddEdge(k1, k2 string) {
 }
 
 type Path struct {
-	Path    []string
-	Visited map[string]bool
+	Path                  []string
+	Visited               map[string]int
+	VisitedSmallCaveTwice bool
 }
 
-func copyMap(a map[string]bool) map[string]bool {
-	out := map[string]bool{}
+func copyMap(a map[string]int) map[string]int {
+	out := map[string]int{}
 	for k, v := range a {
 		out[k] = v
 	}
@@ -96,7 +97,7 @@ func copyMap(a map[string]bool) map[string]bool {
 }
 
 func Traverse(g *CaveGraph) [][]string {
-	queue := []Path{{[]string{START}, map[string]bool{}}}
+	queue := []Path{{[]string{START}, map[string]int{}, false}}
 	paths := [][]string{}
 
 	for len(queue) > 0 {
@@ -116,17 +117,61 @@ func Traverse(g *CaveGraph) [][]string {
 
 		newVisited := copyMap(cur.Visited)
 		if !cave.Big {
-			newVisited[cave.Key] = true
+			newVisited[cave.Key] = 1
 		}
 
 		for _, otherCave := range cave.Vertices {
-			if cur.Visited[otherCave.Key] {
+			if cur.Visited[otherCave.Key] > 0 {
 				continue
 			}
 			newPath := make([]string, len(cur.Path))
 			copy(newPath, cur.Path)
 			newPath = append(newPath, otherCave.Key)
-			queue = append(queue, Path{newPath, newVisited})
+			queue = append(queue, Path{newPath, newVisited, false})
+		}
+	}
+
+	return paths
+}
+
+func TraverseSingleSmallCaveTwice(g *CaveGraph) [][]string {
+	queue := []Path{{[]string{START}, map[string]int{}, false}}
+	paths := [][]string{}
+
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+
+		cave := g.Vertices[cur.Path[len(cur.Path)-1]]
+
+		if len(cave.Key) == 0 {
+			continue
+		}
+
+		if cave.Key == END {
+			paths = append(paths, cur.Path)
+			continue
+		}
+
+		newVisited := copyMap(cur.Visited)
+		if !cave.Big {
+			newVisited[cave.Key] += 1
+		}
+
+		for _, otherCave := range cave.Vertices {
+			newVisitedCalledTwice := cur.VisitedSmallCaveTwice
+			if cur.Visited[otherCave.Key] > 0 {
+				if otherCave.Key == START || cur.VisitedSmallCaveTwice {
+					continue
+				} else {
+					newVisitedCalledTwice = true
+				}
+			}
+
+			newPath := make([]string, len(cur.Path))
+			copy(newPath, cur.Path)
+			newPath = append(newPath, otherCave.Key)
+			queue = append(queue, Path{newPath, newVisited, newVisitedCalledTwice})
 		}
 	}
 
@@ -156,10 +201,18 @@ func Part1(data *CaveGraph) int {
 	return len(paths)
 }
 
+func Part2(data *CaveGraph) int {
+	paths := TraverseSingleSmallCaveTwice(data)
+	return len(paths)
+}
+
 func main() {
 	input := filepath.Join("2021", "day_12", "raw-input.txt")
 	inputData := util.ParseInput(input)
 	caveMap := ProcessInput(inputData)
 	p1Result := Part1(caveMap)
 	fmt.Printf("Part I: Paths that visit small caves is = %v\n", p1Result) // 4549
+
+	p2Result := Part2(caveMap)
+	fmt.Printf("Part II: Paths that visit small caves is = %v\n", p2Result) // 120535
 }

@@ -9,7 +9,7 @@ import (
 func setupTests(filePath string) *Origami {
 	inputExample := filepath.Join(filePath)
 	inputData := util.ParseInput(inputExample)
-	origamiData := ProcessInput(&inputData)
+	origamiData := ProcessInput(&inputData, '#', '.')
 	return &origamiData
 }
 

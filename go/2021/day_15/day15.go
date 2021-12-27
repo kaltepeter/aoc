@@ -39,15 +39,7 @@ func Part1(data *[][]int) int {
 	total := 0
 	distance := map[util.Coord]int{}
 	visited := map[util.Coord]bool{}
-	for y := 0; y < maxY; y++ {
-		for x := 0; x < maxX; x++ {
-			if x == 0 && y == 0 {
-				distance[util.Coord{x, y}] = 0
-			} else {
-				distance[util.Coord{x, y}] = math.MaxInt
-			}
-		}
-	}
+	distance[util.Coord{0, 0}] = 0
 
 	current := util.Coord{0, 0}
 	endNode := util.Coord{maxX - 1, maxY - 1}
@@ -59,7 +51,64 @@ func Part1(data *[][]int) int {
 			}
 			x, y := n[0], n[1]
 			newDistance := distance[current] + (*data)[y][x]
-			if newDistance < distance[n] {
+			if _, ok := distance[n]; !ok {
+				distance[n] = newDistance
+			} else if newDistance < distance[n] {
+				distance[n] = newDistance
+			}
+		}
+
+		visited[current] = true
+
+		if visited[endNode] {
+			total = distance[endNode]
+			break
+		}
+
+		minDist := math.MaxInt
+		current = util.Coord{maxX, maxY}
+		for p, v := range distance {
+			if !visited[p] && v < minDist {
+				minDist = v
+				current = p
+			}
+		}
+	}
+
+	return total
+}
+
+func Part2(data *[][]int) int {
+	maxX := len((*data)[0]) * 5
+	maxY := len(*data) * 5
+	total := 0
+	distance := map[util.Coord]int{}
+	visited := map[util.Coord]bool{}
+	distance[util.Coord{0, 0}] = 0
+
+	current := util.Coord{0, 0}
+	endNode := util.Coord{maxX - 1, maxY - 1}
+
+	for {
+		for _, n := range GetNeighbors(current, maxX, maxY) {
+			if visited[n] {
+				continue
+			}
+
+			rows := len(*data)
+			cols := len((*data)[0])
+			y := n[1] % rows
+			x := n[0] % cols
+			val := (*data)[y][x]
+			val += n[1]/rows + n[0]/cols
+			if val > 9 {
+				val -= 9
+			}
+
+			newDistance := distance[current] + val
+			if _, ok := distance[n]; !ok {
+				distance[n] = newDistance
+			} else if newDistance < distance[n] {
 				distance[n] = newDistance
 			}
 		}
@@ -89,5 +138,8 @@ func main() {
 	inputData := util.ParseInput(input)
 	riskData := ProcessInput(&inputData)
 	p1Result := Part1(&riskData)
-	fmt.Printf("Part I: the lowest risk path level is = %v\n", p1Result) // 2988
+	fmt.Printf("Part I: the lowest risk path level is = %v\n", p1Result) // 562
+
+	p2Result := Part2(&riskData)
+	fmt.Printf("Part II: the lowest risk path level is = %v\n", p2Result)
 }

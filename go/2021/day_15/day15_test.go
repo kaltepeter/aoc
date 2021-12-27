@@ -21,3 +21,12 @@ func TestPartI(t *testing.T) {
 		t.Errorf(`Part I should return %v for least risk, got %v`, want, got)
 	}
 }
+
+func TestPartII(t *testing.T) {
+	input := setupTests("example.txt")
+	got := Part2(&input)
+	want := 315
+	if got != want {
+		t.Errorf(`Part II should return %v for least risk, got %v`, want, got)
+	}
+}

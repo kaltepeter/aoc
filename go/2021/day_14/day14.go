@@ -4,54 +4,63 @@ import (
 	"fmt"
 	"ka/m/util"
 	"path/filepath"
-	"strings"
 )
+
+type Rule struct {
+	Pair1, Pair2 string
+	NewChar      string
+}
 
 type Polymer struct {
 	Template           string
-	PairInsertionRules map[string]string
+	PairInsertionRules map[string]Rule
 }
 
-type CountMap struct {
-	char  string
-	count int
+type CharCount = map[string]int
+
+func MakeCharCount(str string) CharCount {
+	charCount := CharCount{}
+	for _, char := range str {
+		charCount[string(char)] += 1
+	}
+	return charCount
 }
 
-type CharCounts struct {
-	total       int
-	mostCommon  CountMap
-	leastCommon CountMap
-}
-
-func CountChars(s string) CharCounts {
-	charCounts := CharCounts{total: len(s)}
-	counts := map[rune]int{}
-	least, most := rune(s[0]), rune(s[0])
-	for _, c := range s {
-		counts[c] += 1
-		if counts[c] > counts[most] {
-			most = c
+func MostAndLeast(cc *CharCount) (int, int) {
+	most, least := 0, 0
+	for _, count := range *cc {
+		if count > most {
+			most = count
 		}
-		if counts[c] < counts[least] {
-			least = c
+		if count < least || least == 0 {
+			least = count
 		}
 	}
-	charCounts.mostCommon = CountMap{string(most), counts[most]}
-	charCounts.leastCommon = CountMap{string(least), counts[least]}
-	return charCounts
+	return most, least
 }
 
+type CacheStep struct {
+	Pairs  map[string]int
+	Counts CharCount
+}
+type Cache = map[int]CacheStep
+
 func ProcessInput(inputData *[]string) *Polymer {
-	polymer := Polymer{Template: (*inputData)[0], PairInsertionRules: map[string]string{}}
+	polymer := Polymer{Template: (*inputData)[0], PairInsertionRules: map[string]Rule{}}
 	instructions := (*inputData)[2:]
 	for _, instruction := range instructions {
-		rule := strings.Split(instruction, " -> ")
-		pair, insertion := strings.Trim(rule[0], " \n"), strings.Trim(rule[1], " \n")
-		polymer.PairInsertionRules[pair] = fmt.Sprintf("%s%s%s", string(pair[0]), insertion, string(pair[1]))
+		var in, out string
+		fmt.Sscanf(instruction, "%s -> %s", &in, &out)
+		polymer.PairInsertionRules[in] = Rule{
+			Pair1:   string(in[0]) + out,
+			Pair2:   out + string(in[1]),
+			NewChar: out,
+		}
 	}
 	return &polymer
 }
 
+// brute force, large string
 func Part1(pd *Polymer) int {
 	str := pd.Template
 	newStr := ""
@@ -60,14 +69,43 @@ func Part1(pd *Polymer) int {
 		// take first char
 		newStr += string(str[0])
 		for idx := 1; idx < len(str); idx++ {
-			pair := fmt.Sprintf("%s%s", string(str[idx-1]), string(str[idx]))
-			newStr += pd.PairInsertionRules[pair][1:3] // last two chars of pair, they overlap
+			pair := string(str[idx-1]) + string(str[idx])
+			newStr += pd.PairInsertionRules[pair].NewChar + string(str[idx]) // last two chars of pair, they overlap
 		}
 		str = newStr
 		newStr = ""
 	}
-	counts := CountChars(str)
-	return counts.mostCommon.count - counts.leastCommon.count
+	cc := MakeCharCount(str)
+	mostCommon, leastCommon := MostAndLeast(&cc)
+	return mostCommon - leastCommon
+}
+
+func Part2(pd *Polymer) int {
+	cache := Cache{0: CacheStep{Pairs: map[string]int{}, Counts: map[string]int{}}}
+	for i := 0; i < len(pd.Template)-1; i++ {
+		pair := pd.Template[i : i+2]
+		cache[0].Pairs[pair]++
+	}
+
+	for i := 0; i < len(pd.Template); i++ {
+		cache[0].Counts[string(pd.Template[i])]++
+	}
+
+	steps := 40
+	for i := 1; i < steps+1; i++ {
+		prevCounts := cache[i-1].Counts
+		cache[i] = CacheStep{Pairs: map[string]int{}, Counts: prevCounts}
+		pairs := cache[i-1].Pairs
+		for p, count := range pairs {
+			r := pd.PairInsertionRules[p]
+			cache[i].Pairs[r.Pair1] += count
+			cache[i].Pairs[r.Pair2] += count
+			cache[i].Counts[r.NewChar] += count
+		}
+	}
+	c := cache[steps-1].Counts
+	mostCommon, leastCommon := MostAndLeast(&c)
+	return mostCommon - leastCommon
 }
 
 func main() {
@@ -76,4 +114,7 @@ func main() {
 	polymerData := ProcessInput(&inputData)
 	p1Result := Part1(polymerData)
 	fmt.Printf("Part I: most common element minus least common element = %v\n", p1Result) // 2988
+
+	p2Result := Part2(polymerData)
+	fmt.Printf("Part II: most common element minus least common element = %v\n", p2Result) // 3572761917024
 }

@@ -7,94 +7,39 @@ import (
 	"strconv"
 )
 
-type Packet struct {
-	Version   int64
-	TypeId    int64
-	Value     string
-	SubPacket *Packet
+type Literal struct {
+	Version int64
+	TypeId  int64
+	Value   int64
 }
 
-type Bits struct {
-	Packet
+type Operator struct {
+	Version  int64
+	TypeId   int64
+	Value    int64
+	LengthId int64
+	Length   int64
+	Packets  []interface{}
 }
 
 const (
 	TYPE_LITERAL = 4
 )
 
-func (p *Packet) String() string {
-	return fmt.Sprintf("[Packet] Version: %v TypeId: %v Value: %v \nSubPacket: %v", p.Version, p.TypeId, p.Value, p.SubPacket)
-}
-
-func (b *Bits) CountSubPackets() int {
-	packets := 0
-	for p := b.SubPacket; p != nil; {
-		packets += 1
-		p = p.SubPacket
-	}
-	return packets
-}
-
-func (b *Bits) SumVersions() int {
-	versionSum := int(b.Version)
-	for p := b.SubPacket; p != nil; {
-		versionSum += int(p.Version)
-		p = p.SubPacket
-	}
-	return versionSum
-}
-
-func (p *Packet) ProcessLiteral(input string) (string, int64, error) {
-	remainingPackets := input
-	for i := 0; i < len(input); i += 5 {
-		max := i + 5
-		if max > len(input) {
-			max = len(input) - 1
+func PrintPacket(p interface{}) string {
+	switch p.(type) {
+	case Operator:
+		packet := p.(Operator)
+		subpackets := ""
+		for _, sp := range packet.Packets {
+			subpackets += PrintPacket(sp)
 		}
-		pv := input[i:max][1:]
-		if pv != "0" {
-			p.Value += pv
-		}
-		if input[i:max][0:1] == "0" {
-			fmt.Println("Last bits for literal ", pv)
-			remainingPackets = remainingPackets[max:]
-			break
-		}
+		return fmt.Sprintf("[Operator Packet] Version: %v TypeId: %v Value: %v LengthId: %v, Length: %v \n\t %v", packet.Version, packet.TypeId, packet.Value, packet.LengthId, packet.Length, subpackets)
+	case Literal:
+		packet := p.(Literal)
+		return fmt.Sprintf("[Literal Packet] Version: %v TypeId: %v Value: %v \n", packet.Version, packet.TypeId, packet.Value)
 	}
-	lv, err := strconv.ParseInt(p.Value, 2, 64)
-	return remainingPackets, lv, err
-}
-
-func (p *Packet) ProcessOperator(input string) (string, int, error) {
-	lengthTypeId := input[0:1]
-	remainingPackets := ""
-	remainingPacketCount := -1
-	var err error
-	if len(lengthTypeId) != 1 {
-		err = fmt.Errorf(`error finding length type id`)
-	}
-	fmt.Println("Length type ID: ", lengthTypeId)
-	fmt.Println("ProcessOperator: ", input[1:])
-	switch lengthTypeId {
-	case "0":
-		chop := 15
-		subpacketLength, e := ReadBitsFromPacket(input[1:], 0, chop)
-		if e != nil {
-			err = fmt.Errorf(`failed to read subpacket length for type %v`, lengthTypeId)
-		}
-		subpackets := input[chop+1 : chop+int(subpacketLength)+1]
-		remainingPackets = subpackets
-	case "1":
-		chop := 11
-		subpacketCount, e := ReadBitsFromPacket(input[1:], 0, chop)
-		if e != nil {
-			err = fmt.Errorf(`failed to read subpacket length for type %v`, lengthTypeId)
-		}
-		remainingPacketCount = int(subpacketCount)
-		subpackets := input[chop+1:]
-		remainingPackets = subpackets
-	}
-	return remainingPackets, remainingPacketCount, err
+	return ""
 }
 
 // Takes hexidecimal input and converts to binary with 4 bits per byte
@@ -108,116 +53,110 @@ func ProcessInput(data string) string {
 	return inputStr
 }
 
-// read the bits from a packet from start, end into digit
-func ReadBitsFromPacket(packet string, start int, end int) (int64, error) {
-	bits, err := strconv.ParseInt(packet[start:end], 2, 64)
-	return bits, err
-}
+func ReadPacket(input string, startPos int) (l interface{}, c int) {
+	var count int
+	n := startPos
 
-func GetPacketVersion(input string) int64 {
-	version, err := ReadBitsFromPacket(input, 0, 3)
-	if err != nil {
-		panic("Failed to convert to version")
-	}
-	return version
-}
+	version, count, _ := ReadBits(input, n, 3)
+	n += count
 
-func GetPacketTypeId(input string) int64 {
-	typeId, err := ReadBitsFromPacket(input, 3, 6)
-	if err != nil {
-		panic("Failed to convert to typeId")
-	}
-	return typeId
-}
+	typeId, count, _ := ReadBits(input, n, 3)
+	n += count
 
-func (p *Packet) ProcessPackets(remainingPackets string, remainingPacketCount int) (string, error) {
-	// max := 10
-	var err error
-	if len(remainingPackets) == 0 {
-		fmt.Println("END")
-		p = nil
-		return remainingPackets, err
-	} else {
-		fmt.Println("ProcessPackets RR:", len(remainingPackets), remainingPackets, remainingPacketCount)
+	switch typeId {
+	case TYPE_LITERAL:
+		value, count := ReadNumber(input, n)
+		n += count
+		return Literal{
+			Version: version,
+			TypeId:  typeId,
+			Value:   value,
+		}, n - startPos
+	default:
+		lengthId, count, _ := ReadBits(input, n, 1)
+		n += count
 
-		p.Version = GetPacketVersion(remainingPackets)
-		p.TypeId = GetPacketTypeId(remainingPackets)
-		p.Value = remainingPackets[6:]
-		var rp string
-		var rpc int
-		var e error
-		var lv int64
+		op := Operator{
+			Version:  version,
+			TypeId:   typeId,
+			LengthId: lengthId,
+			Length:   0,
+			Packets:  nil,
+		}
 
-		if p.TypeId == TYPE_LITERAL {
-			fmt.Println("****Literal")
-			rp, lv, e = p.ProcessLiteral(remainingPackets[6:])
-			if e != nil {
-				err = fmt.Errorf("failed to convert to literal value")
-				return rp, err
+		if lengthId == 0 {
+			length, count, _ := ReadBits(input, n, 15)
+			n += count
+
+			op.Length = length
+
+			subpacketStart := n
+			for n-subpacketStart < int(length) {
+				packet, count := ReadPacket(input, n)
+				n += count
+				op.Packets = append(op.Packets, packet)
 			}
-			fmt.Printf("%d\n", lv)
 		} else {
-			// operator packets
-			rp, rpc, e = p.ProcessOperator(remainingPackets[6:])
-			if e != nil {
-				err = fmt.Errorf("failed to process operator packet")
-				return rp, err
+			length, count, _ := ReadBits(input, n, 11)
+			n += count
+
+			op.Length = length
+
+			for i := int64(0); i < length; i++ {
+				packet, count := ReadPacket(input, n)
+				n += count
+				op.Packets = append(op.Packets, packet)
 			}
 		}
-		p.SubPacket = &Packet{}
-		fmt.Printf("RR2: %d %s %d\n", len(rp), rp, rpc)
-		return p.SubPacket.ProcessPackets(rp, rpc)
+		return op, n - startPos
 	}
-	// for i := 0; len(remainingPackets) > 0 && i < max; i++ {
-	// 	fmt.Println("ProcessPackets RR:", i, remainingPackets, remainingPacketCount)
+}
 
-	// 	p.Version = GetPacketVersion(remainingPackets)
-	// 	p.TypeId = GetPacketTypeId(remainingPackets)
-	// 	if p.TypeId == TYPE_LITERAL {
-	// 		fmt.Println("****Literal")
-	// 		remainingPackets, lv, err := p.ProcessLiteral(remainingPackets[6:])
-	// 		if err != nil {
-	// 			panic("Failed to convert to literal value")
-	// 		}
-	// 		fmt.Printf("%d %s\n", lv, remainingPackets)
-	// 		break
-	// 	} else {
-	// 		// operator packets
-	// 		p.SubPacket = &Packet{}
-	// 		remainingPackets, _, err := p.ProcessOperator(remainingPackets[6:])
-	// 		p.Value = remainingPackets
-	// 		if err != nil {
-	// 			panic("Failed to process operator packet")
-	// 		}
-	// 		if len(remainingPackets) > 0 {
-	// 			p.SubPacket.ProcessPackets(remainingPackets, remainingPacketCount)
-	// 		}
-	// 	}
+// Takes a binary string, e.g. 011111100101
+// @returns an int64 representing the conversion from start to count + start
+func ReadBits(packet string, start, count int) (int64, int, error) {
+	bits, err := strconv.ParseInt(packet[start:start+count], 2, 64)
+	return bits, count, err
+}
 
-	// 	fmt.Printf("RR2: %s %d\n", remainingPackets, remainingPacketCount)
-	// }
-	// return remainingPackets, err
+func ReadNumber(input string, startPos int) (out int64, count int) {
+	for {
+		part, _, err := ReadBits(input, startPos, 5)
+		if err != nil {
+			fmt.Printf(`failed to ReadNumber. %v %v`, input, startPos)
+		}
+		out <<= 4
+		out |= int64(part & 0x0f)
+		startPos += 5
+		count += 5
+		if part&0x10 == 0 {
+			break
+		}
+	}
+	return out, count
+}
+
+func SumVersions(packet interface{}) int64 {
+	var sum int64
+	switch p := packet.(type) {
+	case Literal:
+		sum += p.Version
+	case Operator:
+		sum += p.Version
+		for _, sp := range p.Packets {
+			sum += SumVersions(sp)
+		}
+	}
+	return sum
 }
 
 func Part1(data string) int {
 	bitData := data
-	fmt.Println("***********")
-	fmt.Println("***********")
-	fmt.Println("***********")
-	fmt.Println("Process for: ", bitData)
 
-	bits := Bits{
-		Packet: Packet{
-			SubPacket: &Packet{},
-		},
-	}
-	_, err := bits.ProcessPackets(bitData, -1)
-	if err != nil {
-		panic("Failed to process packets")
-	}
-	fmt.Println(bits.String())
+	packets, _ := ReadPacket(bitData, 0)
+	// fmt.Println(PrintPacket(packets))
 
-	return bits.SumVersions()
+	return int(SumVersions(packets))
 }
 
 func Part2(data string) int {
@@ -227,13 +166,14 @@ func Part2(data string) int {
 func main() {
 	input := filepath.Join("2021", "day_16", "raw-input.txt")
 	inputData := util.ParseInput(input)
-	p1Result := Part1(inputData[0])
-	fmt.Printf("Part I: the lowest risk path level is = %v\n", p1Result)
-	if p1Result != 562 {
-		panic("FAILED on Part I")
+	bitData := ProcessInput(inputData[0])
+	p1Result := Part1(bitData)
+	fmt.Printf("Part I: the sum of versions is = %v\n", p1Result)
+	if p1Result != 1007 {
+		panic("FAILED on Part I ")
 	}
 
-	p2Result := Part2(inputData[0])
+	p2Result := Part2(bitData)
 	fmt.Printf("Part II: the lowest risk path level is = %v\n", p2Result)
 	if p2Result != 2874 {
 		panic("FAILED on Part II")

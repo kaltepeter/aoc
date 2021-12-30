@@ -3,6 +3,7 @@ package main
 import (
 	"ka/m/util"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -49,122 +50,153 @@ func TestProcessInput(t *testing.T) {
 	}
 }
 
-func TestCountPackets(t *testing.T) {
-	bits := Bits{
-		Packet: Packet{
-			Version: 6,
-			TypeId:  4,
-			Value:   "111011100000000011",
-			SubPacket: &Packet{
-				Version: 6,
-				TypeId:  4,
-				Value:   "01010000001",
-				SubPacket: &Packet{
-					Version: 6,
-					TypeId:  4,
-					Value:   "10010000010",
-					SubPacket: &Packet{
-						Version: 6,
-						TypeId:  4,
-						Value:   "00110000011",
-					},
-				},
-			},
+func TestReadBits(t *testing.T) {
+
+	cases := []struct {
+		input    string
+		start    int
+		count    int
+		expected int64
+	}{
+		{
+			input:    "110100101111111000101000",
+			start:    0,
+			count:    3,
+			expected: 6,
+		},
+		{
+			input:    "110100101111111000101000",
+			start:    3,
+			count:    3,
+			expected: 4,
+		},
+		{
+			input:    "011111100101",
+			start:    0,
+			count:    12,
+			expected: 2021,
 		},
 	}
-	got := bits.CountSubPackets()
-	want := 3
-	if got != want {
-		t.Errorf(`CountPackets should return %v, got %v`, want, got)
+	for _, c := range cases {
+		got, _, err := ReadBits(c.input, c.start, c.count)
+		if err != nil {
+			t.Errorf(`Failed to read bits`)
+		}
+		want := c.expected
+		if got != want {
+			t.Errorf(`ReadBits should return %d for %v, got %v`, want, c.input, got)
+		}
+	}
+}
+
+func TestReadNumber(t *testing.T) {
+	got, gotCount := ReadNumber("110100101111111000101000", 6)
+	want := int64(2021)
+	wantCount := 15
+	if got != want || gotCount != wantCount {
+		t.Errorf(`ReadNumber should return %v %v, got %v, %v`, want, wantCount, got, gotCount)
 	}
 }
 
 func TestSumVersions(t *testing.T) {
-	bits := Bits{
-		Packet: Packet{
-			Version: 4,
-			TypeId:  4,
-			Value:   "1111",
-			SubPacket: &Packet{
-				Version: 1,
+	packets := Operator{
+		Version:  1,
+		TypeId:   6,
+		Value:    0,
+		LengthId: 0,
+		Length:   27,
+		Packets: []interface{}{
+			Literal{
+				Version: 6,
 				TypeId:  4,
-				Value:   "1111",
-				SubPacket: &Packet{
-					Version: 5,
-					TypeId:  4,
-					Value:   "1111",
-					SubPacket: &Packet{
-						Version: 6,
-						TypeId:  4,
-						Value:   "1111",
-					},
-				},
+				Value:   10,
+			},
+			Literal{
+				Version: 2,
+				TypeId:  4,
+				Value:   20,
 			},
 		},
 	}
-	got := bits.SumVersions()
-	want := 16
+	got := SumVersions(packets)
+	want := int64(9)
 	if got != want {
 		t.Errorf(`SumVersions should return %v, got %v`, want, got)
 	}
 }
 
-func TestProcessLiteral(t *testing.T) {
-	input := setupTests("example.txt")
-	bitData := ProcessInput(input[0])
-
-	bits := Bits{
-		Packet: Packet{
-			Version: 6,
-			TypeId:  4,
-		},
-	}
-	gotRp, got, err := bits.ProcessLiteral(bitData[6:])
-	if err != nil {
-		t.Errorf(`Failed to convert`)
-	}
-	want := int64(2021)
-	if got != want || gotRp != "000" {
-		t.Errorf(`ProcessLiteral should return %v, got %v. RemainingPackets: want: %v, got: %v`, want, got, "", gotRp)
-	}
-}
-
-func TestProcessOperator(t *testing.T) {
-	input := setupTests("example.txt")
+func TestReadPacket(t *testing.T) {
 	cases := []struct {
-		input                        string
-		expectedRemainingPackets     string
-		expectedRemainingPacketCount int
+		input     string
+		want      interface{}
+		wantCount int
 	}{
 		{
-			input:                        input[1],
-			expectedRemainingPackets:     "110100010100101001000100100",
-			expectedRemainingPacketCount: -1,
+			input: "110100101111111000101000",
+			want: Literal{
+				Version: 6,
+				TypeId:  4,
+				Value:   2021,
+			},
+			wantCount: 21,
 		},
 		{
-			input:                        input[2],
-			expectedRemainingPackets:     "01010000001100100000100011000001100000",
-			expectedRemainingPacketCount: 3,
+			input: "00111000000000000110111101000101001010010001001000000000",
+			want: Operator{
+				Version:  1,
+				TypeId:   6,
+				Value:    0,
+				LengthId: 0,
+				Length:   27,
+				Packets: []interface{}{
+					Literal{
+						Version: 6,
+						TypeId:  4,
+						Value:   10,
+					},
+					Literal{
+						Version: 2,
+						TypeId:  4,
+						Value:   20,
+					},
+				},
+			},
+			wantCount: 49,
+		},
+		{
+			input: "11101110000000001101010000001100100000100011000001100000",
+			want: Operator{
+				Version:  7,
+				TypeId:   3,
+				Value:    0,
+				LengthId: 1,
+				Length:   3,
+				Packets: []interface{}{
+					Literal{
+						Version: 2,
+						TypeId:  4,
+						Value:   1,
+					},
+					Literal{
+						Version: 4,
+						TypeId:  4,
+						Value:   2,
+					},
+					Literal{
+						Version: 1,
+						TypeId:  4,
+						Value:   3,
+					},
+				},
+			},
+			wantCount: 51,
 		},
 	}
+
 	for _, c := range cases {
-		bits := Bits{
-			Packet: Packet{
-				Version: 1,
-				TypeId:  6,
-			},
-		}
-		bitData := ProcessInput(c.input)[6:]
-		got, remainingCount, err := bits.ProcessOperator(bitData)
-		if err != nil {
-			t.Error(`Failed to process operator. `, err)
-		}
-		want := c.expectedRemainingPackets
-		if got != want {
-			t.Errorf(`ProcessOperator should return %v for %v, got %v`, want, bitData, got)
-		}
-		if remainingCount != c.expectedRemainingPacketCount {
-			t.Errorf(`ProcessOperator should return %v for remainingCounts, got %v`, c.expectedRemainingPacketCount, remainingCount)
+		got, gotC := ReadPacket(c.input, 0)
+		if !reflect.DeepEqual(got, c.want) || gotC != c.wantCount {
+			t.Errorf(`ReadLiteral should return (%v %v), got (%v, %v).`, c.want, c.wantCount, got, gotC)
 		}
 	}
 }
@@ -180,14 +212,14 @@ func TestPartI(t *testing.T) {
 			input:    input[3],
 			expected: 16,
 		},
-		// {
-		// 	input:    input[4],
-		// 	expected: 12,
-		// },
-		// {
-		// 	input:    input[5],
-		// 	expected: 23,
-		// },
+		{
+			input:    input[4],
+			expected: 12,
+		},
+		{
+			input:    input[5],
+			expected: 23,
+		},
 		{
 			input:    input[6],
 			expected: 31,

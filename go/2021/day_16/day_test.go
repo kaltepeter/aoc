@@ -236,12 +236,56 @@ func TestPartI(t *testing.T) {
 	}
 }
 
-// func TestPartII(t *testing.T) {
-// 	input := setupTests("example.txt")
-// 	bitData := ProcessInput(input[0])
-// 	got := Part2(bitData)
-// 	want := 315
-// 	if got != want {
-// 		t.Errorf(`Part II should return %v for blah, got %v`, want, got)
-// 	}
-// }
+func TestPartII(t *testing.T) {
+	input := setupTests("example.txt")
+
+	cases := []struct {
+		input    string
+		expected int
+	}{
+		{
+			input:    input[7],
+			expected: 3,
+		},
+		{
+			input:    input[8],
+			expected: 54,
+		},
+		{
+			input:    input[9],
+			expected: 7,
+		},
+		{
+			input:    input[10],
+			expected: 9,
+		},
+		{
+			input:    input[11],
+			expected: 1,
+		},
+		{
+			input:    input[12],
+			expected: 0,
+		},
+		{
+			input:    input[13],
+			expected: 0,
+		},
+		{
+			input:    input[14],
+			expected: 1,
+		},
+	}
+	for _, c := range cases {
+		bitData := ProcessInput(c.input)
+
+		got, err := Part2(bitData)
+		if err != nil {
+			t.Errorf(`Part 2 failed. %v`, err)
+		}
+		want := c.expected
+		if got != want {
+			t.Errorf(`Part II should return %d for %v, got %v`, want, c.input, got)
+		}
+	}
+}

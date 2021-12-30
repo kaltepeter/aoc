@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"ka/m/util"
+	"math"
 	"path/filepath"
 	"strconv"
 )
@@ -151,16 +152,111 @@ func SumVersions(packet interface{}) int64 {
 }
 
 func Part1(data string) int {
-	bitData := data
-
-	packets, _ := ReadPacket(bitData, 0)
+	packets, _ := ReadPacket(data, 0)
 	// fmt.Println(PrintPacket(packets))
 
 	return int(SumVersions(packets))
 }
 
-func Part2(data string) int {
-	return 0
+func ReadSubPackets(p Operator) (packetValues []int) {
+	for i := 0; i < len(p.Packets); i++ {
+		// packet :=
+		switch packet := p.Packets[i].(type) {
+		case Literal:
+			packetValues = append(packetValues, int(packet.Value))
+		case Operator:
+			packetValues = append(packetValues, int(packet.Value))
+		}
+	}
+	return
+}
+
+func DecodePacket(packet interface{}) (decoded int) {
+	var err error = nil
+	switch p := packet.(type) {
+	case Literal:
+		decoded += int(p.Value)
+	case Operator:
+		switch p.TypeId {
+		case 0:
+			// sum of subpackets
+			for _, p2 := range p.Packets {
+				decoded += DecodePacket(p2)
+			}
+		case 1:
+			decoded = 1
+			for _, p2 := range p.Packets {
+				decoded *= DecodePacket(p2)
+			}
+		case 2:
+			// minimum of subpackets
+			min := math.MaxInt
+			for _, p2 := range p.Packets {
+				v := DecodePacket(p2)
+				if v < min {
+					min = v
+				}
+			}
+			decoded = min
+		case 3:
+			// max of subpackets
+			max := 0
+			for _, p2 := range p.Packets {
+				v := DecodePacket(p2)
+				if v > max {
+					max = v
+				}
+			}
+			decoded = max
+		case 5:
+			if len(p.Packets) != 2 {
+				err = fmt.Errorf(`Operator packet typeId %v should only have 2 packets, got %v`, p.TypeId, len(p.Packets))
+			}
+			// 	// 1 ? first subpacket greater than second : 0
+			v1 := DecodePacket(p.Packets[0])
+			v2 := DecodePacket(p.Packets[1])
+			if v1 > v2 {
+				decoded = 1
+			} else {
+				decoded = 0
+			}
+		case 6:
+			if len(p.Packets) != 2 {
+				err = fmt.Errorf(`Operator packet typeId %v should only have 2 packets, got %v`, p.TypeId, len(p.Packets))
+			}
+			// 	// 1 ? first subpacket less than second : 0
+			v1 := DecodePacket(p.Packets[0])
+			v2 := DecodePacket(p.Packets[1])
+			if v1 < v2 {
+				decoded = 1
+			} else {
+				decoded = 0
+			}
+		case 7:
+			// always 2 packets
+			if len(p.Packets) != 2 {
+				err = fmt.Errorf(`Operator packet typeId %v should only have 2 packets, got %v`, p.TypeId, len(p.Packets))
+			}
+			// 1 ? first packet == second : 0
+			v1 := DecodePacket(p.Packets[0])
+			v2 := DecodePacket(p.Packets[1])
+			if v1 == v2 {
+				decoded = 1
+			} else {
+				decoded = 0
+			}
+		}
+	}
+	if err != nil {
+		fmt.Println("Decode failed: ", err)
+	}
+	return
+}
+
+func Part2(data string) (decoded int, err error) {
+	packet, _ := ReadPacket(data, 0)
+	decoded = DecodePacket(packet)
+	return
 }
 
 func main() {
@@ -173,9 +269,12 @@ func main() {
 		panic("FAILED on Part I ")
 	}
 
-	p2Result := Part2(bitData)
-	fmt.Printf("Part II: the lowest risk path level is = %v\n", p2Result)
-	if p2Result != 2874 {
+	p2Result, err := Part2(bitData)
+	if err != nil {
+		panic(`Failed on Part II`)
+	}
+	fmt.Printf("Part II: the BITS packet decodes to = %v\n", p2Result)
+	if p2Result <= 790560764472 || p2Result != 834151779165 {
 		panic("FAILED on Part II")
 	}
 }

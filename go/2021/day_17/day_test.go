@@ -87,12 +87,12 @@ func TestPartI(t *testing.T) {
 	}
 }
 
-// func TestPartII(t *testing.T) {
-// 	input := setupTests("example.txt")
-// 	data := ProcessInput(&input[0])
-// 	got := Part1(&data)
-// 	want := 315
-// 	if got != want {
-// 		t.Errorf(`Part II should return %v for blah, got %v`, want, got)
-// 	}
-// }
+func TestPartII(t *testing.T) {
+	input := setupTests("example.txt")
+	data := ProcessInput(&input[0])
+	got := Part2(&data)
+	want := 112
+	if got != want {
+		t.Errorf(`Part II should return %v for the total possible velocities, got %v`, want, got)
+	}
+}

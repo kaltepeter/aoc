@@ -14,39 +14,6 @@ type TargetArea struct {
 	MaxY int
 }
 
-const (
-	PROBE       = "#"
-	START       = "S"
-	TARGET_AREA = "T"
-	EMPTY       = "."
-)
-
-// func PrintView(p util.Point, ta TargetArea) {
-// 	viewMaxY := int(math.Abs(float64(ta.MaxY)))
-// 	viewMinY := int(math.Abs(float64(ta.MinY)))
-// 	viewMaxX := int(math.Abs(float64(ta.MaxX)))
-// 	viewMinX := int(math.Abs(float64(ta.MinX)))
-// 	maxY := viewMinY + viewMaxY
-// 	maxX := viewMinX + viewMaxX
-// 	view := make([][]string, maxY)
-// 	for idx, _ := range view {
-// 		r := make([]string, maxX)
-// 		for cIdx := range r {
-// 			r[cIdx] = EMPTY
-// 		}
-// 		view[idx] = r
-// 	}
-// 	view[p.Y][p.X] = PROBE
-// 	for y := viewMinY; y < int(viewMaxY); y++ {
-// 		for x := viewMinX; x < int(viewMaxX); x++ {
-// 			view[y][x] = TARGET_AREA
-// 		}
-// 	}
-// 	for _, row := range view {
-// 		fmt.Println(strings.Join(row, ""))
-// 	}
-// }
-
 func ProcessInput(data *string) TargetArea {
 	var minX, maxX, minY, maxY int
 	fmt.Sscanf(*data, "target area: x=%d..%d, y=%d..%d", &minX, &maxX, &minY, &maxY)
@@ -80,8 +47,23 @@ func Part1(data *TargetArea) int {
 	return x * y / 2 // triangle number
 }
 
-func Part2(data *TargetArea) int {
-	return 0
+func Part2(data *TargetArea) (validCount int) {
+	// quadratic, solve for drag
+	minX := math.Ceil((math.Sqrt(float64(1+data.MinX*8)) - 1) / 2)
+	for iY := data.MinY - 1; iY <= -data.MinY; iY++ {
+		for iX := int(minX); iX <= data.MaxX; iX++ {
+			p := util.Point{X: 0, Y: 0}
+			dX, dY := int(iX), int(iY)
+			for p.X <= data.MaxX && p.Y >= data.MinY {
+				dX, dY = Step(&p, dX, dY)
+				if p.X >= data.MinX && p.X <= data.MaxX && p.Y >= data.MinY && p.Y <= data.MaxY {
+					validCount++
+					break
+				}
+			}
+		}
+	}
+	return validCount
 }
 
 func main() {
@@ -95,8 +77,8 @@ func main() {
 	}
 
 	p2Result := Part2(&targetArea)
-	fmt.Printf("Part II: the lowest risk path level is = %v\n", p2Result)
-	if p2Result != 2874 {
+	fmt.Printf("Part II: the total possible velocity combinations = %v\n", p2Result)
+	if p2Result != 1546 {
 		panic("FAILED on Part II")
 	}
 }

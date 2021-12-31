@@ -9,3 +9,8 @@ func ReduceInt(nums []int, f func(int, int) int, start int) int {
 }
 
 type Coord [2]int
+
+type Point struct {
+	X int
+	Y int
+}

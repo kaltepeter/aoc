@@ -52,3 +52,12 @@ func ArrayContainsString(data *[]string, v string) bool {
 	}
 	return false
 }
+
+func ArrayContainsInt(data *[]int, v int) bool {
+	for _, c := range *data {
+		if c == v {
+			return true
+		}
+	}
+	return false
+}

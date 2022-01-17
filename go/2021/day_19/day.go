@@ -420,15 +420,25 @@ func Part1(scanners []Scanner) int {
 	return len(uniqueBeacons)
 }
 
-func Part2(scanners []Scanner) int {
-	uniqueBeacons := map[Coord]int{}
+func Part2(scanners []Scanner) (manhattenDist int) {
 	for _, s := range scanners {
-		for _, b := range s.Beacons {
-			uniqueBeacons[b.Pos] += 1
+		v1 := mat.NewVecDense(3, []float64{float64(s.Pos.X), float64(s.Pos.Y), float64(s.Pos.Z)})
+		for _, s2 := range scanners {
+			if s.Name == s2.Name {
+				continue
+			}
+			v2 := mat.NewVecDense(3, []float64{float64(s2.Pos.X), float64(s2.Pos.Y), float64(s2.Pos.Z)})
+			var res mat.VecDense
+			res.SubVec(v2, v1)
+			sum := 0
+			for _, v := range res.RawVector().Data {
+				sum += int(math.Abs(v))
+			}
+			manhattenDist = int(math.Max(float64(manhattenDist), float64(sum)))
 		}
 	}
 
-	return len(uniqueBeacons)
+	return
 }
 
 func main() {
@@ -447,7 +457,7 @@ func main() {
 
 	p2Result := Part2(scanners)
 	fmt.Printf("Part II: the largest manhatten distance is = %v\n", p2Result)
-	if p2Result != 2874 {
+	if p2Result != 10895 {
 		panic("FAILED on Part II")
 	}
 }

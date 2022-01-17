@@ -21,17 +21,6 @@ type Coord struct {
 	Z int
 }
 
-type IntAdjList struct {
-	Pos     int
-	AdjList [][]int
-}
-
-func NewIntAdjList(coord int, other [][]int) (c IntAdjList) {
-	c.Pos = coord
-	c.AdjList = append(c.AdjList, other...)
-	return
-}
-
 func (c Coord) String() string {
 	return fmt.Sprintf("[%d,%d,%d]", c.X, c.Y, c.Z)
 }
@@ -67,50 +56,12 @@ func (s *Scanner) SetBeaconDist() {
 	s.BeaconDist = beaconDist
 }
 
-type CoordPair struct {
-	Key   [2]int
-	Value float64
-}
-
-type CoordPairList []CoordPair
-
-func (p CoordPairList) Len() int { return len(p) }
-func (p CoordPairList) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
-}
-func (p CoordPairList) Less(i, j int) bool {
-	return p[i].Value < p[j].Value
-}
-
 func (s *Scanner) FindCommonBeacons(s2 *Scanner) (matchedCoords [][2]Coord) {
-	// count := 0
-	// d1Set := map[float64][][2]int{}
-	// d2Set := map[float64][][2]int{}
-
-	d1Sorted := make(CoordPairList, len(s.BeaconDist))
-	i := 0
-	for k, v := range s.BeaconDist {
-		d1Sorted[i] = CoordPair{k, v}
-		i++
-	}
-	sort.Sort(d1Sorted)
-
-	d2Sorted := make(CoordPairList, len(s2.BeaconDist))
-	i = 0
-	for k, v := range s2.BeaconDist {
-		d2Sorted[i] = CoordPair{k, v}
-		i++
-	}
-	sort.Sort(d2Sorted)
-	// pList := map[int]int{}
-
 	foundMap := map[int]map[int]int{}
 
 	// get list of overlaps
-	for _, cp1 := range d1Sorted {
-		for _, cp2 := range d2Sorted {
-			d1, d1Key := cp1.Value, cp1.Key
-			d2, d2Key := cp2.Value, cp2.Key
+	for d1Key, d1 := range s.BeaconDist {
+		for d2Key, d2 := range s2.BeaconDist {
 			sort.Ints(d1Key[:])
 			sort.Ints(d2Key[:])
 
@@ -127,9 +78,6 @@ func (s *Scanner) FindCommonBeacons(s2 *Scanner) (matchedCoords [][2]Coord) {
 				foundMap[d1Key[1]][d2Key[0]] += 1
 				foundMap[d1Key[1]][d2Key[1]] += 1
 
-				// d1Set[d1] = append(d1Set[d1], d1Key)
-				// d2Set[d2] = append(d2Set[d2], d2Key)
-				// count++
 			}
 		}
 	}

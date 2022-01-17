@@ -1,5 +1,16 @@
 package main
 
+type IntAdjList struct {
+	Pos     int
+	AdjList [][]int
+}
+
+func NewIntAdjList(coord int, other [][]int) (c IntAdjList) {
+	c.Pos = coord
+	c.AdjList = append(c.AdjList, other...)
+	return
+}
+
 func (c *Coord) RotateCoord(xDir, yDir, zDir int) *Coord {
 	return &Coord{
 		X: c.X + xDir,

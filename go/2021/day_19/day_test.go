@@ -32,63 +32,6 @@ func TestProcessInput(t *testing.T) {
 	}
 }
 
-func TestRotateCoord(t *testing.T) {
-	cases := []struct {
-		coord  *Coord
-		rotate [3]int
-		want   *Coord
-	}{
-		{
-			coord:  &Coord{1, 1, 1},
-			rotate: [3]int{-1, 0, 0},
-			want:   &Coord{0, 1, 1},
-		},
-		{
-			coord:  &Coord{-1, 1, 1},
-			rotate: [3]int{-1, 0, 0},
-			want:   &Coord{-2, 1, 1},
-		},
-		{
-			coord:  &Coord{1, 5, 1},
-			rotate: [3]int{-1, 1, 0},
-			want:   &Coord{0, 6, 1},
-		},
-	}
-	for _, c := range cases {
-		got := c.coord.RotateCoord(c.rotate[0], c.rotate[1], c.rotate[2])
-		want := c.want
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf(`RotateCoord should return %v, got: %v`, want, got)
-		}
-	}
-}
-
-func TestGetAllRotations(t *testing.T) {
-	coord := &Coord{1, 2, -3}
-	got := coord.GetAllRotations()
-	want := 24
-	if len(got) != want {
-		t.Errorf(`GetAllRotations should return %v, got %v`, want, len(got))
-	}
-}
-
-func TestCalcL2Norm(t *testing.T) {
-	got := CalcL2Norm([3]int{25, 2, 5})
-	got2 := CalcL2Norm([3]int{2, -25, 5})
-	want := 25.573423705088842
-	if got != want {
-		t.Errorf(`CalcL2Norm() = %v, got %v`, want, got)
-	}
-	if got2 != want {
-		t.Errorf(`CalcL2Norm() = %v, got %v`, want, got2)
-	}
-	pos := []float64{float64(2), float64(-25), float64(5)}
-	vect := mat.NewVecDense(3, pos)
-	if got != mat.Norm(vect, 2) {
-		t.Errorf(`CalcL2Norm() = %v, got %v`, got, mat.Norm(vect, 2))
-	}
-}
-
 func TestCalcSquaredNorm(t *testing.T) {
 	got := CalcSquaredNorm([3]float64{25, 2, 5})
 	got2 := CalcSquaredNorm([3]float64{2, -25, 5})

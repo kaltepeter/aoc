@@ -11,7 +11,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -33,117 +32,8 @@ func NewIntAdjList(coord int, other [][]int) (c IntAdjList) {
 	return
 }
 
-// https://codeburst.io/slice-based-stack-implementation-in-golang-8140603a1dc2
-type CoordStack struct {
-	items  []Coord
-	rwLock sync.RWMutex
-}
-
-func (stack *CoordStack) Push(t Coord) {
-	if stack.items == nil {
-		stack.items = []Coord{}
-	}
-	stack.rwLock.Lock()
-	stack.items = append(stack.items, t)
-	stack.rwLock.Unlock()
-}
-
-func (stack *CoordStack) Pop() *Coord {
-	if len(stack.items) == 0 {
-		return nil
-	}
-	stack.rwLock.Lock()
-	item := stack.items[len(stack.items)-1]
-	stack.items = stack.items[0 : len(stack.items)-1]
-	stack.rwLock.Unlock()
-	return &item
-}
-
-func (stack *CoordStack) Size() int {
-	stack.rwLock.RLock()
-	defer stack.rwLock.RUnlock()
-	return len(stack.items)
-}
-
-func (stack *CoordStack) All() []Coord {
-	stack.rwLock.RLock()
-	defer stack.rwLock.RUnlock()
-	return stack.items
-}
-
-func (stack *CoordStack) IsEmpty() bool {
-	stack.rwLock.RLock()
-	defer stack.rwLock.RUnlock()
-	return len(stack.items) == 0
-}
-
-type Pair struct {
-	Left   *Pair
-	Right  *Pair
-	Parent *Pair
-	Depth  int
-	Value  int
-}
-
-func (p *Pair) String() string {
-	return fmt.Sprintf("Left: %v Right: %v Depth: %d VAlue: %d", p.Left, p.Right, p.Depth, p.Value)
-}
-
 func (c Coord) String() string {
 	return fmt.Sprintf("[%d,%d,%d]", c.X, c.Y, c.Z)
-}
-
-func (c *Coord) RotateCoord(xDir, yDir, zDir int) *Coord {
-	return &Coord{
-		X: c.X + xDir,
-		Y: c.Y + yDir,
-		Z: c.Z + zDir,
-	}
-}
-
-func calcCombos(g *IntAdjList) (cList []Coord) {
-	coord := &Coord{
-		X: g.Pos,
-	}
-	p1 := g.AdjList[0]
-	p2 := g.AdjList[1]
-	coord.Y = p1[0]
-	coord.Z = p2[0]
-	cList = append(cList, *coord)
-	coord.Y = p1[1]
-	coord.Z = p2[1]
-	cList = append(cList, *coord)
-	coord.Y = p1[0]
-	coord.Z = p2[1]
-	cList = append(cList, *coord)
-	coord.Y = p1[1]
-	coord.Z = p2[0]
-	cList = append(cList, *coord)
-	return
-}
-
-// Not needed if using the Norm to match coords
-func (c *Coord) GetAllRotations() map[Coord]bool {
-	coords := map[Coord]bool{}
-	pairs := [][]int{{c.X, c.X * -1}, {c.Y, c.Y * -1}, {c.Z, c.Z * -1}}
-	for i, c := range pairs {
-		pList := [][]int{}
-		if i > 0 {
-			pList = append(pList, pairs[:i]...)
-		}
-		if i < len(pairs)-1 {
-			pList = append(pList, pairs[i+1:]...)
-		}
-		cListL := NewIntAdjList(c[0], pList)
-		cListR := NewIntAdjList(c[1], pList)
-		adjList := calcCombos(&cListL)
-		adjList = append(adjList, calcCombos(&cListR)...)
-		for _, c := range adjList {
-			coords[c] = true
-		}
-	}
-
-	return coords
 }
 
 type Scanner struct {
@@ -151,10 +41,6 @@ type Scanner struct {
 	Pos        Coord
 	Beacons    []Beacon
 	BeaconDist map[[2]int]float64
-}
-
-func CalcL2Norm(vect [3]int) float64 {
-	return math.Sqrt(math.Pow(float64(vect[0]), 2) + math.Pow(float64(vect[1]), 2) + math.Pow(float64(vect[2]), 2))
 }
 
 func CalcSquaredNorm(vect [3]float64) float64 {
@@ -165,24 +51,15 @@ func (s *Scanner) SetBeaconDist() {
 	beaconDist := map[[2]int]float64{}
 	for i := 0; i < len(s.Beacons)-1; i++ {
 		for j := i + 1; j < len(s.Beacons); j++ {
-			// beaconDist = append(beaconDist, Coord{
-			//   X:
-			// })
 			cb := s.Beacons[i]
 			curBeacon := [3]float64{float64(cb.Pos.X), float64(cb.Pos.Y), float64(cb.Pos.Z)}
-			// curBeacon := [3]float64{math.Abs(float64(cb.Pos.X)), math.Abs(float64(cb.Pos.Y)), math.Abs(float64(cb.Pos.Z))}
-			// sort.Float64s(curBeacon[:])
 			nb := s.Beacons[j]
 			nextBeacon := [3]float64{float64(nb.Pos.X), float64(nb.Pos.Y), float64(nb.Pos.Z)}
-			// nextBeacon := [3]float64{math.Abs(float64(nb.Pos.X)), math.Abs(float64(nb.Pos.Y)), math.Abs(float64(nb.Pos.Z))}
-			// sort.Float64s(nextBeacon[:])
 			curVect := mat.NewVecDense(3, curBeacon[:])
 			nextVect := mat.NewVecDense(3, nextBeacon[:])
 			distVect := mat.NewVecDense(3, nil)
 			distVect.SubVec(curVect, nextVect)
 			dist := CalcSquaredNorm([3]float64{distVect.AtVec(0), distVect.AtVec(1), distVect.AtVec(2)})
-			// dist := mat.Norm(distVect, 2)
-			// dist := mat.Norm(curVect, 2) - mat.Norm(nextVect, 2)
 			beaconDist[[2]int{i, j}] = dist
 			beaconDist[[2]int{j, i}] = dist
 		}
@@ -315,14 +192,6 @@ func (s Scanner) String() string {
 	return fmt.Sprintf("[Scanner %d] Pos: %s %d Beacons", s.Name, s.Pos.String(), len(s.Beacons))
 }
 
-func (s *Scanner) Exists() bool {
-	exists := false
-	if s.Name != -1 && len(s.Beacons) > 0 {
-		exists = true
-	}
-	return exists
-}
-
 type Beacon struct {
 	Pos Coord
 }
@@ -339,10 +208,6 @@ type ScannerData struct {
 func (sd *ScannerData) String() string {
 	return fmt.Sprintf("Scanners: %v, Beacons: %v", sd.Scanners, sd.Beacons)
 }
-
-const (
-	MAX_DISTANCE = 1000
-)
 
 func ProcessInput(data *[]string) []Scanner {
 	scannerData := []Scanner{}

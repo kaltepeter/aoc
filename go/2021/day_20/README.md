@@ -46,3 +46,20 @@ round 2 (35 pixels)
 ```
 
 000000000 (Dark)
+
+## Steps
+
+1. Read input
+1. Split into algorithm and image
+1. for each round
+
+   1. Grow image by 1
+   1. Process image for each pixel
+
+      1. get neighbor cells
+      1. calculate binary from neighbor cells
+      1. convert to decimal
+      1. read value from alorithm
+
+   1. print image
+   1. count lit values

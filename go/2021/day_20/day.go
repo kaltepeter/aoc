@@ -8,8 +8,6 @@ import (
 	"ka/m/util"
 	"path/filepath"
 	"strings"
-
-	"gonum.org/v1/gonum/mat"
 )
 
 type PixelChar int
@@ -28,44 +26,83 @@ func (char PixelChar) String() string {
 	return chars[char]
 }
 
-type ImageProcessor struct {
-	EnhancementAlgorithm string
-	InputImage           []string
-	ImageMat             *mat.Dense
-	Off                  PixelChar
-	On                   PixelChar
-}
-
-func CalcPixelDigit(s *mat.Dense) (val int) {
-	bits := 0b000000000
-	r, c := s.Dims()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			bits = bits<<1 | int(s.At(i, j))
-		}
+func GetPixelCharFromByte(char byte) (pc PixelChar) {
+	switch string(char) {
+	case LightPixel.String():
+		pc = LightPixel
+	case DarkPixel.String():
+		pc = DarkPixel
 	}
-	// fmt.Printf("bits: %09b %v\n", bits, bits)
-	val = bits
 	return
 }
 
-func matPrint(X mat.Matrix) {
-	fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
-	fmt.Printf("%v\n\n", fa)
+func ProcessInput(data [][]string) (algo string, img []string) {
+	algo = data[0][0]
+	img = data[1]
+	return
 }
 
-func printImage(ip *ImageProcessor) {
-	height, width := ip.ImageMat.Dims()
+func GrowImage(img []string, padding int, defaultChar string) (newImage []string) {
+	// r := len(image)
+	c := len(img[0])
+	newImage = []string{}
+	newRow := strings.Repeat(defaultChar, c+(padding*2))
+	for i := 0; i < (padding); i++ {
+		newImage = append(newImage, newRow)
+	}
+
+	for _, imageRow := range img {
+		paddedRow := strings.Repeat(defaultChar, padding)
+		paddedRow += imageRow
+		paddedRow += strings.Repeat(defaultChar, padding)
+		newImage = append(newImage, paddedRow)
+	}
+
+	for i := 0; i < (padding); i++ {
+		newImage = append(newImage, newRow)
+	}
+	return
+}
+
+func GetNeighborsAndCell(img []string, coord [2]int, notFoundVal string) (s [][3]string) {
+	rows := len(img)
+	cols := len(img[0])
+
+	s = make([][3]string, 3)
+	curRow, curCol := 0, 0
+
+	for i := coord[0] - 1; i < coord[0]+2; i++ {
+		for j := coord[1] - 1; j < coord[1]+2; j++ {
+			if (i < 0 || i > rows-1) || (j < 0 || j > cols-1) {
+				s[curRow][curCol] = notFoundVal
+			} else {
+				s[curRow][curCol] = fmt.Sprintf("%c", img[i][j])
+			}
+
+			if curCol >= 2 {
+				curCol = 0
+			} else {
+				curCol++
+			}
+		}
+		curRow++
+	}
+	return
+}
+
+func printImage(img []string) {
+	height := len(img)
+	width := len(img[0])
 	// matPrint(ip.ImageMat)
 	im := image.NewGray(image.Rectangle{Max: image.Point{X: width, Y: height}})
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			pixel := ip.ImageMat.At(y, x)
+			pixel := img[y][x]
 			var gray uint8
-			switch pixel {
-			case float64(LightPixel):
+			switch GetPixelCharFromByte(pixel) {
+			case LightPixel:
 				gray = 255
-			case float64(DarkPixel):
+			case DarkPixel:
 				gray = 0
 			}
 			im.SetGray(x, y, color.Gray{Y: 255 - gray})
@@ -89,126 +126,79 @@ func printImage(ip *ImageProcessor) {
 	}
 }
 
-func GetPixelCharFromByte(char byte) (pc PixelChar) {
-	switch string(char) {
-	case LightPixel.String():
-		pc = LightPixel
-	case DarkPixel.String():
-		pc = DarkPixel
-	}
-	return
-}
-
-func ProcessInput(data [][]string, padding int) (ip ImageProcessor) {
-	ip.EnhancementAlgorithm = data[0][0]
-	ip.InputImage = data[1]
-	rows, cols := len(data[1])+(padding*2), len(data[1][0])+(padding*2)
-
-	paddingRow := make([]float64, cols)
-	// ip.Off = GetPixelCharFromByte(ip.EnhancementAlgorithm[0])
-	if GetPixelCharFromByte(ip.EnhancementAlgorithm[0]) == LightPixel {
-		ip.Off = LightPixel
-		ip.On = DarkPixel
-	} else {
-		ip.Off = DarkPixel
-		ip.On = LightPixel
-	}
-	// ip.On = GetPixelCharFromByte(ip.EnhancementAlgorithm[511])
-	for i := 0; i < len(paddingRow); i++ {
-		paddingRow[i] = float64(ip.Off)
-	}
-	// padding for the image view, space is infinite
-	imageData := []float64{}
-	for i := 0; i < padding; i++ {
-		imageData = append(imageData, paddingRow...)
-	}
-	for _, v := range data[1] {
-		for i := 0; i < cols; i++ {
-			val := fmt.Sprintf("%v%v%v", strings.Repeat(ip.Off.String(), padding), v, strings.Repeat(ip.Off.String(), padding)) // add padding for the image view
-			char := val[i]
-			pixelChar := GetPixelCharFromByte(char)
-			imageData = append(imageData, float64(pixelChar))
+func CalcPixelDigit(cells [][3]string) (val int) {
+	bits := 0b000000000
+	r := len(cells)
+	c := len(cells[0])
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			b := []byte(cells[i][j])
+			val := GetPixelCharFromByte(b[0])
+			bits = bits<<1 | int(val)
 		}
 	}
-	for i := 0; i < padding; i++ {
-		imageData = append(imageData, paddingRow...)
-	}
-	ip.ImageMat = mat.NewDense(rows, cols, imageData)
-
+	val = bits
 	return
 }
 
-func GetNeighborsAndCell(m *mat.Dense, coord [2]int) (s mat.Matrix) {
-	rows, cols := m.Dims()
-	startI := 0
-	startJ := 0
-	endI := rows
-	endJ := cols
-	i, j := coord[0], coord[1]
-
-	if i > 0 {
-		startI = i - 1
-	} else if i == 0 {
-		startI = i
-	}
-	if i < rows-1 {
-		endI = i + 2
-	}
-	if j > 0 {
-		startJ = j - 1
-	} else if j == 0 {
-		startJ = j
-	}
-	if j < cols-1 {
-		endJ = j + 2
-	}
-	s = m.Slice(startI, endI, startJ, endJ)
-	return
-}
-
-func ProcessImage(ip *ImageProcessor, padding int) {
-	rows, cols := ip.ImageMat.Dims()
-	// padding ensures neighborcells always returns 9 digits
-	var newImage mat.Dense
-	newImage.CloneFrom(ip.ImageMat)
+func ProcessImage(algo string, img []string, defaultChar string) (newImage []string) {
+	rows := len(img)
+	cols := len(img[0])
 	for i := 0; i < rows; i++ {
+		newRow := ""
 		for j := 0; j < cols; j++ {
-			// fmt.Printf("i,j: %v,%v pixel: %v\n", i, j, pixel)
-			s := GetNeighborsAndCell(ip.ImageMat, [2]int{i, j})
-			enhancementIndex := CalcPixelDigit(s.(*mat.Dense))
-			pixelChar := GetPixelCharFromByte(ip.EnhancementAlgorithm[enhancementIndex])
-			newImage.Set(i, j, float64(pixelChar))
+			neighbors := GetNeighborsAndCell(img, [2]int{i, j}, defaultChar)
+			enhancementIndex := CalcPixelDigit(neighbors)
+			pixelChar := GetPixelCharFromByte(algo[enhancementIndex])
+			newRow += pixelChar.String()
+			// newImage.Set(i, j, float64(pixelChar))
+			// newImage[i][j] = pixelChar
 		}
+		newImage = append(newImage, newRow)
 	}
-	ip.ImageMat = &newImage
+	return
 }
 
-func Part1(ip *ImageProcessor, padding int, rounds int) int {
+func CalcLitPixels(img []string) (v int) {
+	for _, value := range img {
+		v += strings.Count(value, LightPixel.String())
+	}
+	return
+}
+
+func Part1(algo string, img []string, rounds int) (count int) {
+	pImage := img
+	defaultChar := DarkPixel.String()
 	for i := 0; i < rounds; i++ {
-		ProcessImage(ip, padding)
+		if i%2 != 0 && LightPixel.String() == string(algo[0]) {
+			defaultChar = LightPixel.String()
+		}
+		expImage := GrowImage(pImage, 1, defaultChar)
+		pImage = ProcessImage(algo, expImage, defaultChar)
 	}
-	printImage(ip)
-	return int(mat.Sum(ip.ImageMat))
-}
-
-func Part2(ip *ImageProcessor) int {
-	return 0
+	printImage(pImage)
+	fmt.Print("\n\n")
+	count = CalcLitPixels(pImage)
+	return
 }
 
 func main() {
-	input := filepath.Join("2021", "day_20", "raw-input.txt")
-	inputData := util.SplitInputByEmptyLines(input)
-	padding := 1
-	imageData := ProcessInput(inputData, padding)
-	p1Result := Part1(&imageData, padding, 2)
-	fmt.Printf("Part I: the number of lit pixels is = %v\n", p1Result)
-	if p1Result <= 5245 {
-		panic("FAILED on Part I")
+	exampleInput := filepath.Join("2021", "day_20", "example.txt")
+	exampleData := util.SplitInputByEmptyLines(exampleInput)
+	exampleAlgo, exampleImage := ProcessInput(exampleData)
+	exampleResult := Part1(exampleAlgo, exampleImage, 2)
+	fmt.Printf("Example: the number of lit pixels is = %v\n\n", exampleResult)
+	if exampleResult != 35 {
+		panic("FAILED on Example")
 	}
 
-	p2Result := Part2(&imageData)
-	fmt.Printf("Part II: the lowest risk path level is = %v\n", p2Result)
-	if p2Result != 2874 {
-		panic("FAILED on Part II")
+	input := filepath.Join("2021", "day_20", "raw-input.txt")
+	inputData := util.SplitInputByEmptyLines(input)
+
+	algo, img := ProcessInput(inputData)
+	p1Result := Part1(algo, img, 2)
+	fmt.Printf("Part I: the number of lit pixels is = %v\n", p1Result)
+	if p1Result <= 5245 || p1Result >= 5679 {
+		panic("FAILED on Part I")
 	}
 }

@@ -144,6 +144,7 @@ func CalcPixelDigit(cells [][3]string) (val int) {
 func ProcessImage(algo string, img []string, defaultChar string) (newImage []string) {
 	rows := len(img)
 	cols := len(img[0])
+
 	for i := 0; i < rows; i++ {
 		newRow := ""
 		for j := 0; j < cols; j++ {
@@ -151,8 +152,6 @@ func ProcessImage(algo string, img []string, defaultChar string) (newImage []str
 			enhancementIndex := CalcPixelDigit(neighbors)
 			pixelChar := GetPixelCharFromByte(algo[enhancementIndex])
 			newRow += pixelChar.String()
-			// newImage.Set(i, j, float64(pixelChar))
-			// newImage[i][j] = pixelChar
 		}
 		newImage = append(newImage, newRow)
 	}
@@ -169,11 +168,20 @@ func CalcLitPixels(img []string) (v int) {
 func Part1(algo string, img []string, rounds int) (count int) {
 	pImage := img
 	defaultChar := DarkPixel.String()
+	shouldFlip := false
+	if string(algo[0]) == LightPixel.String() && string(algo[511]) == DarkPixel.String() {
+		shouldFlip = true
+	}
+	padding := 1
 	for i := 0; i < rounds; i++ {
-		if i%2 != 0 && LightPixel.String() == string(algo[0]) {
-			defaultChar = LightPixel.String()
+		if shouldFlip {
+			if i%2 != 0 {
+				defaultChar = LightPixel.String()
+			} else {
+				defaultChar = DarkPixel.String()
+			}
 		}
-		expImage := GrowImage(pImage, 1, defaultChar)
+		expImage := GrowImage(pImage, padding, defaultChar)
 		pImage = ProcessImage(algo, expImage, defaultChar)
 	}
 	printImage(pImage)
@@ -198,7 +206,13 @@ func main() {
 	algo, img := ProcessInput(inputData)
 	p1Result := Part1(algo, img, 2)
 	fmt.Printf("Part I: the number of lit pixels is = %v\n", p1Result)
-	if p1Result <= 5245 || p1Result >= 5679 {
+	if p1Result != 5619 {
 		panic("FAILED on Part I")
+	}
+
+	p2Result := Part1(algo, img, 50)
+	fmt.Printf("Part II: the number of lit pixels is = %v\n", p2Result)
+	if p2Result != 20122 {
+		panic("FAILED on Part II")
 	}
 }

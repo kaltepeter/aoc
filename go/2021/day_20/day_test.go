@@ -52,8 +52,9 @@ func TestProcessInput(t *testing.T) {
 
 func TestGrowImage(t *testing.T) {
 	type args struct {
-		m   []string
-		num int
+		m           []string
+		num         int
+		defaultChar string
 	}
 	tests := []struct {
 		name    string
@@ -63,15 +64,25 @@ func TestGrowImage(t *testing.T) {
 		{
 			name: "should return with 2 rows padding",
 			args: args{
-				m:   []string{"#..#.", "#....", "##..#", "..#..", "..###"},
-				num: 2,
+				m:           []string{"#..#.", "#....", "##..#", "..#..", "..###"},
+				num:         2,
+				defaultChar: ".",
 			},
 			wantVal: []string{".........", ".........", "..#..#...", "..#......", "..##..#..", "....#....", "....###..", ".........", "........."},
+		},
+		{
+			name: "should return with 2 rows padding for # default char",
+			args: args{
+				m:           []string{"#..#.", "#....", "##..#", "..#..", "..###"},
+				num:         1,
+				defaultChar: "#",
+			},
+			wantVal: []string{"#######", "##..#.#", "##....#", "###..##", "#..#..#", "#..####", "#######"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotVal := GrowImage(tt.args.m, tt.args.num, "."); !reflect.DeepEqual(gotVal, tt.wantVal) {
+			if gotVal := GrowImage(tt.args.m, tt.args.num, tt.args.defaultChar); !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("GrowImage() = %v, want %v", gotVal, tt.wantVal)
 			}
 		})
@@ -115,6 +126,15 @@ func TestGetNeighborsAndCell(t *testing.T) {
 				coord:       [2]int{4, 4},
 			},
 			wantVal: [][3]string{{".", ".", "."}, {"#", "#", "."}, {".", ".", "."}},
+		},
+		{
+			name: "should return [[.,.,.], [#,#,.], [.,.,.]]",
+			args: args{
+				m:           []string{"#..#.", "#....", "##..#", "..#..", "..###"},
+				defaultChar: "#",
+				coord:       [2]int{4, 4},
+			},
+			wantVal: [][3]string{{".", ".", "#"}, {"#", "#", "#"}, {"#", "#", "#"}},
 		},
 	}
 	for _, tt := range tests {
@@ -213,5 +233,14 @@ func TestPartI(t *testing.T) {
 	want := 35
 	if got != want {
 		t.Errorf(`Part I should return %v, got %v`, want, got)
+	}
+}
+
+func TestPartII(t *testing.T) {
+	algo, image := setupTests("example.txt")
+	got := Part1(algo, image, 50)
+	want := 3351
+	if got != want {
+		t.Errorf(`Part II should return %v, got %v`, want, got)
 	}
 }

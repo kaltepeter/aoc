@@ -16,11 +16,11 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "util/list/*": ["src/util/list/*"],
-      "util/*": ["src/util/*"],
-      "testing/util/*": ["src/testing/util/*"],
+      "model/*": ["src/model/*"],
       "testing/*": ["src/testing/*"],
-      "model/*": ["src/model/*"]
+      "testing/util/*": ["src/testing/util/*"],
+      "util/*": ["src/util/*"],
+      "util/list/*": ["src/util/list/*"]
     }
   },
   "exclude": ["src/test-setup.ts", "**/*.spec.ts"]

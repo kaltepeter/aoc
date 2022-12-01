@@ -14,4 +14,5 @@ module.exports = {
     '^testing/util/(.*)': '<rootDir>/src/testing/util/$1',
     '^model/(.*)': '<rootDir>/src/model',
   },
+  projects: '<rootDir>/apps/aoc-2019',
 };

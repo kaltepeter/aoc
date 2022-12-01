@@ -68,9 +68,7 @@ describe(`2019: day-1`, () => {
     it('total fuel required for [14,1969,100756] is 51314', async () => {
       expect.assertions(1);
       const val$ = await doubleCheckedFuelCounterUpper$([
-        14,
-        1969,
-        100756,
+        14, 1969, 100756,
       ]).toPromise();
       expect(val$).toBe(51314);
     });

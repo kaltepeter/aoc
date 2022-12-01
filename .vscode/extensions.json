@@ -1,5 +1,7 @@
 {
-    "recommendations": [
-        "golang.go"
-    ]
+  "recommendations": [
+    "golang.go",
+    "firsttris.vscode-jest-runner",
+    "dbaeumer.vscode-eslint"
+  ]
 }

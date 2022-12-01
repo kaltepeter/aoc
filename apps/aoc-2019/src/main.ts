@@ -1,5 +1,5 @@
-import { inputs as day2Inputs } from './day-2/inputs';
-import { checkCrossedWires } from './day-3/crossed-wires';
+import { inputs as day2Inputs } from './app/day-2/inputs';
+import { checkCrossedWires } from './app/day-3/crossed-wires';
 
 const day1Vals = [
   [0, 2],

@@ -24,6 +24,18 @@ Templates directory has a `day-template` dir. Copy that and modify.
 - The test is intentionally broken.
 - The Inputs parsing is bare minimum. Modify for complex examples.
 
+## GO
+
+```bash
+brew install golang
+```
+
+### Running a module
+
+```bash
+go run ./2021/day_1
+```
+
 ## Larger lessons learned
 
 1. 2019

@@ -16,6 +16,17 @@ class RoundResult(Enum):
     DRAW = 3
     WON = 6
 
+    @staticmethod
+    def get_round_result_from_key(key: str) -> "RoundResult":
+        if key == "Y":
+            return RoundResult.DRAW
+        elif key == "X":
+            return RoundResult.LOST
+        elif key == "Z":
+            return RoundResult.WON
+        else:
+            raise ValueError(f"Invalid key: {key}")
+
 
 class Move(Enum):
     ROCK = ("A", "X", 1)
@@ -28,6 +39,24 @@ class Move(Enum):
             if move.value[0] == key or move.value[1] == key:
                 return move
         raise ValueError(f"Invalid key: {key}")
+
+    @staticmethod
+    def get_move_from_result(p1_move: "Move", result: RoundResult) -> "Move":
+        # lookup move, move: (won, lost)
+        move_list = {
+            Move.ROCK: (Move.PAPER, Move.SCISSORS),
+            Move.PAPER: (Move.SCISSORS, Move.ROCK),
+            Move.SCISSORS: (Move.ROCK, Move.PAPER),
+        }
+
+        if result == RoundResult.DRAW:
+            return p1_move
+        elif result == RoundResult.LOST:
+            return move_list[p1_move][1]
+        elif result == RoundResult.WON:
+            return move_list[p1_move][0]
+
+        raise ValueError(f"Invalid result: {result}")
 
 
 def calc_game_score(scores: Scores) -> Tuple[int, int]:
@@ -70,8 +99,15 @@ def part_1(game: Game) -> int:
 
 
 def part_2(game: Game) -> int:
-    score = 0
-    return score
+    scores: List[int] = []
+    for round in game:
+        res = RoundResult.get_round_result_from_key(round[1])
+        p1_move = Move.get_move_from_key(round[0])
+        p2_move = Move.get_move_from_result(p1_move, res)
+        my_result = who_won(p1_move, p2_move, 2)
+        scores += [(0, calc_score(p2_move, my_result))]
+
+    return calc_game_score(scores)[1]
 
 
 def main():

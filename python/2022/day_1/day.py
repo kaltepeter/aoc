@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, List, NewType, TypedDict
+from typing import List, TypedDict
 
 base_path = Path(__file__).parent
 

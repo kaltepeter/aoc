@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from day import process_input, calc_calories, part_1, part_2
+from .day import process_input, calc_calories, part_1, part_2
 
 base_path = Path(__file__).parent
 

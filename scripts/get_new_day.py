@@ -26,6 +26,7 @@ def create_empty_files(filename: str) -> None:
 
 create_empty_files("input.txt")
 create_empty_files("example.txt")
+create_empty_files("__init__.py")
 create_empty_files("day.py")
 create_empty_files("day_test.py")
 

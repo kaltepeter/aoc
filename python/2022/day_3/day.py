@@ -16,6 +16,9 @@ Rucksack = TypedDict(
 )
 Rucksacks = List[Rucksack]
 
+ElfGroup = Tuple[str, str, str]
+Groups = List[ElfGroup]
+
 
 def split_word_in_half(word: str) -> List[str]:
     if len(word) % 2 != 0:
@@ -24,8 +27,9 @@ def split_word_in_half(word: str) -> List[str]:
     return (word[:half], word[half:])
 
 
-def find_common_items(items: Tuple[str, str]) -> Set[str]:
-    return set([item for item in items[0] if item in items[1]])
+def find_common_items(items: Tuple[str, ...]) -> Set[str]:
+    return set(items[0]).intersection(*items[1:])
+    # return set([item for item in items[0] if item in items[1]])
 
 
 def calc_priority(item: str) -> int:
@@ -46,6 +50,12 @@ def process_input(file: str) -> Rucksacks:
         ]
 
 
+def process_groups_input(file: str) -> Groups:
+    with open(file) as reader:
+        data = reader.read().strip().split("\n")
+        return [tuple(data[i : i + 3]) for i in range(0, len(data), 3)]
+
+
 def part_1(data: Rucksacks) -> int:
     return sum(
         [
@@ -55,16 +65,23 @@ def part_1(data: Rucksacks) -> int:
     )
 
 
-def part_2(data: Rucksacks) -> int:
-    return 0
+def part_2(data: Groups) -> int:
+    common_items = [find_common_items(item) for item in data]
+    return sum([sum([calc_priority(item) for item in items]) for items in common_items])
 
 
 def main():
-    game = process_input(os.path.join(base_path, "input.txt"))
+    rucksacks = process_input(os.path.join(base_path, "input.txt"))
+    groups = process_groups_input(os.path.join(base_path, "input.txt"))
 
-    print(f"Part I: {part_1(game)} is the total of the priorities")
+    part1_answer = part_1(rucksacks)
+    assert part1_answer == 7428
+    print(f"Part I: {part1_answer} is the total of the priorities")
 
-    print(f"Part II: {part_2(game)} is the total of the priorities")
+    part2_answer = part_2(groups)
+    assert part2_answer == 2650
+
+    print(f"Part II: {part2_answer} is the total of the priorities")
 
 
 if __name__ == "__main__":

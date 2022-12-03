@@ -7,6 +7,7 @@ from .day import (
     find_common_items,
     part_1,
     part_2,
+    process_groups_input,
     process_input,
     split_word_in_half,
 )
@@ -25,6 +26,7 @@ def test_find_common_items():
     assert find_common_items(("abc", "ade")) == {"a"}
     assert find_common_items(("abc", "def")) == set()
     assert find_common_items(("abcc", "ccdef")) == {"c"}
+    assert find_common_items(("abc", "dcf", "ghc")) == {"c"}
 
 
 def test_calc_priority():
@@ -71,9 +73,24 @@ def test_process_input():
     ]
 
 
+def test_process_groups_input():
+    assert process_groups_input(os.path.join(base_path, "example.txt")) == [
+        (
+            "vJrwpWtwJgWrhcsFMMfFFhFp",
+            "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
+            "PmmdzqPrVvPwwTWBwg",
+        ),
+        (
+            "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
+            "ttgJtRGJQctTZtZT",
+            "CrZsJsPPZsGzwwsLwLmpwMDw",
+        ),
+    ]
+
+
 def test_part_1():
     assert part_1(process_input(os.path.join(base_path, "example.txt"))) == 157
 
 
 def test_part_2():
-    assert part_2(process_input(os.path.join(base_path, "example.txt"))) == 0
+    assert part_2(process_groups_input(os.path.join(base_path, "example.txt"))) == 70

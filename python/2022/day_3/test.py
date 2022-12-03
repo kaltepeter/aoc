@@ -13,3 +13,5 @@ print(upper_letters)
 for let in letters:
     letter = ord(let)
     print(f"char of ASCII {let} is {letter}")
+
+print(set("vJrwpWtwJgWrhcsFMMfFFhFp"))

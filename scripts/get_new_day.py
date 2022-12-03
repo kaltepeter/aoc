@@ -30,7 +30,7 @@ create_empty_files("__init__.py")
 create_empty_files("day.py")
 create_empty_files("day_test.py")
 
-url = f"https://adventofcode.com/{today.year}/day/2"
+url = f"https://adventofcode.com/{today.year}/day/{today.day}"
 
 page = requests.get(url)
 soup = BeautifulSoup(page.text, "html.parser")

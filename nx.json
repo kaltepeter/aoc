@@ -37,5 +37,9 @@
     "appsDir": "packages",
     "libsDir": "packages"
   },
-  "defaultProject": "y2019"
+  "defaultProject": "y2019",
+  "plugins": ["@nx-go/nx-go"],
+  "implicitDependencies": {
+    "go.mod": "*"
+  }
 }

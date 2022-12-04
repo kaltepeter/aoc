@@ -30,7 +30,7 @@ func TestProcessInput(t *testing.T) {
 			args: args{
 				data: &inputData,
 			},
-			wantGame: Game{dieRollCount: 0, players: []Player{{name: "Player 1", score: 0, position: 4}, {name: "Player 2", score: 0, position: 8}}},
+			wantGame: Game{dieRollCount: 1, players: []Player{{name: "Player 1", score: 0, position: 4}, {name: "Player 2", score: 0, position: 8}}},
 		},
 	}
 	for _, tt := range tests {
@@ -47,7 +47,8 @@ func TestProcessInput(t *testing.T) {
 func TestIsGameWon(t *testing.T) {
 
 	type args struct {
-		data *Game
+		data        *Game
+		targetScore int
 	}
 	tests := []struct {
 		name       string
@@ -57,15 +58,24 @@ func TestIsGameWon(t *testing.T) {
 	}{
 		{name: "should return true if player is over 1000",
 			args: args{
-				data: &Game{dieRollCount: 993, players: []Player{{name: "Player 1", score: 1000, position: 10}, {name: "Player 2", score: 745, position: 3}}},
+				data:        &Game{dieRollCount: 993, players: []Player{{name: "Player 1", score: 1000, position: 10}, {name: "Player 2", score: 745, position: 3}}},
+				targetScore: 1000,
 			},
 			want:       true,
 			wantWinner: Player{name: "Player 1", score: 1000, position: 10},
 		},
+		{name: "should return true if player is over 21",
+			args: args{
+				data:        &Game{dieRollCount: 21, players: []Player{{name: "Player 1", score: 26, position: 6}, {name: "Player 2", score: 16, position: 7}}},
+				targetScore: 21,
+			},
+			want:       true,
+			wantWinner: Player{name: "Player 1", score: 26, position: 6},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotIsWon, gotWinner := IsGameWon(tt.args.data)
+			gotIsWon, gotWinner := IsGameWon(tt.args.data, tt.args.targetScore)
 
 			if gotIsWon != tt.want {
 				t.Errorf("IsGameWon() = %v, want %v", gotIsWon, tt.want)
@@ -178,17 +188,17 @@ func TestCalcLoserScore(t *testing.T) {
 
 func TestPartI(t *testing.T) {
 	input := setupTests("example.txt")
-	got := Part1(&input)
+	got := Part1(input)
 	want := 739785
 	if got != want {
 		t.Errorf(`Part I should return %v, got %v`, want, got)
 	}
 }
 
-func TestPartII(t *testing.T) {
+func SkipTestPartII(t *testing.T) {
 	input := setupTests("example.txt")
-	got := Part2(&input)
-	want := 315
+	got := Part2(input)
+	want := int64(444356092776315)
 	if got != want {
 		t.Errorf(`Part II should return %v, got %v`, want, got)
 	}

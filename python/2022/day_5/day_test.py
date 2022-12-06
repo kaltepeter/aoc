@@ -29,4 +29,4 @@ def test_part_1():
 
 def test_part_2():
     stacks, moves = process_input(os.path.join(base_path, "example.txt"))
-    assert part_2(stacks, moves) == ""
+    assert part_2(stacks, moves) == "MCD"

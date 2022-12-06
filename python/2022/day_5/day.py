@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 from pathlib import Path
@@ -83,8 +84,8 @@ def pretty_print_stacks(stacks: Stacks):
 def part_1(stacks: Stacks, moves: Moves) -> str:
     for move in moves:
         count, from_stack, to_stack = move
-        pretty_print_stacks(stacks)
-        print(f"Moving {count} from {from_stack} to {to_stack}")
+        # pretty_print_stacks(stacks)
+        # print(f"Moving {count} from {from_stack} to {to_stack}")
         for i in range(count):
             item_to_move = stacks[from_stack][0]
             new_from_stack = stacks[from_stack][1:]
@@ -95,20 +96,30 @@ def part_1(stacks: Stacks, moves: Moves) -> str:
 
 
 def part_2(stacks: Stacks, moves: Moves) -> str:
-    return ""
+    for move in moves:
+        count, from_stack, to_stack = move
+
+        items_to_move = stacks[from_stack][:count]
+        new_from_stack = stacks[from_stack][count:]
+        items_to_move.reverse()
+        for i in items_to_move:
+            stacks[to_stack].insert(0, i)
+
+        stacks[from_stack] = new_from_stack
+
+    return get_top_of_stacks(stacks)
 
 
 def main():
     stacks, moves = process_input(os.path.join(base_path, "input.txt"))
 
-    part1_answer = part_1(stacks, moves)
+    part1_answer = part_1(copy.deepcopy(stacks), moves)
     print(f"Part I: {part1_answer} are the top boxes in order")
     assert part1_answer == "ZRLJGSCTR"
 
-    part2_answer = part_2(stacks, moves)
-    assert part2_answer == ""
-
+    part2_answer = part_2(copy.deepcopy(stacks), moves)
     print(f"Part II: {part2_answer} are the top boxes in order")
+    assert part2_answer == "PRTTGRFPB"
 
 
 if __name__ == "__main__":

@@ -33,4 +33,8 @@ def test_part_1():
 
 def test_part_2():
     signal_data = process_input(os.path.join(base_path, "example.txt"))
-    assert part_2(signal_data) == 0
+    assert part_2(signal_data[0]) == 19
+    assert part_2(signal_data[1]) == 23
+    assert part_2(signal_data[2]) == 23
+    assert part_2(signal_data[3]) == 29
+    assert part_2(signal_data[4]) == 26

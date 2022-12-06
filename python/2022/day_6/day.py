@@ -25,6 +25,11 @@ def part_1(data: str) -> int:
 
 
 def part_2(data: str) -> int:
+    packet_length = 14
+    for i in range(len(data)):
+        # print(f"for i={i}, data[i:i+3]={data[i:i+packet_length]}")
+        if check_unique(data[i : i + packet_length]):
+            return i + packet_length
     return 0
 
 
@@ -37,7 +42,7 @@ def main():
 
     part2_answer = part_2(signal_data)
     print(f"Part II: {part2_answer} characters")
-    assert part2_answer == 0
+    assert part2_answer == 3605
 
 
 if __name__ == "__main__":

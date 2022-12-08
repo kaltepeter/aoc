@@ -238,7 +238,28 @@ def part_1(node: FileTree) -> int:
 
 
 def part_2(node: FileTree) -> int:
-    return 0
+    max_file_size = 70000000
+    update_space_needed = 30000000
+
+    sm = {("root",): (0, NodeType.D)}
+    calc_all_dir_sizes(node, ["root"], sm, [])
+    total_used_space = sm[("root",)][0]
+    free_space = max_file_size - total_used_space
+
+    if free_space >= update_space_needed:
+        return 0
+
+    # print(f"Total used space: {total_used_space}, free space is {free_space}\n")
+    # print(sm)
+    # print()
+    possible_dir_sizes = []
+
+    for key, (s, t) in sm.items():
+        if t == NodeType.D:
+            if free_space + s >= update_space_needed:
+                possible_dir_sizes.append(s)
+    # print(possible_dir_sizes)
+    return min(possible_dir_sizes)
 
 
 def main():
@@ -249,8 +270,8 @@ def main():
     assert part1_answer == 1206825
 
     part2_answer = part_2(file_tree)
-    print(f"Part II: {part2_answer} sum of large dirs")
-    assert part2_answer == 0
+    print(f"Part II: {part2_answer} is the size of the dir to delete")
+    assert part2_answer == 9608311
 
 
 if __name__ == "__main__":

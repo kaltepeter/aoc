@@ -175,4 +175,4 @@ def test_part_1():
 
 def test_part_2():
     file_tree = process_input(os.path.join(base_path, "example.txt"))
-    assert part_2(file_tree) == 0
+    assert part_2(file_tree) == 24933642

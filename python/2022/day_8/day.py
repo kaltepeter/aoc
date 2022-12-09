@@ -71,6 +71,38 @@ def is_visible(row: TreeRow, colIdx: int) -> bool:
     return left_visible or right_visible
 
 
+def get_scenic_score(row: TreeRow, colIdx: int) -> Tuple[int, int]:
+    col = row[colIdx]
+    left_range = list(range(0, colIdx))
+    left_range.sort(reverse=True)
+
+    right_range = list(range(colIdx + 1, len(row)))
+
+    # print(f"col: {col}, colIdx: {colIdx} rr: {right_range} lr: {left_range}")
+    left_score = 0
+    right_score = 0
+
+    if colIdx == 0:
+        left_score = 0
+    else:
+        for y in left_range:
+            # print(f"left: {y} {row[y] >= col}")
+            left_score += 1
+            if row[y] >= col:
+                break
+
+    if colIdx == len(row) - 1:
+        right_score = 0
+    else:
+        for y in right_range:
+            # print(f"right: {y} {row[y] >= col}")
+            right_score += 1
+            if row[y] >= col:
+                break
+
+    return (left_score, right_score)
+
+
 def part_1(trees: TreeGrid) -> int:
     trees_to_check = copy.copy(trees)
     visible_trees = []
@@ -102,7 +134,25 @@ def part_1(trees: TreeGrid) -> int:
 
 
 def part_2(trees: TreeGrid) -> int:
-    return 0
+    trees_to_check = copy.copy(trees)
+    best_score = 0
+    for rowIdx in range(len(trees_to_check)):
+        row = trees_to_check[rowIdx]
+        for colIdx in range(len(row)):
+            vertical_slice = [
+                trees_to_check[x][colIdx] for x in range(0, len(trees_to_check))
+            ]
+
+            left_score, right_score = get_scenic_score(row, colIdx)
+            up_score, down_score = get_scenic_score(vertical_slice, rowIdx)
+
+            scenic_score = left_score * right_score * up_score * down_score
+
+            if scenic_score > best_score:
+                print(f"scenic_score: {scenic_score} best_score: {best_score}")
+                best_score = scenic_score
+
+    return best_score
 
 
 def main():
@@ -113,8 +163,8 @@ def main():
     assert part1_answer == 1776
 
     part2_answer = part_2(file_tree)
-    print(f"Part II: {part2_answer} trees are visible")
-    assert part2_answer == 0
+    print(f"Part II: {part2_answer} is the highest scenic score")
+    assert part2_answer == 234416
 
 
 if __name__ == "__main__":

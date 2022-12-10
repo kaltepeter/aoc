@@ -35,6 +35,20 @@ def is_touching(h: Position, t: Position, max_distance: int = 1) -> bool:
     return touching
 
 
+def get_diag(h: Position, t: Position) -> Position:
+    diags = [
+        (t[0] - 1, t[1] - 1),
+        (t[0] + 1, t[1] - 1),
+        (t[0] - 1, t[1] + 1),
+        (t[0] + 1, t[1] + 1),
+    ]
+    pos = [d for d in diags if is_touching(h, d)]
+    if len(pos) > 1:
+        raise Exception(f"More than one diag: {pos}")
+    else:
+        return pos
+
+
 def process_input(file: str) -> Moves:
     with open(file) as reader:
         lines = reader.read().strip().split("\n")
@@ -48,24 +62,24 @@ def part_1(moves: Moves) -> int:
     t = s
     for idx, m in enumerate(moves):
         prev_m = moves[idx - 1] if idx > 0 else ()
-        print(f"move: {m} prev_move: {prev_m}")
-        for _ in range(m[1]):
-            # print(f"i: {i} h: {h} t: {t}")
+        # print(f"move: {m} prev_move: {prev_m} h:{h} t:{t}")
+        for i in range(m[1]):
             h = move(h, (m[0], 1))
+
             if h[0] != t[0] and h[1] != t[1] and not is_touching(h, t):
-                t = move(t, (prev_m[0], 1))
+                t = get_diag(h, t)[0]
 
             if not is_touching(h, t):
                 t = move(t, (m[0], 1))
 
             #  catch error
             if not is_touching(h, t):
-                print("not touching")
                 raise ValueError("Too far away")
 
             visited.add(t)
 
-        print(f"head: {h} tail: {t}")
+        # print(f"head: {h} tail: {t}")
+        # print()
 
     return len(visited)
 
@@ -79,7 +93,7 @@ def main():
 
     part1_answer = part_1(file_tree)
     print(f"Part I: {part1_answer} spaces visited")
-    assert part1_answer == 0
+    assert part1_answer == 6023
 
     part2_answer = part_2(file_tree)
     print(f"Part II: {part2_answer} spaces visited")

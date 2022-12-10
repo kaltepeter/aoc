@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from .day import is_touching, move, process_input, part_1, part_2
+from .day import get_diag, is_touching, move, process_input, part_1, part_2
 
 
 base_path = Path(__file__).parent
@@ -29,6 +29,11 @@ def test_is_touching():
     assert is_touching((-1, 1), (0, 0)) == True
     assert is_touching((3, 3), (2, 2)) == True
     assert is_touching((4, -1), (3, 0)) == True
+    assert is_touching((6, -5), (7, -4)) == True
+
+
+def test_get_diag():
+    assert get_diag((6, -6), (7, -4)) == [(6, -5)]
 
 
 def test_process_input():

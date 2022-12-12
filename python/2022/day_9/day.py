@@ -1,6 +1,9 @@
+from functools import reduce
+from itertools import accumulate, chain, repeat, tee
+from operator import add, sub
 import os
 from pathlib import Path
-from typing import List, Literal, Set, Tuple
+from typing import Iterable, List, Literal, Set, Tuple
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -13,6 +16,53 @@ Dir = Literal["U", "D", "L", "R"]
 Move = Tuple[Dir, int]
 Moves = List[Move]
 Rope = List[Position]
+
+
+def gen_movement_vectors(instruction: Move) -> Iterable[tuple[int, int]]:
+    match instruction:
+        case ("U", distance):
+            return repeat((0, 1), distance)
+        case ("D", distance):
+            return repeat((0, -1), distance)
+        case ("R", distance):
+            return repeat((1, 0), distance)
+        case ("L", distance):
+            return repeat((-1, 0), distance)
+        case _:
+            raise RuntimeError(f"Unexpected instruction {instruction}")
+
+
+def point_operation(ab, xy, func) -> tuple[int, int]:
+    (a, b), (x, y) = ab, xy
+    return (func(a, x), func(b, y))
+
+
+def add_vector_to_point(ab, xy) -> tuple[int, int]:
+    return point_operation(ab, xy, add)
+
+
+def get_diff_vector(ab, xy) -> tuple[int, int]:
+    return point_operation(ab, xy, sub)
+
+
+def compare(a, b) -> int:
+    return (a > b) - (a < b)
+
+
+def tail_movement_vector(tail_position, head_position) -> tuple[int, int]:
+    (dx, dy) = get_diff_vector(head_position, tail_position)
+    within_range = abs(dx) <= 1 and abs(dy) <= 1
+
+    if within_range:
+        return (0, 0)
+    else:
+        return point_operation((dx, dy), (0, 0), compare)
+
+
+def move_tail(tail_position, head_position) -> tuple[int, int]:
+    return add_vector_to_point(
+        tail_position, tail_movement_vector(tail_position, head_position)
+    )
 
 
 def move(pos: Position, move: Move) -> Position:
@@ -150,42 +200,55 @@ def move_knot(
     return (rope, visited)
 
 
+# def part_2(moves: Moves) -> int:
+#     s = (0, 0)
+#     visited = set()
+#     visited.add(s)
+#     rope: Rope = [s for _ in range(10)]
+#     for idx, m in enumerate(moves):
+#         print(f"move: {m} h:{rope[0]} t:{rope[-1]} ")
+#         for i in range(m[1]):
+#             # move head
+#             rope[0] = move(rope[0], (m[0], 1))
+
+#             # loop through knots in rope H+1 -- T
+#             for knot, knot_pos in enumerate(rope):
+#                 # skip head
+#                 if knot == 0:
+#                     continue
+
+#                 prev_knot = knot - 1
+#                 # if knot touches prev knot move on
+#                 if is_touching(rope[prev_knot], rope[knot]):
+#                     continue
+
+#                 # print(
+#                 #     f"\ti: {i} knot: {knot} knot_pos: {knot_pos} prev_knot: {prev_knot} prev_knot_pos: {rope[prev_knot]}"
+#                 # )
+
+#                 rope, v = move_knot(knot, prev_knot, m, rope)
+#                 visited.update(v)
+
+#             # visited.add(rope[-1])
+
+#     # plot_rope(rope)
+#     # print(f"\thead: {rope[0]} tail: {rope[-1]} rope: {rope} visited: {visited}")
+#     # print()
+
+#     return len(visited)
+
+
 def part_2(moves: Moves) -> int:
-    s = (0, 0)
-    visited = set()
-    visited.add(s)
-    rope: Rope = [s for _ in range(10)]
-    for idx, m in enumerate(moves):
-        print(f"move: {m} h:{rope[0]} t:{rope[-1]} ")
-        for i in range(m[1]):
-            # move head
-            rope[0] = move(rope[0], (m[0], 1))
-
-            # loop through knots in rope H+1 -- T
-            for knot, knot_pos in enumerate(rope):
-                # skip head
-                if knot == 0:
-                    continue
-
-                prev_knot = knot - 1
-                # if knot touches prev knot move on
-                if is_touching(rope[prev_knot], rope[knot]):
-                    continue
-
-                # print(
-                #     f"\ti: {i} knot: {knot} knot_pos: {knot_pos} prev_knot: {prev_knot} prev_knot_pos: {rope[prev_knot]}"
-                # )
-
-                rope, v = move_knot(knot, prev_knot, m, rope)
-                visited.update(v)
-
-            # visited.add(rope[-1])
-
-    # plot_rope(rope)
-    # print(f"\thead: {rope[0]} tail: {rope[-1]} rope: {rope} visited: {visited}")
-    # print()
-
-    return len(visited)
+    head_vectors = chain.from_iterable(
+        gen_movement_vectors(instruction) for instruction in moves
+    )
+    head_coordinates = accumulate(head_vectors, add_vector_to_point)
+    ninth_tail_coordinates = reduce(
+        lambda xth_tail, _: accumulate(xth_tail, move_tail, initial=(0, 0)),
+        range(9),
+        head_coordinates,
+    )
+    return len(set(ninth_tail_coordinates))
 
 
 def main():
@@ -197,7 +260,7 @@ def main():
 
     part2_answer = part_2(moves)
     print(f"Part II: {part2_answer} spaces visited")
-    assert part2_answer > 2532 and part2_answer < 2601
+    assert part2_answer == 2533
 
 
 if __name__ == "__main__":

@@ -6,5 +6,6 @@
         "joltage",
         "nums",
         "xprod"
-    ]
+    ],
+    "python.formatting.provider": "black"
 }

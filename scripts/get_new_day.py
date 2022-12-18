@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 from os import chmod, mkdir, path
 from pathlib import Path
 from markdownify import MarkdownConverter
@@ -12,7 +13,7 @@ def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = date.today()
+today = datetime.datetime(2022, 12, 10)
 
 day_dir = path.join("python", f"{today.year}", f"day_{today.day}")
 if not path.exists(day_dir):

@@ -13,7 +13,7 @@ def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = datetime.datetime(2022, 12, 10)
+today = datetime.datetime(2022, 12, 11)
 
 day_dir = path.join("python", f"{today.year}", f"day_{today.day}")
 if not path.exists(day_dir):

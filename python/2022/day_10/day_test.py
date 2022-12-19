@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from .day import get_signal_strength, part_1, process_input
+from .day import get_signal_strength, part_1, part_2, process_input
 
 base_path = Path(__file__).parent
 
@@ -44,6 +44,9 @@ def test_part_1():
     assert part_1(data) == 13140
 
 
-def skip_test_part_2():
+def test_part_2():
     data = process_input(os.path.join(base_path, "example.txt"))
-    assert part_1(data) == 140
+    assert (
+        part_2(data)
+        == "##..##..##..##..##..##..##..##..##..##..\n###...###...###...###...###...###...###.\n####....####....####....####....####....\n#####.....#####.....#####.....#####.....\n######......######......######......####\n#######.......#######.......#######....."
+    )

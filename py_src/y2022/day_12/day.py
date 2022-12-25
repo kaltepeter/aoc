@@ -190,13 +190,13 @@ def part_1(data: InputData) -> int:
     # print(cost_so_far)
     # print(came_from)
 
-    draw_grid(
-        graph,
-        path=reconstruct_path(came_from, start=start_pos, goal=end_pos),
-        point_to=came_from,
-        start=start_pos,
-        goal=end_pos,
-    )
+    # draw_grid(
+    #     graph,
+    #     path=reconstruct_path(came_from, start=start_pos, goal=end_pos),
+    #     point_to=came_from,
+    #     start=start_pos,
+    #     goal=end_pos,
+    # )
     return cost_so_far.popitem()[1]
 
 
@@ -211,7 +211,7 @@ def main():
 
     part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} shortest path\n")
-    assert part1_answer == 0
+    assert part1_answer == 352
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} shortest path\n")

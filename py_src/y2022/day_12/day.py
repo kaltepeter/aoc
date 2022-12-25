@@ -204,7 +204,39 @@ def part_1(data: InputData) -> int:
 
 def get_a_locations(graph: HeightMapGrid) -> List[Location]:
     return [key for key, val in graph.weights.items() if val == ord("a")]
+    steps = []
 
+    while not frontier.empty():
+        current: Location = frontier.get()
+
+        if current == goal:
+            break
+
+        for next in graph.neighbors(current):
+            new_cost = cost_so_far[current] + graph.cost(current, next)
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost + heuristic(next, goal)
+                frontier.put(next, priority)
+                came_from[next] = current
+
+    return came_from, cost_so_far
+
+
+def part_1(data: InputData) -> int:
+    graph, start_pos, end_pos = data
+    came_from, cost_so_far = a_star_search(graph, start_pos, end_pos)
+    # print(cost_so_far)
+    # print(came_from)
+
+    draw_grid(
+        graph,
+        path=reconstruct_path(came_from, start=start_pos, goal=end_pos),
+        point_to=came_from,
+        start=start_pos,
+        goal=end_pos,
+    )
+    return cost_so_far.popitem()[1]
 
 def part_2(data: InputData) -> int:
     graph, _, end_pos = data

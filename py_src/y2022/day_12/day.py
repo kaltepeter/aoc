@@ -229,13 +229,13 @@ def part_1(data: InputData) -> int:
     # print(cost_so_far)
     # print(came_from)
 
-    draw_grid(
-        graph,
-        path=reconstruct_path(came_from, start=start_pos, goal=end_pos),
-        point_to=came_from,
-        start=start_pos,
-        goal=end_pos,
-    )
+    # draw_grid(
+    #     graph,
+    #     path=reconstruct_path(came_from, start=start_pos, goal=end_pos),
+    #     point_to=came_from,
+    #     start=start_pos,
+    #     goal=end_pos,
+    # )
     return cost_so_far.popitem()[1]
 
 def part_2(data: InputData) -> int:

@@ -27,3 +27,32 @@ print([a for a in range(ord('a'), ord('z')+1)])
 print([chr(a) for a in range(ord('a'), ord('z')+1)])
 # ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 ```
+
+0.22s user 0.06s system 97% cpu 0.277 total max RSS 22472
+
+```text
+Sabqponm
+abcryxxl
+accszExk
+acctuvwj
+abdefghi
+```
+
+```text
+@..@@@@@
+@@.@@@@@
+.@@@@E@@
+..@@@@@@
+..@@@@@@
+```
+
+```text
+m=109
+n=110
+o=111
+
+111 - 109 = 3
+106 - 109 = -3
+z=122
+E=123
+```

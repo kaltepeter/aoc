@@ -204,12 +204,13 @@ def part_1(data: InputData) -> int:
 
 def get_a_locations(graph: HeightMapGrid) -> List[Location]:
     return [key for key, val in graph.weights.items() if val == ord("a")]
-    steps = []
 
     while not frontier.empty():
         current: Location = frontier.get()
 
         if current == goal:
+            found = True
+            # print(f"here: {cost_so_far[current]}")
             break
 
         for next in graph.neighbors(current):
@@ -220,12 +221,12 @@ def get_a_locations(graph: HeightMapGrid) -> List[Location]:
                 frontier.put(next, priority)
                 came_from[next] = current
 
-    return came_from, cost_so_far
+    return came_from, cost_so_far, found
 
 
 def part_1(data: InputData) -> int:
     graph, start_pos, end_pos = data
-    came_from, cost_so_far = a_star_search(graph, start_pos, end_pos)
+    came_from, cost_so_far, _ = a_star_search(graph, start_pos, end_pos)
     # print(cost_so_far)
     # print(came_from)
 
@@ -237,6 +238,11 @@ def part_1(data: InputData) -> int:
     #     goal=end_pos,
     # )
     return cost_so_far.popitem()[1]
+
+
+def get_a_locations(graph: HeightMapGrid) -> List[Location]:
+    return [key for key, val in graph.weights.items() if val == ord("a")]
+
 
 def part_2(data: InputData) -> int:
     graph, _, end_pos = data

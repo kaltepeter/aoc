@@ -3,7 +3,7 @@ from functools import partial
 import os
 
 from pathlib import Path
-from typing import Generator, Iterator, Optional, Tuple
+from typing import Generator, Iterator, List, Optional, Tuple
 
 from py_src.shared.graph import Location, SquareGrid, GridLocation, WeightedGraph
 from py_src.shared.queue_1 import PriorityQueue
@@ -165,12 +165,14 @@ def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
     cost_so_far: dict[Location, float] = {}
     came_from[start] = None
     cost_so_far[start] = 0
-    steps = []
+    found = False
 
     while not frontier.empty():
         current: Location = frontier.get()
 
         if current == goal:
+            found = True
+            # print(f"here: {cost_so_far[current]}")
             break
 
         for next in graph.neighbors(current):
@@ -181,12 +183,12 @@ def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
                 frontier.put(next, priority)
                 came_from[next] = current
 
-    return came_from, cost_so_far
+    return came_from, cost_so_far, found
 
 
 def part_1(data: InputData) -> int:
     graph, start_pos, end_pos = data
-    came_from, cost_so_far = a_star_search(graph, start_pos, end_pos)
+    came_from, cost_so_far, _ = a_star_search(graph, start_pos, end_pos)
     # print(cost_so_far)
     # print(came_from)
 
@@ -200,10 +202,23 @@ def part_1(data: InputData) -> int:
     return cost_so_far.popitem()[1]
 
 
-def part_2(data: InputData) -> int:
-    graph, start_pos, end_pos = data
+def get_a_locations(graph: HeightMapGrid) -> List[Location]:
+    return [key for key, val in graph.weights.items() if val == ord("a")]
 
-    return 0
+
+def part_2(data: InputData) -> int:
+    graph, _, end_pos = data
+    a_locations = get_a_locations(graph)
+    distances = []
+
+    for start_pos in a_locations:
+        came_from, cost_so_far, found = a_star_search(graph, start_pos, end_pos)
+        res = cost_so_far.popitem()[1]
+        if found:
+            # print(f"res: {res} found: {found}")
+            distances.append(res)
+
+    return min(distances)
 
 
 def main():
@@ -215,7 +230,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} shortest path\n")
-    assert part2_answer == 0
+    assert part2_answer == 345
 
 
 if __name__ == "__main__":

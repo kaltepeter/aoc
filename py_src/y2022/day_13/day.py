@@ -117,12 +117,16 @@ def compare(left_list: Packet, right_list: Packet) -> int:
             return 1
         if rr == None:
             return -1
+            return True
+        if rr == None:
+            return False
 
         if isinstance(ll, int) and isinstance(rr, int):
             if ll > rr:
                 return -1
             if ll < rr:
                 return 1
+                return True
 
         else:
             if isinstance(rr, int):
@@ -132,6 +136,8 @@ def compare(left_list: Packet, right_list: Packet) -> int:
 
             ret = compare(ll, rr)
             if ret in [1, -1]:
+            ret = process_pairs(ll, rr)
+            if ret in [True, False]:
                 return ret
 
 

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from itertools import zip_longest
 import os
 from pathlib import Path
 import re
@@ -73,60 +74,68 @@ def compare_pairs(
     return results, left_list, right_list
 
 
-def process_pairs(left_list: Packet, right_list: Packet) -> Generator[bool, None, None]:
-    if isinstance(left_list, int) and isinstance(right_list, list):
-        left_list = [left_list]
-    elif isinstance(right_list, int) and isinstance(left_list, list):
-        right_list = [right_list]
+# def process_pairs(left_list: Packet, right_list: Packet) -> Generator[bool, None, None]:
+#     if isinstance(left_list, int) and isinstance(right_list, list):
+#         left_list = [left_list]
+#     elif isinstance(right_list, int) and isinstance(left_list, list):
+#         right_list = [right_list]
 
-    while len(left_list) or len(right_list):
-        if len(left_list) == 0:
-            yield True
-            break
+#     while len(left_list) or len(right_list):
+#         if len(left_list) == 0:
+#             yield True
+#             break
 
-        if len(right_list) == 0:
-            if len(left_list) >= 1:
-                yield False
-                return
-            break
+#         if len(right_list) == 0:
+#             if len(left_list) >= 1:
+#                 yield False
+#                 return
+#             break
 
-        left = left_list.pop(0)
-        right = right_list.pop(0)
+#         left = left_list.pop(0)
+#         right = right_list.pop(0)
 
-        if isinstance(left, int) and isinstance(right, int):
-            print(f"left: {left} right: {right} ")
+#         if isinstance(left, int) and isinstance(right, int):
+#             print(f"left: {left} right: {right} ")
 
-            if left < right:
-                yield True
-                return
-            elif left == right:
-                yield True
-            else:
-                yield False
-                return
+#             if left < right:
+#                 yield True
+#                 return
+#             elif left == right:
+#                 yield True
+#             else:
+#                 yield False
+#                 return
+
+#         else:
+#             yield from process_pairs(left, right)
+
+
+def process_pairs(left_list: Packet, right_list: Packet) -> bool:
+    for ll, rr in zip_longest(left_list, right_list, fillvalue=None):
+        if ll == None:
+            return True
+        if rr == None:
+            return False
+
+        if isinstance(ll, int) and isinstance(rr, int):
+            if ll > rr:
+                return False
+            if ll < rr:
+                return True
 
         else:
-            yield from process_pairs(left, right)
+            if isinstance(rr, int):
+                rr = [rr]
+            if isinstance(ll, int):
+                ll = [ll]
+
+            ret = process_pairs(ll, rr)
+            if ret in [True, False]:
+                return ret
 
 
 def part_1(data: InputData) -> int:
-    ordered_pairs = []
-    for i, value in enumerate(data):
-        left, right = value
-        idx = i + 1
-        print(f"idx: {idx} l: {left} r: {right}")
-        res = process_pairs(left, right)
-        all_true = all(list(res))
-        print(f"res: {list(res)} {all_true}")
-        # res, ll, rl = compare_pairs(left, right, list())
-        if all_true == True:
-            # if all(res) and len(ll) == 0:
-            ordered_pairs.append(idx)
-        # print(f"res: {res} ll: {ll} rl: {rl}")
-        print()
-
-    print(f"op: {ordered_pairs}")
-    return sum(ordered_pairs)
+    return sum([i for i, p in enumerate(data, 1) if process_pairs(*p) == True])
 
 
 def part_2(data: InputData) -> int:
@@ -138,7 +147,7 @@ def main():
 
     part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} sum of pairs\n")
-    assert part1_answer > 4174
+    assert part1_answer == 5623
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} sum of pairs\n")

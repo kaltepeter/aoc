@@ -13,9 +13,9 @@ def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = datetime.datetime(2022, 12, 12)
+today = datetime.datetime(2022, 12, 13)
 
-day_dir = path.join("python", f"{today.year}", f"day_{today.day}")
+day_dir = path.join("py_src", f"y{today.year}", f"day_{today.day}")
 if not path.exists(day_dir):
     mkdir(day_dir)
 

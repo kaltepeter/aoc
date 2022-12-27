@@ -83,4 +83,4 @@ def test_part_1():
 
 def test_part_2():
     data = process_input(os.path.join(base_path, "example.txt"))
-    assert part_2(data) == 0
+    assert part_2(data) == 140

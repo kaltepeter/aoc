@@ -1,5 +1,6 @@
 from copy import deepcopy
-from itertools import zip_longest
+from functools import cmp_to_key
+from itertools import chain, zip_longest
 import os
 from pathlib import Path
 import re
@@ -110,18 +111,18 @@ def compare_pairs(
 #             yield from process_pairs(left, right)
 
 
-def process_pairs(left_list: Packet, right_list: Packet) -> bool:
+def compare(left_list: Packet, right_list: Packet) -> int:
     for ll, rr in zip_longest(left_list, right_list, fillvalue=None):
         if ll == None:
-            return True
+            return 1
         if rr == None:
-            return False
+            return -1
 
         if isinstance(ll, int) and isinstance(rr, int):
             if ll > rr:
-                return False
+                return -1
             if ll < rr:
-                return True
+                return 1
 
         else:
             if isinstance(rr, int):
@@ -129,17 +130,23 @@ def process_pairs(left_list: Packet, right_list: Packet) -> bool:
             if isinstance(ll, int):
                 ll = [ll]
 
-            ret = process_pairs(ll, rr)
-            if ret in [True, False]:
+            ret = compare(ll, rr)
+            if ret in [1, -1]:
                 return ret
 
 
 def part_1(data: InputData) -> int:
-    return sum([i for i, p in enumerate(data, 1) if process_pairs(*p) == True])
+    return sum([i for i, p in enumerate(data, 1) if compare(*p) == 1])
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    div1, div2 = [[2]], [[6]]
+    all_packets = list(
+        chain(*[ele if isinstance(ele, list) else [ele] for ele in data])
+    ) + [div1, div2]
+
+    sorted_packets = sorted(all_packets, key=cmp_to_key(compare), reverse=True)
+    return (sorted_packets.index(div1) + 1) * (sorted_packets.index(div2) + 1)
 
 
 def main():
@@ -150,8 +157,8 @@ def main():
     assert part1_answer == 5623
 
     part2_answer = part_2(deepcopy(pi))
-    print(f"Part II: {part2_answer} sum of pairs\n")
-    assert part2_answer == 0
+    print(f"Part II: {part2_answer} decoder key\n")
+    assert part2_answer == 20570
 
 
 if __name__ == "__main__":

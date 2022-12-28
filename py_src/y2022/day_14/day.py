@@ -1,8 +1,7 @@
 from copy import deepcopy
 import os
-
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator, List, Tuple
 
 from py_src.shared.graph import GridLocation
 
@@ -18,8 +17,8 @@ class ReservoirMap:
         self.highest_y: int = 0
         self.has_floor = False
         self.floor_y: int = 0
-        self.rocks: list[GridLocation] = []
-        self.sand: list[GridLocation] = []
+        self.rocks: set[GridLocation] = set()
+        self.sand: set[GridLocation] = set()
 
     def in_bounds(self, location: GridLocation) -> bool:
         (x, y) = location
@@ -52,8 +51,7 @@ class ReservoirMap:
         if y > self.highest_y:
             self.highest_y = y
 
-        if location not in self.rocks:
-            self.rocks.append(location)
+        self.rocks.add(location)
 
     def add_sand(self, location: GridLocation) -> None:
         (x, y) = location
@@ -66,18 +64,20 @@ class ReservoirMap:
         if y > self.highest_y:
             self.highest_y = y
 
-        if location not in self.sand:
-            self.sand.append(location)
+        self.sand.add(location)
 
     def move_sand(
-        self, location: GridLocation, path: List[GridLocation] = list()
-    ) -> Generator[GridLocation, None, None]:
+        self, location: GridLocation, path_list: List[GridLocation]
+    ) -> Generator[Tuple[GridLocation, List[GridLocation]], None, None]:
         (x, y) = location
         path = [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
         results = list(filter(self.passable, path))
         if len(results) == 0:
             self.add_sand(location)
-            yield location
+            yield (
+                location,
+                path_list,
+            )
 
         new_loc = results[0]
         if (
@@ -85,9 +85,13 @@ class ReservoirMap:
             and self.passable(new_loc)
             and not self.is_floor(new_loc)
         ):
-            yield from self.move_sand(new_loc)
+            path_list.append(new_loc)
+            yield from self.move_sand(new_loc, path_list)
 
-        yield new_loc
+        yield (
+            new_loc,
+            path_list,
+        )
 
 
 SAND_START: GridLocation = (500, 0)
@@ -170,9 +174,10 @@ def part_1(data: InputData) -> int:
     run_simulation = True
     count = 0
     sand = SAND_START
+    path_list = list()
     while run_simulation == True:
-        nl = data.move_sand(sand)
-        new_location = next(nl)
+        nl = data.move_sand(sand, path_list)
+        new_location, pl = next(nl)
         if data.in_bounds(new_location) == False:
             run_simulation = False
         else:
@@ -186,23 +191,26 @@ def part_1(data: InputData) -> int:
 def part_2(data: InputData) -> int:
     data.has_floor = True
     data.floor_y = data.highest_y + 2
-    run_simulation = True
-    count = 0
-    sand = SAND_START
-    while run_simulation == True:
-        if count % 100 == 0:
-            print(f"Count: {count}")
-        nl = data.move_sand(sand)
-        new_location = next(nl)
-        # base case blocked entry
-        if new_location == SAND_START:
-            count += 1
-            run_simulation = False
-        else:
-            count += 1
 
-    print_reservoir_map(data)
-    print()
+    sand = SAND_START
+
+    nl = data.move_sand(sand, list())
+    new_location, pl = next(nl)
+    count = 1
+
+    while new_location != SAND_START:
+        if pl[-1] in data.sand:
+            pl.pop()
+
+        start_location = pl[-1] if len(pl) > 0 else SAND_START
+
+        nl = data.move_sand(start_location, pl)
+        new_location, pl = next(nl)
+
+        count += 1
+
+    # print_reservoir_map(data)
+    # print()
 
     return count
 
@@ -216,7 +224,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 28145
 
 
 if __name__ == "__main__":

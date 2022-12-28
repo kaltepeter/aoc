@@ -2,7 +2,7 @@ from copy import deepcopy
 import os
 
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
 
 from py_src.shared.graph import GridLocation
 
@@ -16,17 +16,30 @@ class ReservoirMap:
         self.lowest_y: int = 0
         self.highest_x: int = 0
         self.highest_y: int = 0
+        self.has_floor = False
+        self.floor_y: int = 0
         self.rocks: list[GridLocation] = []
         self.sand: list[GridLocation] = []
 
     def in_bounds(self, location: GridLocation) -> bool:
         (x, y) = location
+        if self.has_floor == True:
+            return True
+
         return (
             self.lowest_x <= x < self.highest_x and self.lowest_y <= y < self.highest_y
         )
 
+    def is_floor(self, location: GridLocation) -> bool:
+        (x, y) = location
+        return y == self.floor_y
+
     def passable(self, location: GridLocation) -> bool:
-        return location not in self.rocks and location not in self.sand
+        return (
+            location not in self.rocks
+            and location not in self.sand
+            and not self.is_floor(location)
+        )
 
     def add_rock(self, location: GridLocation) -> None:
         (x, y) = location
@@ -43,10 +56,22 @@ class ReservoirMap:
             self.rocks.append(location)
 
     def add_sand(self, location: GridLocation) -> None:
+        (x, y) = location
+        if x < self.lowest_x:
+            self.lowest_x = x
+        if x > self.highest_x:
+            self.highest_x = x
+        if y < self.lowest_y:
+            self.lowest_y = y
+        if y > self.highest_y:
+            self.highest_y = y
+
         if location not in self.sand:
             self.sand.append(location)
 
-    def move_sand(self, location: GridLocation) -> Generator[GridLocation, None, None]:
+    def move_sand(
+        self, location: GridLocation, path: List[GridLocation] = list()
+    ) -> Generator[GridLocation, None, None]:
         (x, y) = location
         path = [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
         results = list(filter(self.passable, path))
@@ -55,7 +80,11 @@ class ReservoirMap:
             yield location
 
         new_loc = results[0]
-        if self.in_bounds(new_loc) and self.passable(new_loc):
+        if (
+            self.in_bounds(new_loc)
+            and self.passable(new_loc)
+            and not self.is_floor(new_loc)
+        ):
             yield from self.move_sand(new_loc)
 
         yield new_loc
@@ -74,12 +103,12 @@ def get_printable_map(
 ) -> Generator[str, None, None]:
     graph = data
 
-    for y in range(data.lowest_y, data.highest_y + 1):
+    for y in range(data.lowest_y, data.highest_y + 3):
         for x in range(data.lowest_x, data.highest_x + 1):
             location = (x, y)
             if location == SAND_START:
                 yield START_CHAR
-            elif location in graph.rocks:
+            elif location in graph.rocks or graph.is_floor(location):
                 yield ROCK_CHAR
             elif location in graph.sand:
                 yield SAND_CHAR
@@ -149,12 +178,33 @@ def part_1(data: InputData) -> int:
         else:
             count += 1
 
-    print_reservoir_map(data)
+    # print_reservoir_map(data)
+    # print()
     return count
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    data.has_floor = True
+    data.floor_y = data.highest_y + 2
+    run_simulation = True
+    count = 0
+    sand = SAND_START
+    while run_simulation == True:
+        if count % 100 == 0:
+            print(f"Count: {count}")
+        nl = data.move_sand(sand)
+        new_location = next(nl)
+        # base case blocked entry
+        if new_location == SAND_START:
+            count += 1
+            run_simulation = False
+        else:
+            count += 1
+
+    print_reservoir_map(data)
+    print()
+
+    return count
 
 
 def main():

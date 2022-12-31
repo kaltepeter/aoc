@@ -14,7 +14,7 @@ def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = datetime.datetime(2022, 12, 14)
+today = datetime.datetime(2022, 12, 15)
 
 day_dir = path.join("py_src", f"y{today.year}", f"day_{today.day}")
 template_dir = path.join("py_src", "template")

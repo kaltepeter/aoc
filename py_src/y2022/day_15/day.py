@@ -18,7 +18,7 @@ SensorData = dict[GridLocation, Sensor]
 ScannedData = Set[GridLocation]
 
 EMPTY_SPACE_CHAR = "."
-EXCLUSION_MARKER = "sw"
+EXCLUSION_MARKER = "sk"
 BEACON_MARKER = "*r"
 SENSOR_MARKER = "ob"
 
@@ -62,25 +62,41 @@ class BeaconMap:
             "distance": distance.cityblock(location, beacon),
         }
 
-    def scan_field(self, location: GridLocation, max_dist: int) -> set[GridLocation]:
-        count = 0
-        scanned = set()
+    def add_scanned(self, location: GridLocation) -> None:
+        (x, y) = location
+        if x < self.lowest_x:
+            self.lowest_x = x
+        if x > self.highest_x:
+            self.highest_x = x
+        if y < self.lowest_y:
+            self.lowest_y = y
+        if y > self.highest_y:
+            self.highest_y = y
+
+        self.scanned_data.add(location)
+
+    def scan_row(
+        self,
+        scanner_location: GridLocation,
+        max_dist: int,
+        location: GridLocation,
+    ) -> None:
         x, y = location
-        scanning = True
-        while scanning == True:
-            if count >= 10:
-                scanning = False
+        while distance.cityblock((x, y), scanner_location) <= max_dist:
+            if (x, y) != scanner_location:
+                self.add_scanned((x, y))
+                delta = x - location[0]
+                self.add_scanned((scanner_location[0] - delta, y))
+            x += 1
 
-            print(f"count: {count}, x: {x}, y: {y}")
-            while distance.cityblock((x, y), location) <= max_dist:
-                scanned.add((x, y))
-                scanned.add((location[0]))
-                x += 1
-                # print(scanned)
+    def scan_field(self, location: GridLocation, max_dist: int) -> None:
+        x, y = location
 
-            count += 1
-        print()
-        return scanned
+        while distance.cityblock((x, y), location) <= max_dist:
+            self.scan_row(location, max_dist, (x, y))
+            delta = y - location[1]
+            self.scan_row(location, max_dist, (x, location[1] - delta))
+            y += 1
 
 
 InputData = BeaconMap
@@ -92,7 +108,6 @@ def print_plot(data: InputData) -> None:
     beacons = np.array(list(data.beacons))
     sensors = np.array(list(data.sensors))
     scanned = np.array(list(data.scanned_data))
-    print(scanned)
     fig, ax = plt.subplots()
     ax.set_xlim(data.lowest_x - border, data.highest_x + border)
     ax.set_ylim(
@@ -108,29 +123,20 @@ def print_plot(data: InputData) -> None:
     plt.yticks(range(data.lowest_y - border, data.highest_y + border + 1, tick_spacing))
 
     plt.rcParams["axes.autolimit_mode"] = "round_numbers"
-    ax.fmt_ydata = lambda x: x
+    if len(scanned) > 0:
+        ax.plot(scanned[:, [0]], scanned[:, [1]], EXCLUSION_MARKER, alpha=0.3)
+
     ax.plot(
         beacons[:, [0]],
         beacons[:, [1]],
         BEACON_MARKER,
-        label="Beacons",
     )
 
     ax.plot(
         sensors[:, [0]],
         sensors[:, [1]],
         SENSOR_MARKER,
-        label="Sensors",
     )
-
-    if len(scanned) > 0:
-        ax.plot(
-            scanned[:, [0]],
-            scanned[:, [1]],
-            EXCLUSION_MARKER,
-            label="Sensors",
-        )
-
     plt.show()
 
 
@@ -157,15 +163,17 @@ def process_input(file: str) -> InputData:
 
 
 def part_1(data: InputData) -> int:
+    # print(data.sensors)
     for sensor, sensor_data in data.sensors.items():
-        print(f"sensor: {sensor}, sensor_data: {sensor_data}")
-        v = data.scan_field(sensor, sensor_data["distance"])
-    print_plot(data)
-    # for y in range(data.lowest_y, data.highest_y + 1):
-    #     for x in range(data.lowest_x, data.highest_x + 1):
-    #         print(f"{x},{y}", end=" ")
+        # print(f"sensor: {sensor}, sensor_data: {sensor_data}")
+        data.scan_field(sensor, sensor_data["distance"])
+    # print_plot(data)
+    val = set(filter(lambda val: val[1] == 10, list(data.scanned_data)))
+    val -= data.beacons
+    count = len(list(val))
+    print(count)
 
-    return 0
+    return count
 
 
 def part_2(data: InputData) -> int:

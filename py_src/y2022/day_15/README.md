@@ -19,3 +19,5 @@ Sensors = Set[Sensor]
 1. create a map of beacons(known) and sensors
 1. store the Manhattan distance and index of the closet beacon for the sensor
 1.
+
+`####B######################`

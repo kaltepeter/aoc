@@ -43,8 +43,21 @@ class BeaconMap:
         }
 
     def add_scanned(self, location: GridLocation) -> None:
+        count = 0
+        scanned = set()
         if location[1] == self.row_to_check:
             self.scanned_data.add(location)
+        (x, y) = location
+        if x < self.lowest_x:
+            self.lowest_x = x
+        if x > self.highest_x:
+            self.highest_x = x
+        if y < self.lowest_y:
+            self.lowest_y = y
+        if y > self.highest_y:
+            self.highest_y = y
+
+        self.scanned_data.add(location)
 
     def scan_row(
         self,
@@ -52,6 +65,7 @@ class BeaconMap:
         max_dist: int,
         location: GridLocation,
     ) -> Set[GridLocation]:
+    ) -> None:
         x, y = location
         results = set()
         while distance.cityblock((x, y), scanner_location) <= max_dist:
@@ -63,6 +77,7 @@ class BeaconMap:
                 delta = x - location[0]
                 results.add((scanner_location[0] - delta, y))
                 # self.add_scanned((scanner_location[0] - delta, y))
+                self.add_scanned((scanner_location[0] - delta, y))
             x += 1
         return results
 

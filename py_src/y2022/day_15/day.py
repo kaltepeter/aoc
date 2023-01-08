@@ -54,7 +54,6 @@ class BeaconMap:
         max_dist: int,
         location: GridLocation,
     ) -> Set[GridLocation]:
-    ) -> None:
         x, y = location
         results = set()
         while distance.cityblock((x, y), scanner_location) <= max_dist:
@@ -66,7 +65,6 @@ class BeaconMap:
                 delta = x - location[0]
                 results.add((scanner_location[0] - delta, y))
                 # self.add_scanned((scanner_location[0] - delta, y))
-                self.add_scanned((scanner_location[0] - delta, y))
             x += 1
         return results
 

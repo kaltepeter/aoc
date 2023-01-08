@@ -70,7 +70,7 @@ class BeaconMap:
         location = sensor_data[0]
         x, y = location
         max_dist = sensor_data[1]["distance"]
-        print(f"sensor: {location}, sensor_data: {sensor_data}")
+        # print(f"sensor: {location}, sensor_data: {sensor_data}")
 
         # while distance.cityblock((x, y), location) <= max_dist:
         # print(f"scan_field: ({x,y},{location}) <= {max_dist}")
@@ -143,6 +143,15 @@ def process_input(file: str) -> InputData:
         return beacon_map
 
 
+def is_free(point: tuple[int, int], sensors: SensorData) -> bool:
+    """Returns True if point is outside the exclusion range of every sensor in sensors"""
+    for sensor, sensor_data in sensors.items():
+        (x, y) = point
+        if distance.cityblock((x, y), sensor) <= sensor_data["distance"]:
+            return False
+    return True
+
+
 def part_1(data: InputData, row_check: int) -> int:
     data.row_to_check = row_check
     results: List[Set[GridLocation]] = list()
@@ -162,8 +171,73 @@ def part_1(data: InputData, row_check: int) -> int:
     return count
 
 
-def part_2(data: InputData) -> int:
-    return 0
+def part_2(data: InputData, max_range: int) -> int:
+    # https://byjus.com/maths/slope-intercept-form/
+    # https://github.com/BuonHobo/advent-of-code/blob/master/2022/15/Alex/second.py
+    lines: dict[tuple[bool, int], int] = {}
+    for sensor, sensor_data in data.sensors.items():
+        top_rising = (
+            True,  # m is 1
+            sensor[1] - sensor_data["distance"] - 1 - sensor[0],  # this is q
+        )
+
+        top_descending = (
+            False,  # m is -1
+            sensor[1] - sensor_data["distance"] - 1 + sensor[0],
+        )
+
+        bottom_rising = (
+            True,
+            sensor[1] + sensor_data["distance"] + 1 - sensor[0],
+        )
+
+        bottom_descending = (
+            False,
+            sensor[1] + sensor_data["distance"] + 1 + sensor[0],
+        )
+
+        for line in [top_rising, top_descending, bottom_rising, bottom_descending]:
+            """I'm counting the occurrences of each line"""
+            if line in lines:
+                lines[line] += 1
+            else:
+                lines[line] = 1
+
+    rising_lines: list[int] = []
+    descending_lines: list[int] = []
+
+    for line, count in lines.items():
+        """
+        I only keep the lines that appear at least two times.
+        I do this because I know that the single free spot lies where 4 lines intersect
+        (2 rising and 2 descending)
+        """
+        if count > 1:
+            if line[0]:
+                descending_lines.append(line[1])
+            else:
+                rising_lines.append(line[1])
+
+    points: list[tuple[int, int]] = []
+
+    for rising_q in rising_lines:
+        for descending_q in descending_lines:
+            """I calculate the intersections between all the rising and descending lines i got"""
+            x = (rising_q - descending_q) // 2
+            y = x + descending_q
+            point = (x, y)
+            points.append(point)
+
+    for point in points:
+        """I check which of the intersections is the free point"""
+        if (
+            (0 <= point[1] <= max_range)
+            and (0 <= point[0] <= max_range)
+            and is_free(point, data.sensors)
+        ):
+            return point[0] * 4000000 + point[1]
+
+    raise ValueError  # If the point is not found then the input is wrong
 
 
 def main():
@@ -173,9 +247,9 @@ def main():
     print(f"Part I: {part1_answer} \n")
     assert part1_answer == 5100463
 
-    part2_answer = part_2(deepcopy(pi))
+    part2_answer = part_2(deepcopy(pi), 4000000)
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 11557863040754
 
 
 if __name__ == "__main__":

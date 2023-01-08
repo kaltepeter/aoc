@@ -1,9 +1,11 @@
 from functools import lru_cache
+from itertools import chain
 import os
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Set, TypedDict
+from typing import List, Set, TypedDict
+import multiprocessing
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -49,23 +51,30 @@ class BeaconMap:
         scanner_location: GridLocation,
         max_dist: int,
         location: GridLocation,
-    ) -> None:
+    ) -> Set[GridLocation]:
         x, y = location
+        results = set()
         while distance.cityblock((x, y), scanner_location) <= max_dist:
             # print(f"scan_row: ({x,y},{location}) <= {max_dist}")
             if (x, y) != scanner_location:
-                self.add_scanned((x, y))
+                results.add((x, y))
+                # self.add_scanned((x, y))
                 # x mirror
                 delta = x - location[0]
-                self.add_scanned((scanner_location[0] - delta, y))
+                results.add((scanner_location[0] - delta, y))
+                # self.add_scanned((scanner_location[0] - delta, y))
             x += 1
+        return results
 
-    def scan_field(self, location: GridLocation, max_dist: int) -> None:
+    def scan_field(self, sensor_data: SensorData) -> Set[GridLocation]:
+        location = sensor_data[0]
         x, y = location
+        max_dist = sensor_data[1]["distance"]
+        print(f"sensor: {location}, sensor_data: {sensor_data}")
 
         # while distance.cityblock((x, y), location) <= max_dist:
         # print(f"scan_field: ({x,y},{location}) <= {max_dist}")
-        self.scan_row(location, max_dist, (x, self.row_to_check))
+        return self.scan_row(location, max_dist, (x, self.row_to_check))
         # delta = y - location[1]
         # self.scan_row(location, max_dist, (x, location[1] - delta))
         # y += 1
@@ -136,11 +145,16 @@ def process_input(file: str) -> InputData:
 
 def part_1(data: InputData, row_check: int) -> int:
     data.row_to_check = row_check
-    for sensor, sensor_data in data.sensors.items():
-        print(f"sensor: {sensor}, sensor_data: {sensor_data}")
-        data.scan_field(sensor, sensor_data["distance"])
+    results: List[Set[GridLocation]] = list()
+    with multiprocessing.Pool() as pool:
+        results = pool.map(data.scan_field, data.sensors.items())
+    exclusion_zone = set(chain.from_iterable(results))
+    # for sensor, sensor_data in data.sensors.items():
+    #     print(f"sensor: {sensor}, sensor_data: {sensor_data}")
+    #     data.scan_field(sensor, sensor_data["distance"])
     # print_plot(data)
-    val = data.scanned_data
+    # val = data.scanned_data
+    val = exclusion_zone
     # val = set(filter(lambda val: val[1] == row_check, list(data.scanned_data)))
     val -= data.beacons
     count = len(list(val))

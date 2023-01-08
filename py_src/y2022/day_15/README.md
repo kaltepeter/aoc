@@ -81,4 +81,12 @@ after limit:
 pytest py_src/y2022/day_15 1.94s user 0.66s system 222% cpu 1.167 total max RSS 65708
 ```
 
-The first half of this puzzle is complete! It provides one gold star: \*
+## part I
+
+```bash
+python py_src/y2022/day_15/day.py 24.01s user 0.85s system 107% cpu 23.186 total max RSS 1060756
+```
+
+```bash
+python py_src/y2022/day_15/day.py 39.92s user 3.83s system 399% cpu 10.951 total max RSS 1949208
+```

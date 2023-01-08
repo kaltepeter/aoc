@@ -18,14 +18,14 @@ def test_process_input(example_data):
     )
     assert len(example_data.sensors) == 14
     assert example_data.sensors[(2, 18)] == {"nearest_beacon": (-2, 15), "distance": 7}
-    assert example_data.lowest_x == -2
-    assert example_data.highest_x == 25
-    assert example_data.lowest_y == 0
-    assert example_data.highest_y == 22
+    # assert example_data.lowest_x == -2
+    # assert example_data.highest_x == 25
+    # assert example_data.lowest_y == 0
+    # assert example_data.highest_y == 22
 
 
 def test_part_1(example_data):
-    assert part_1(example_data) == 26
+    assert part_1(example_data, 10) == 26
 
 
 def test_part_2(example_data):

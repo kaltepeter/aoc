@@ -47,17 +47,6 @@ class BeaconMap:
         scanned = set()
         if location[1] == self.row_to_check:
             self.scanned_data.add(location)
-        (x, y) = location
-        if x < self.lowest_x:
-            self.lowest_x = x
-        if x > self.highest_x:
-            self.highest_x = x
-        if y < self.lowest_y:
-            self.lowest_y = y
-        if y > self.highest_y:
-            self.highest_y = y
-
-        self.scanned_data.add(location)
 
     def scan_row(
         self,

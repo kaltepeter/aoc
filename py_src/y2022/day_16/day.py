@@ -93,7 +93,15 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    data.floyd_warshall()
+
+    visited = visit(data, "AA", 26, 0, 0, {})
+    return max(
+        v1 + v2
+        for bitm1, v1 in visited.items()
+        for bitm2, v2 in visited.items()
+        if not bitm1 & bitm2
+    )
 
 
 def main():
@@ -101,11 +109,11 @@ def main():
 
     part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} \n")
-    assert part1_answer == 0
+    assert part1_answer == 1595
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 2189
 
 
 if __name__ == "__main__":

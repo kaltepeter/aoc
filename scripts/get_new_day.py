@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import datetime
 from os import chmod, mkdir, path
 from pathlib import Path
+from shutil import copyfile
 from markdownify import MarkdownConverter
 import requests
 from datetime import date
@@ -12,9 +14,10 @@ def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = date.today()
+today = datetime.datetime(2022, 12, 17)
 
-day_dir = path.join("python", f"{today.year}", f"day_{today.day}")
+day_dir = path.join("py_src", f"y{today.year}", f"day_{today.day}")
+template_dir = path.join("py_src", "template")
 if not path.exists(day_dir):
     mkdir(day_dir)
 
@@ -24,11 +27,19 @@ def create_empty_files(filename: str) -> None:
         Path(path.join(day_dir, filename)).touch()
 
 
+def copy_template_files() -> None:
+    if not path.exists(path.join(day_dir, "day.py")):
+        copyfile(path.join(template_dir, "day.py"), path.join(day_dir, "day.py"))
+    if not path.exists(path.join(day_dir, "day_test.py")):
+        copyfile(
+            path.join(template_dir, "day_test.py"), path.join(day_dir, "day_test.py")
+        )
+
+
 create_empty_files("input.txt")
 create_empty_files("example.txt")
 create_empty_files("__init__.py")
-create_empty_files("day.py")
-create_empty_files("day_test.py")
+copy_template_files()
 
 url = f"https://adventofcode.com/{today.year}/day/{today.day}"
 

@@ -68,15 +68,35 @@ def part_1(data: InputData) -> int:
 
 def part_2(race: tuple[int, int]) -> int:
     time, record = race
-    speed = 0
     winners = []
-    for i in range(1, time):
-        speed = i * 1
-        dist = (time - i) * speed
-        if dist > record:
-            winners.append(i)
 
-    return len(winners)
+    def get_speed(x):
+        return x * (time - x)
+
+    lo = 0
+    hi = time // 2
+    if hi * (time - hi) < record:
+        return 0
+    assert get_speed(lo) < record and get_speed(hi) >= record
+    while lo + 1 < hi:
+        mid = (lo + hi) // 2
+        if get_speed(mid) >= record:
+            hi = mid
+        else:
+            lo = mid
+    first = lo + 1
+    assert get_speed(first) >= record and get_speed(first - 1) < record
+
+    last = (time // 2) + (time // 2 - first) + (1 if time % 2 == 1 else 0)
+    assert get_speed(last) >= record and get_speed(last + 1) < record
+
+    # for i in range(1, time):
+    #     speed = i * 1
+    #     dist = (time - i) * speed
+    #     if dist > record:
+    #         winners.append(i)
+
+    return last - first + 1
 
 
 def main():

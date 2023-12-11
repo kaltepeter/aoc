@@ -10,6 +10,7 @@ from .day import (
     get_neighbor_coords,
     lookup_char,
     CharMap,
+    count_inversions,
 )
 
 base_path = Path(__file__).parent
@@ -21,7 +22,7 @@ def example_data():
 
 
 def test_process_input(example_data):
-    assert list(example_data) == [
+    assert list(example_data)[0:2] == [
         [
             ".....",
             ".S-7.",
@@ -54,12 +55,11 @@ def test_get_neighbor_coords():
     ]
 
 
-def test_get_connected_pipes():
-    pipe_map = [
-        "||F",
-        "|S|",
-        "|||",
-    ]
+def test_count_inversions(example_data):
+    example = list(example_data)[0]
+    assert count_inversions({(1, 1), (2, 1), (3, 1)}, example[1], 0, 1) == 0
+    assert count_inversions({(1, 2), (3, 2)}, example[2], 0, 2) == 0
+    assert count_inversions({(1, 2), (3, 2)}, example[2], 2, 2) == 1
 
 
 def test_lookup_char():
@@ -79,4 +79,10 @@ def test_part_1(example_data):
 
 
 def test_part_2(example_data):
-    assert part_2(example_data) == 0
+    examples = list(example_data)
+    assert part_2(examples[0]) == 1
+    assert part_2(examples[1]) == 1
+    assert part_2(examples[2]) == 4
+    assert part_2(examples[3]) == 4
+    assert part_2(examples[4]) == 8
+    assert part_2(examples[5]) == 10  # edge case

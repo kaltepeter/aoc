@@ -100,12 +100,22 @@ def calculate_start_pipe(data: InputData) -> StartPipe:
     neighbors = get_neighbor_coords(start_pipe[0], (0, len(data[0])), (0, len(data)))
     connected_pipes = []
     for x, y in neighbors:
-        if data[y][x] != CharMap.EMPTY.value:
+        direction = np.subtract(start_pipe[0], (x, y))
+        # print(
+        #     direction,
+        #     data[y][x],
+        #     CharMap(data[y][x]) in pipe_map[(direction[0], direction[1])],
+        # )
+        if (
+            data[y][x] != CharMap.EMPTY.value
+            and CharMap(data[y][x]) in pipe_map[(direction[0], direction[1])]
+        ):
             connected_pipes.append((x, y))
 
         if len(connected_pipes) == 2:
             break
 
+    # print(start_pipe[0], connected_pipes)
     start_pipe[1] = lookup_char(start_pipe[0], connected_pipes[0], connected_pipes[1])
 
     return start_pipe
@@ -118,9 +128,9 @@ def get_coord(prev_coord: Coord, path: Coord) -> Coord:
     return (prev_coord[0] + path[0], prev_coord[1] + path[1])
 
 
-def part_1(data: InputData) -> int:
-    start_pipe = calculate_start_pipe(data)
-    visited_pipes = {start_pipe[0]}
+def find_loop(
+    data: InputData, visited_pipes: set[Coord], start_pipe: StartPipe
+) -> set[Coord]:
     q = deque([start_pipe[0]])
 
     char = start_pipe[1]
@@ -157,11 +167,52 @@ def part_1(data: InputData) -> int:
         prev_char = char
         prev_coord = (x, y)
 
+    return visited_pipes
+
+
+# http://philliplemons.com/posts/ray-casting-algorithm
+# https://www.youtube.com/watch?v=zhmzPQwgPg0
+# has edge cases
+def count_inversions(visited: set[Coord], line: str, x: int, y: int) -> int:
+    count = 0
+    for idx in range(x):
+        if not (idx, y) in visited:
+            continue
+
+        count += line[idx] in {CharMap.PIPE.value, CharMap.EL.value, CharMap.JAY.value}
+
+    return count
+
+
+def part_1(data: InputData) -> int:
+    start_pipe = calculate_start_pipe(data)
+    print(start_pipe)
+    visited_pipes = find_loop(data, {start_pipe[0]}, start_pipe)
+
     return len(visited_pipes) / 2
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    start_pipe = calculate_start_pipe(data)
+    print(start_pipe)
+    visited_pipes = find_loop(data, {start_pipe[0]}, start_pipe)
+    # print(visited_pipes)
+
+    start_row = data[start_pipe[0][1]]
+    data[start_pipe[0][1]] = start_row.replace(
+        CharMap.START.value, start_pipe[1].value, start_pipe[0][0]
+    )
+
+    count = 0
+    for y, row in enumerate(data):
+        for x, _ in enumerate(row):
+            if not (x, y) in visited_pipes:
+                inversions = count_inversions(visited_pipes, row, x, y)
+                # print(f"inversions: {inversions}, {inversions % 2}")
+                if inversions % 2 == 1:
+                    count += 1
+
+    return count
 
 
 def main():
@@ -173,7 +224,9 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer < 2836
+    assert part2_answer < 273
+    assert part2_answer == 265
 
 
 if __name__ == "__main__":

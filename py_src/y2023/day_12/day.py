@@ -29,6 +29,9 @@ def process_input(file: str) -> Generator[InputData, None, None]:
             yield r
 
 
+cache = {}
+
+
 def find_broken_springs(rec: Record) -> int:
     arrangement, counts = rec
     if arrangement == "":
@@ -36,6 +39,9 @@ def find_broken_springs(rec: Record) -> int:
     if counts == ():
         return 0 if DAMAGED in arrangement else 1
 
+    key = (arrangement, counts)
+    if key in cache:
+        return cache[key]
     result = 0
 
     if arrangement[0] in [OPERATIONAL, UNKNOWN]:
@@ -49,6 +55,7 @@ def find_broken_springs(rec: Record) -> int:
         ):
             result += find_broken_springs((arrangement[counts[0] + 1 :], counts[1:]))
 
+    cache[key] = result
     return result
 
 
@@ -86,7 +93,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi)[0])
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 37366887898686
 
 
 if __name__ == "__main__":

@@ -46,6 +46,23 @@ def find_mirror(note: InputData) -> int:
     return 0
 
 
+def find_mirror_with_smudges(note: InputData) -> int:
+    for r in range(1, len(note)):
+        above = note[:r][::-1]
+        below = note[r:]
+
+        if (
+            sum(
+                sum(0 if a == b else 1 for a, b in zip(x, y))
+                for x, y in zip(above, below)
+            )
+            == 1
+        ):
+            return r
+
+    return 0
+
+
 def find_mirrored_rows(note: InputData, start_pair: (int, int)) -> int:
     current_pairs = deque([start_pair])
 
@@ -105,7 +122,14 @@ def part_1(data: List[InputData]) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    row_count = 0
+    col_count = 0
+    for note in data:
+        rotated_note = rotate90(note)
+        col_count += find_mirror_with_smudges(rotated_note)
+        row_count += find_mirror_with_smudges(note)
+
+    return (row_count * 100) + col_count
 
 
 def main():
@@ -118,7 +142,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 31974
 
 
 if __name__ == "__main__":

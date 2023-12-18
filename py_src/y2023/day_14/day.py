@@ -7,6 +7,7 @@ import re
 base_path = Path(__file__).parent
 
 InputData = List[str]
+InputData2 = tuple[str]
 
 ROLLING_ROCK = "O"
 FLAT_ROCK = "#"
@@ -30,6 +31,23 @@ def calculate_load(data: InputData) -> int:
         # result += num_rows - i
 
     return result
+
+
+def spin_cycle(data: InputData2) -> InputData2:
+    rotated_data = data
+    for _ in range(4):
+        rotated_grid = tuple(map("".join, zip(*rotated_data)))
+        tilted = tuple(
+            FLAT_ROCK.join(
+                [
+                    "".join(sorted(tuple(group), reverse=True))
+                    for group in row.split(FLAT_ROCK)
+                ]
+            )
+            for row in rotated_grid
+        )
+        rotated_data = tuple(row[::-1] for row in tilted)
+    return rotated_data
 
 
 def part_1(data: InputData) -> int:
@@ -63,7 +81,25 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    data = tuple(data)
+    seen = {data}
+    cycles = [data]
+
+    iteration = 0
+    while True:
+        iteration += 1
+        data = spin_cycle(data)
+        if data in seen:
+            break
+
+        seen.add(data)
+        cycles.append(data)
+
+    first = cycles.index(data)
+    cycle_grid_index = (1000000000 - first) % (iteration - first) + first
+    data = cycles[cycle_grid_index]
+
+    return calculate_load(list(data))
 
 
 def main():
@@ -76,7 +112,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi)[0])
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 98029
 
 
 if __name__ == "__main__":

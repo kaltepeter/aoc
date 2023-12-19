@@ -37,4 +37,4 @@ def test_part_1(example_data):
 
 
 def test_part_2(example_data):
-    assert part_2(next(example_data)) == 0
+    assert part_2(next(example_data)) == 145

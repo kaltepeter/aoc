@@ -23,9 +23,13 @@ HORIZONTALS = {WEST, EAST}
 
 
 class HeatLossGrid(SquareGrid):
-    def __init__(self, width: int, height: int):
+    def __init__(
+        self, width: int, height: int, is_ultra: bool = False, max_run: int = 3
+    ):
         super().__init__(width, height)
         self.weights: dict[GridLocation, float] = {}
+        self.max_run = max_run
+        self.is_ultra = is_ultra
 
     def cost(
         self,
@@ -112,9 +116,10 @@ class HeatLossGrid(SquareGrid):
         self, position: Location, direction: Direction, cost: int
     ) -> List[State]:
         neighbors = []
-        for x, y in self.get_line_of_positions(position, direction):
+        for i, (x, y) in enumerate(self.get_line_of_positions(position, direction), 1):
             cost += self.weights.get((x, y), 0)
-            neighbors.append((cost, (x, y), direction))
+            if not self.is_ultra or (self.is_ultra and i >= 4):
+                neighbors.append((cost, (x, y), direction))
 
         return neighbors
 
@@ -122,7 +127,7 @@ class HeatLossGrid(SquareGrid):
         self, position: Location, direction: Direction
     ) -> List[Location]:
         adjacent = []
-        for _ in range(3):
+        for _ in range(self.max_run):
             position = self.add(position, direction)
             adjacent.append(position)
 
@@ -269,7 +274,8 @@ def dijkstra(
     graph: HeatLossGrid, start: Location, goal: Location
 ) -> tuple[int, CameFromMap, bool]:
     frontier: State = PriorityQueue()
-    frontier.put((0, start, EAST), (0, start, SOUTH))
+    frontier.put((0, start, EAST), 0)
+    frontier.put((0, start, SOUTH), 0)
     came_from: CameFromMap = {}
     came_from[start] = None
     visited = set()
@@ -289,6 +295,7 @@ def dijkstra(
 
         for state in graph.get_reachable_states(current, current_direction, cost):
             new_cost, next_position, next_direction = state
+            # A* did not help and even made part II worse
             # priority = new_cost + heuristic(next_position, goal)
             frontier.put(state, new_cost)
             came_from[next_position] = current
@@ -325,7 +332,22 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    rows = len(data)
+    cols = len(data[0])
+    graph: HeatLossGrid = HeatLossGrid(cols, rows, is_ultra=True, max_run=10)
+    graph.edges = {}
+    graph.weights = {}
+    start_pos = (0, 0)
+    end_pos = (rows - 1, cols - 1)
+
+    for y, row in enumerate(data):
+        for x, char in enumerate(row):
+            elem = char
+            graph.weights[(x, y)] = elem
+
+    came_from, cost_so_far, _ = dijkstra(graph, start_pos, end_pos)
+
+    return cost_so_far
 
 
 def main():
@@ -337,7 +359,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 1178
 
 
 if __name__ == "__main__":

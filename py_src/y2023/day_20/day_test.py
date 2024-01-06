@@ -32,7 +32,3 @@ def test_process_input(example_data):
 def test_part_1(example_data):
     assert part_1(next(example_data)) == 32000000
     assert part_1(next(example_data)) == 11687500
-
-
-def test_part_2(example_data):
-    assert part_2(next(example_data)) == 0

@@ -2,7 +2,8 @@ from copy import deepcopy
 import os
 from pathlib import Path
 from typing import Generator, List, Deque
-from queue import PriorityQueue, deque
+from queue import deque
+from math import lcm
 
 base_path = Path(__file__).parent
 
@@ -14,6 +15,7 @@ ON = 1
 FLIP_FLOP = "%"
 CONJUNCTION = "&"
 BROADCAST = "b"
+SAND_MOVER = "rx"
 
 
 class Module:
@@ -50,10 +52,7 @@ def process_input(file: str) -> Generator[InputData, None, None]:
             }
 
 
-def push_button(
-    state: State,
-    q: Deque[QueueItem],
-) -> Pulses:
+def push_button(state: State, q: Deque[QueueItem]) -> Pulses:
     lo = 0
     hi = 0
 
@@ -87,8 +86,7 @@ def push_button(
     return (lo, hi)
 
 
-def part_1(data: InputData) -> int:
-    button_pushes = 1000
+def get_state(data: InputData) -> State:
     state: State = {}
 
     for name, (module, outputs) in data.items():
@@ -102,7 +100,13 @@ def part_1(data: InputData) -> int:
             if output in state and state.get(output).module_type == CONJUNCTION:
                 state[output].memory[name] = LOW
 
-    # low, high
+    return state
+
+
+def part_1(data: InputData) -> int:
+    button_pushes = 1000
+    state: State = get_state(data)
+
     lo = 0
     hi = 0
     for _ in range(button_pushes):
@@ -118,7 +122,53 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    state: State = get_state(data)
+
+    count = 0
+    (feed,) = [name for name, module in state.items() if SAND_MOVER in module.outputs]
+    cycle_lengths = {}
+    seen = {name: 0 for name, module in state.items() if feed in module.outputs}
+    while True:
+        count += 1
+        q: Deque[QueueItem] = deque(
+            [("broadcaster", output, LOW) for output in data["broadcaster"][1]]
+        )
+
+        while q:
+            item = q.popleft()
+            input_name, name, pulse = item
+
+            if not state.get(name, False):
+                continue
+
+            module = state[name]
+            if module.name == feed and pulse == HIGH:
+                seen[input_name] += 1
+
+                if input_name not in cycle_lengths:
+                    cycle_lengths[input_name] = count
+                else:
+                    assert count == seen[input_name] * cycle_lengths[input_name]
+
+                if all(seen.values()):
+                    x = 1
+                    for cycle_length in cycle_lengths.values():
+                        x = lcm(x, cycle_length)
+
+                    return x
+
+            if module.module_type == FLIP_FLOP:
+                if pulse == LOW:
+                    module.memory ^= 0b1
+                    for output in module.outputs:
+                        q.append((module.name, output, module.memory))
+
+            else:
+                module.memory[input_name] = pulse
+                # value = (value << 1) | 1
+                value = LOW if all(x == HIGH for x in module.memory.values()) else HIGH
+                for output in module.outputs:
+                    q.append((module.name, output, value))
 
 
 def main():
@@ -130,7 +180,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 244178746156661
 
 
 if __name__ == "__main__":

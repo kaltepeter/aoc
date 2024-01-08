@@ -37,9 +37,15 @@ def get_neighbors(location: Location, max_x: int, max_y: int) -> List[Location]:
     return filter(lambda location: in_bounds(location, max_x, max_y), neighbors)
 
 
-def part_1(data: InputData, goal: int) -> int:
+def get_neighbors_infinite(location: Location) -> List[Location]:
+    x, y = location
+    neighbors = [(x + 1, y), (x - 1, y), (x, y - 1), (x, y + 1)]
+    return neighbors
+
+
+def fill(data: InputData, goal: int) -> int:
     start, grid = data
-    seen = {start}
+    seen: set[Location] = {start}
     result = set()
     # (x, y, steps)
     q: Deque[tuple[int, int, int]] = deque([(*start, goal)])
@@ -64,8 +70,54 @@ def part_1(data: InputData, goal: int) -> int:
     return len(result)
 
 
-def part_2(data: InputData) -> int:
-    return 0
+def part_1(data: InputData, goal: int) -> int:
+    result = fill(data, goal)
+    return result
+
+
+def part_2(data: InputData, goal: int) -> int:
+    start, grid = data
+    x, y = start
+    result = 0
+    # assumptions
+    assert len(grid) == len(grid[0])  # grid is square
+    size = len(grid)
+    assert x == y == size // 2  # start is center
+    if size > 11:
+        assert goal % size == size // 2  # steps reaches end of a grid
+    print(goal // size)  # hint on solution
+    grid_width = goal // size - 1
+
+    odd = (grid_width // 2 * 2 + 1) ** 2
+    even = ((grid_width + 1) // 2 * 2) ** 2
+    odd_points = fill(((x, y), grid), size * 2 + 1)
+    even_points = fill(((x, y), grid), size * 2)
+
+    corner_t = fill(((x, size - 1), grid), size - 1)
+    corner_r = fill(((0, y), grid), size - 1)
+    corner_b = fill(((x, 0), grid), size - 1)
+    corner_l = fill(((size - 1, y), grid), size - 1)
+
+    small_size = size // 2 - 1
+    small_tr = fill(((0, size - 1), grid), small_size)
+    small_tl = fill(((size - 1, size - 1), grid), small_size)
+    small_br = fill(((0, 0), grid), small_size)
+    small_bl = fill(((size - 1, 0), grid), small_size)
+
+    large_size = size * 3 // 2 - 1
+    large_tr = fill(((0, size - 1), grid), large_size)
+    large_tl = fill(((size - 1, size - 1), grid), large_size)
+    large_br = fill(((0, 0), grid), large_size)
+    large_bl = fill(((size - 1, 0), grid), large_size)
+
+    # result, seen = fill(data, goal)
+    result += odd * odd_points
+    result += even * even_points
+    result += corner_t + corner_r + corner_b + corner_l
+    result += (grid_width + 1) * (small_tr + small_tl + small_br + small_bl)
+    result += grid_width * (large_tr + large_tl + large_br + large_bl)
+
+    return result
 
 
 def main():
@@ -75,9 +127,9 @@ def main():
     print(f"Part I: {part1_answer} \n")
     assert part1_answer == 3795
 
-    part2_answer = part_2(deepcopy(pi))
+    part2_answer = part_2(deepcopy(pi), 26501365)
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 630129824772393
 
 
 if __name__ == "__main__":

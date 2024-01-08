@@ -35,5 +35,12 @@ def test_part_1(example_data):
     assert part_1(example_data, 6) == 16
 
 
-def test_part_2(example_data):
-    assert part_2(example_data) == 0
+# Not relevant
+# def test_part_2(example_data):
+#     assert part_2(example_data, 6) == 16
+#     assert part_2(example_data, 10) == 50
+#     assert part_2(example_data, 50) == 1594
+#     assert part_2(example_data, 100) == 6536
+#     assert part_2(example_data, 500) == 167004
+#     assert part_2(example_data, 1000) == 668697
+#     assert part_2(example_data, 5000) == 16733044

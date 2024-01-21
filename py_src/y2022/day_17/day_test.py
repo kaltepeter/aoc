@@ -9,6 +9,7 @@ from .day import (
     part_1,
     part_2,
     process_input,
+    shift_masked,
 )
 
 base_path = Path(__file__).parent
@@ -34,9 +35,14 @@ def test_get_set_bit_indexes():
     assert get_set_bit_indexes(0b0111000) == [3, 4, 5]
 
 
-def test_modify_bit_range():
-    assert modify_bit_range(0b0111100, 3, 5, 1) == 0b1110100
-    assert modify_bit_range(0b0111100, 2, 4, -1) == 0b0101110
+# def test_modify_bit_range():
+#     assert modify_bit_range(0b0111100, 3, 5, 1) == 0b1110100
+#     assert modify_bit_range(0b0111100, 2, 4, -1) == 0b0101110
+
+
+def test_shift_masked():
+    assert shift_masked(0b0010100, 0b0000100, 1) == 0b0010010
+    assert shift_masked(0b0010100, 0b0000100, -1) == 0b0011000
 
 
 def get_bit():
@@ -49,4 +55,4 @@ def test_part_1(example_data):
 
 
 def skip_test_part_2(example_data):
-    assert part_2(example_data) == 0
+    assert part_2(example_data) == 1514285714288

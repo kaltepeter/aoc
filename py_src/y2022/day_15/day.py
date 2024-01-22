@@ -43,6 +43,8 @@ class BeaconMap:
         }
 
     def add_scanned(self, location: GridLocation) -> None:
+        count = 0
+        scanned = set()
         if location[1] == self.row_to_check:
             self.scanned_data.add(location)
 

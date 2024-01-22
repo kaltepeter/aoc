@@ -117,6 +117,8 @@ def compare(left_list: Packet, right_list: Packet) -> int:
             return 1
         if rr == None:
             return -1
+        if rr == None:
+            return -1
 
         if isinstance(ll, int) and isinstance(rr, int):
             if ll > rr:

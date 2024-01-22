@@ -13,12 +13,13 @@ def example_data():
 
 
 def test_process_input(example_data):
-    assert next(example_data) == [[]]
+    assert example_data["jqt"] == {"rhn", "xhk", "nvd", "ntq"}
+    assert example_data["hfx"] == {"xhk", "rhn", "bvb", "pzl", "ntq"}
 
 
 def test_part_1(example_data):
-    assert part_1(next(example_data)) == 0
+    assert part_1(example_data) == 54
 
 
 def test_part_2(example_data):
-    assert part_2(next(example_data)) == 0
+    assert part_2(example_data) == 0

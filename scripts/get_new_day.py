@@ -8,13 +8,32 @@ from markdownify import MarkdownConverter
 import requests
 from datetime import date
 from bs4 import BeautifulSoup
+import sys
 
 
 def md(soup, **options):
     return MarkdownConverter(**options).convert_soup(soup)
 
 
-today = datetime.datetime(2022, 12, 17)
+def print_usage():
+    print("Usage: python3 create_day.py YEAR DAY")
+    exit(1)
+
+
+args = sys.argv[1:]
+
+if len(args) < 2:
+    print_usage()
+
+target_year = int(args[0])
+target_day = int(args[1])
+
+if not target_year or not target_day:
+    print_usage()
+
+today = datetime.datetime(target_year, 12, target_day)
+
+print(f"Creating day {today.day} for year {today.year}")
 
 day_dir = path.join("py_src", f"y{today.year}", f"day_{today.day}")
 template_dir = path.join("py_src", "template")

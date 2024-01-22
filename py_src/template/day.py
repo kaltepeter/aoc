@@ -24,7 +24,7 @@ def part_2(data: InputData) -> int:
 
 
 def main():
-    pi = list(process_input(os.path.join(base_path, "input.txt")))
+    pi = next(process_input(os.path.join(base_path, "input.txt")))
 
     part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} \n")

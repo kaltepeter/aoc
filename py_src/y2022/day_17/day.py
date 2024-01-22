@@ -8,7 +8,7 @@ from typing import Generator, List
 base_path = Path(__file__).parent
 
 CHAMBER_WIDTH = 7
-InputData = Generator[str, None, None]
+InputData = str
 # rocks = {
 #     "dash": [0b0011110],
 #     "plus": [0b0001000, 0b0011100, 0b0001000],
@@ -30,9 +30,7 @@ rocks = [
 
 def process_input(file: str) -> InputData:
     with open(file, "r") as reader:
-        for line in reader.read():
-            for char in line.split():
-                yield char
+        return reader.read().splitlines()[0]
 
 
 def print_tunnel_map(tunnel_map: List[int]) -> None:
@@ -121,7 +119,7 @@ def simulate_tower(data: InputData, num_rocks: int) -> int:
                 solid |= rock
                 rock_count += 1
                 height = max(x.imag for x in solid) + 1
-                if rock_count >= 2022:
+                if rock_count >= num_rocks:
                     break
                 rock_index = (rock_index + 1) % 5
                 rock = {x + 2 + (height + 3) * 1j for x in rocks[rock_index]}
@@ -129,6 +127,62 @@ def simulate_tower(data: InputData, num_rocks: int) -> int:
                 rock = moved
 
     return int(height)
+
+
+def summarize(solid: set[complex]):
+        o = [-20] * CHAMBER_WIDTH
+
+        for x in solid:
+            r = int(x.real)
+            i = int(x.imag)
+            o[r] = max(o[r], i)
+
+        top = max(o)
+        return tuple(x - top for x in o)
+
+
+def simulate_tower_ii(data: InputData, T: int) -> int:
+    jets = [1 if x == ">" else -1 for x in data]
+    solid = {x - 1j for x in range(CHAMBER_WIDTH)}
+    height = 0
+
+    seen = {}
+
+    rock_count = 0
+
+    rock_index = 0
+    rock = {x + 2 + (height + 3) * 1j for x in rocks[rock_index]}
+
+    while rock_count < T:
+        for ji, jet in enumerate(jets):
+            moved = {x + jet for x in rock}
+            if all(0 <= x.real < CHAMBER_WIDTH for x in moved) and not (moved & solid):
+                rock = moved
+            moved = {x - 1j for x in rock}
+            if moved & solid:
+                solid |= rock
+                rock_count += 1
+                o = height
+                height = max(x.imag for x in solid) + 1
+
+                if rock_count >= T:
+                    break
+
+                rock_index = (rock_index + 1) % 5
+                rock = {x + 2 + (height + 3) * 1j for x in rocks[rock_index]}
+                key = (ji, rock_index, summarize(solid))
+                if key in seen:
+                    lrc, lh = seen[key]
+                    rem = T - rock_count
+                    rep = rem // (rock_count - lrc)
+                    offset = rep * (height - lh)
+                    rock_count += rep * (rock_count - lrc)
+                    seen = {}
+                seen[key] = (rock_count, height)
+            else:
+                rock = moved
+
+    return int(height + offset)
 
 
 def part_1(data: InputData) -> int:
@@ -252,19 +306,19 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return simulate_tower(data, 1000000000000)
+    return simulate_tower_ii(data, 1000000000000)
 
 
 def main():
     pi = process_input(os.path.join(base_path, "input.txt"))
 
-    part1_answer = part_1(pi)
+    part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} \n")
     assert part1_answer == 3209
 
-    part2_answer = part_2(pi)
+    part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 1580758017509
 
 
 if __name__ == "__main__":

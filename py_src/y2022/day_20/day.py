@@ -41,7 +41,18 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    decryption_key = 811589153
+    original_order = list(enumerate(int(x) * decryption_key for x in data))
+    sorted_list: Sorted = deque(original_order, maxlen=len(data))
+    for _ in range(10):
+        for val in original_order:
+            sorted_list.rotate(-sorted_list.index(val))
+            sorted_list.rotate(-sorted_list.popleft()[1])
+            sorted_list.appendleft(val)
+
+    start_index = find_start_index(sorted_list)
+
+    return calculate_result(sorted_list, start_index)
 
 
 def main():
@@ -53,7 +64,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 12374299815791
 
 
 if __name__ == "__main__":

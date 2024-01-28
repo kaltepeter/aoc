@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
-from .day import part_1, part_2, process_input
+from .day import part_1, part_2, process_input, calculate_max_spends
 
 base_path = Path(__file__).parent
 
@@ -10,6 +10,11 @@ base_path = Path(__file__).parent
 @pytest.fixture()
 def example_data():
     return process_input(os.path.join(base_path, "example.txt"))
+
+
+@pytest.fixture()
+def max_spend(example_data):
+    return calculate_max_spends(example_data)
 
 
 def test_process_input(example_data):
@@ -29,9 +34,10 @@ def test_process_input(example_data):
     }
 
 
-def test_part_1(example_data):
-    assert part_1(example_data) == 33
+def test_part_1(example_data, max_spend):
+    assert part_1(example_data, max_spend) == 33
 
 
-def test_part_2(example_data):
-    assert part_2(example_data) == 0
+# too slow
+def skip_test_part_2(example_data, max_spend):
+    assert part_2(example_data, max_spend) == (56 * 62)

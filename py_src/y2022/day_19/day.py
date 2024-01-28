@@ -1,14 +1,16 @@
 from copy import deepcopy
 import os
 from pathlib import Path
-from typing import Generator, List
+from typing import List
 import re
+from functools import reduce
 
 base_path = Path(__file__).parent
 
 Cost = tuple[int, int, int]  # ore, clay, obsidian
 BluePrint = dict[str, Cost]
 InputData = dict[int, BluePrint]
+Spends = dict[int, List[int]]
 
 bot_types = {
     "ore": 0,
@@ -101,9 +103,8 @@ def process_blueprint(
     return max_val
 
 
-def part_1(data: InputData) -> int:
-    quality_levels = []
-    max_spend: dict[int, List[int]] = {}
+def calculate_max_spends(data: InputData) -> Spends:
+    max_spend: Spends = {}
     for id, bp in data.items():
         if id not in max_spend:
             max_spend[id] = [0, 0, 0]
@@ -113,6 +114,12 @@ def part_1(data: InputData) -> int:
             max_spend[id][1] = max(max_spend[id][1], val[1])
             max_spend[id][2] = max(max_spend[id][2], val[2])
 
+    return max_spend
+
+
+def part_1(data: InputData, max_spend: Spends) -> int:
+    quality_levels = []
+
     for id, bp in data.items():
         robots = [1, 0, 0, 0]  # ore, clay, obsidian, geode
         geode_count = process_blueprint(id, bp, max_spend, {}, 24, robots, [0, 0, 0, 0])
@@ -121,20 +128,28 @@ def part_1(data: InputData) -> int:
     return sum(quality_levels)
 
 
-def part_2(data: InputData) -> int:
-    return 0
+def part_2(data: InputData, max_spend: Spends) -> int:
+    geode_counts = []
+
+    for id, bp in list(data.items())[:3]:
+        robots = [1, 0, 0, 0]  # ore, clay, obsidian, geode
+        geode_count = process_blueprint(id, bp, max_spend, {}, 32, robots, [0, 0, 0, 0])
+        geode_counts.append(geode_count)
+
+    return reduce(lambda x, y: x * y, geode_counts)
 
 
 def main():
     pi = process_input(os.path.join(base_path, "input.txt"))
+    max_spend = calculate_max_spends(pi)
 
-    part1_answer = part_1(deepcopy(pi))
+    part1_answer = part_1(deepcopy(pi), max_spend)
     print(f"Part I: {part1_answer} \n")
     assert part1_answer == 1650
 
-    part2_answer = part_2(deepcopy(pi))
+    part2_answer = part_2(deepcopy(pi), max_spend)
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 5824
 
 
 if __name__ == "__main__":

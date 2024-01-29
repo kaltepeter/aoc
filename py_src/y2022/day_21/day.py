@@ -1,7 +1,9 @@
 from copy import deepcopy
 import os
 from pathlib import Path
+import re
 from typing import List
+from z3 import Solver, Int
 
 base_path = Path(__file__).parent
 
@@ -50,7 +52,36 @@ def part_1(data: InputData) -> int:
 
 
 def part_2(data: InputData) -> int:
-    return 0
+    s = Solver()
+    values = {k: Int(k) for k in data.keys()}
+    target_key = "humn"
+
+    for key, value in data.items():
+        if key == target_key:
+            continue
+        elif key == "root":
+            o1, _, o2 = value.split()
+            s.add(values[o1] == values[o2])
+            continue
+
+        if isinstance(value, (int, float, complex)):
+            s.add(values[key] == value)
+        else:
+            o1, op, o2 = value.split()
+            match op:
+                case "+":
+                    s.add(values[key] == values[o1] + values[o2])
+                case "-":
+                    s.add(values[key] == values[o1] - values[o2])
+                case "/":
+                    s.add(values[key] == values[o1] / values[o2])
+                    s.add(values[o1] % values[o2] == 0)
+                case "*":
+                    s.add(values[key] == values[o1] * values[o2])
+
+    s.check()
+
+    return s.model().eval(values[target_key])
 
 
 def main():
@@ -62,7 +93,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 3560324848168
 
 
 if __name__ == "__main__":

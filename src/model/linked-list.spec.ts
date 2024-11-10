@@ -1,5 +1,5 @@
 import { range } from 'ramda';
-import { LinkedList, ListEmptyError } from './linked-list';
+import { ItemNotFoundError, LinkedList, ListEmptyError } from './linked-list';
 
 describe(`LinkedList`, () => {
   let list: LinkedList<string>;
@@ -14,81 +14,53 @@ describe(`LinkedList`, () => {
 
   describe(`getFirst()`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.getFirst()).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.getFirst()).toThrowError(ListEmptyError());
     });
   });
 
   describe(`findByItem('20')`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.findByItem('20')).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.findByItem('20')).toThrowError(ListEmptyError());
     });
   });
 
   describe(`getLast()`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.getLast()).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.getLast()).toThrowError(ListEmptyError());
     });
   });
 
   describe(`contains()`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.contains('40')).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.contains('40')).toThrowError(ListEmptyError());
     });
   });
 
   describe(`remove()`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.remove('40')).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.remove('40')).toThrowError(ListEmptyError());
     });
   });
 
   describe(`removeFirst()`, () => {
     it('should throw if empty', () => {
-      try {
-        expect(list.removeFirst()).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('List is empty.');
-      }
+      expect(() => list.removeFirst()).toThrowError(ListEmptyError());
     });
   });
 
   describe(`insertFirstBefore()`, () => {
     it(`should throw error `, () => {
-      try {
-        expect(list.insertBeforeFirst('20', '11')).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('Item "20" not found.');
-      }
+      expect(() => list.insertBeforeFirst('20', '11')).toThrowError(
+        ItemNotFoundError('20')
+      );
     });
   });
 
   describe(`insertFirstAfter()`, () => {
     it(`should throw error `, () => {
-      try {
-        expect(list.insertAfterFirst('20', '11')).toThrowError();
-      } catch (e) {
-        expect(e.message).toBe('Item "20" not found.');
-      }
+      expect(() => list.insertAfterFirst('20', '11')).toThrowError(
+        ItemNotFoundError('20')
+      );
     });
   });
 

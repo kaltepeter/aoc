@@ -1,8 +1,6 @@
-import { exception } from 'console';
 import { LinkedList, LinkedListItem } from 'model/index';
 import { join } from 'path';
 import { range } from 'ramda';
-import { first } from 'rxjs/operators';
 import { writeToLog } from 'util/debug';
 
 const LOG_FILE = join(__dirname, 'challenge.log');

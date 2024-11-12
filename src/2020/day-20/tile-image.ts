@@ -1,10 +1,10 @@
-import { join, transpose } from 'ramda';
+import { transpose } from 'ramda';
 import { SIDE } from './constants';
 import { Tile } from './tile2';
 
-function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
-  return value !== null && value !== undefined;
-}
+// function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+//   return value !== null && value !== undefined;
+// }
 
 class TileImage {
   dimension = 0;
@@ -16,9 +16,9 @@ class TileImage {
   constructor(readonly tiles: Tile[]) {
     tiles.forEach((t) => this._neighbors.set(t.id, this.neighborsOf(t)));
     this.dimension = Math.sqrt(tiles.length);
-    this.assembledImage = new Array(this.dimension)
-      .fill([])
-      .map(() => new Array(this.dimension).fill([]));
+    this.assembledImage = Array.from({ length: this.dimension }, () =>
+      Array.from({ length: this.dimension }, () => null as unknown as Tile)
+    );
     this._corners = Array.from(this._neighbors.entries())
       .filter(([_, neighbors]) => neighbors.length === 2)
       .flatMap(([id, _]) => id);
@@ -78,7 +78,12 @@ class TileImage {
       ) {
         break;
       }
-      i === 3 ? corner.flip() : corner.rotate();
+
+      if (i === 3) {
+        corner.flip();
+      } else {
+        corner.rotate();
+      }
     }
     // Step 3: place the corner piece and mark it as processed
     this.placeTile(corner, 0, 0);

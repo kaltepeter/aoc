@@ -8,8 +8,8 @@ export interface IFoodList {
 
 export type allergenList = Map<string, string[]>;
 
-const getFoodList = (list: string[]): IFoodList[] => {
-  return list
+const getFoodList = (list: string[]): IFoodList[] =>
+  list
     .map((line) =>
       line.split('(').map((part) => part.replace(/[\(\)]|contains/g, '').trim())
     )
@@ -23,7 +23,6 @@ const getFoodList = (list: string[]): IFoodList[] => {
         .split(',')
         .map((a) => a.trim()),
     }));
-};
 
 // get a map of possible unique ingredients for an allergen
 const getAllergenList = (list: IFoodList[]) => {
@@ -37,10 +36,7 @@ const getAllergenList = (list: IFoodList[]) => {
   return aList;
 };
 
-const processAllergens = (
-  list: IFoodList[],
-  aList: allergenList
-): Map<string, string> => {
+const processAllergens = (list: IFoodList[]): Map<string, string> => {
   const badFoods = new Map<string, string>();
   list.forEach((fl, idx) => {
     const newList = [...list];
@@ -67,29 +63,22 @@ const processAllergens = (
   return badFoods;
 };
 
-const findIngredientsNotInAllergenList = (
-  list: IFoodList[],
-  aList: allergenList
-) => {
+const findIngredientsNotInAllergenList = (list: IFoodList[]) => {
   const allIngredients = list.flatMap((f) => f.ingredients);
-  const processedAllergenList = uniq(
-    Array.from(processAllergens(list, aList).keys())
-  );
+  const processedAllergenList = uniq(Array.from(processAllergens(list).keys()));
   return difference(allIngredients, processedAllergenList);
 };
 
-const countAllergens = (listOfSafeFoods: string[], foodList: IFoodList[]) => {
-  return foodList
+const countAllergens = (listOfSafeFoods: string[], foodList: IFoodList[]) =>
+  foodList
     .flatMap((f) => f.ingredients)
     .filter((i) => listOfSafeFoods.includes(i)).length;
-};
 
-const getCanonicalDangerousIngredientList = (badFoods: Map<string, string>) => {
-  return Array.from(badFoods.entries())
-    .sort(([aIng, aAlg], [bIng, bAlg]) => aAlg.localeCompare(bAlg))
-    .flatMap(([ing, alg]) => ing)
+const getCanonicalDangerousIngredientList = (badFoods: Map<string, string>) =>
+  Array.from(badFoods.entries())
+    .sort(([_aIng, aAlg], [_bIng, bAlg]) => aAlg.localeCompare(bAlg))
+    .flatMap(([ing, _alg]) => ing)
     .join(',');
-};
 
 export {
   getFoodList,

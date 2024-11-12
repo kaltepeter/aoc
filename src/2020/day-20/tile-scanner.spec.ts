@@ -1,4 +1,3 @@
-import { TileImage } from './tile-image';
 import { Tile } from './tile2';
 import { TileScanner } from './tile-scanner';
 

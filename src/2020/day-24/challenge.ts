@@ -1,4 +1,4 @@
-import { difference, range } from 'ramda';
+import { difference } from 'ramda';
 
 export type coord = [x: number, y: number, z: number];
 const Direction: Record<string, coord> = {
@@ -66,7 +66,7 @@ const moveTile = (startingCoord: coord, dir: directions) => {
 const getPermutationsOfCoords = (coords: coord): coord[] => {
   // only six neighbors, use Directions
   let res: coord[] = [];
-  [...Object.entries(Direction)].map(([k, v]) => {
+  [...Object.entries(Direction)].map(([_k, v]) => {
     const [x, y, z] = coords;
     const newPos = [x + v[0], y + v[1], z + v[2]] as coord;
     res = [...res, [...newPos]];
@@ -75,9 +75,9 @@ const getPermutationsOfCoords = (coords: coord): coord[] => {
 };
 
 const getBlackTiles = (ts: Map<string, TileState>) =>
-  [...ts.entries()].filter(([k, v]) => {
+  [...ts.entries()].filter(([_k, v]) => {
     const self = v & TileState.SELF;
-    return self === TileColor.BLACK;
+    return self === TileColor.BLACK.valueOf();
   });
 
 const getCoordListFromMap = (ts: Map<string, TileState>): string[] =>
@@ -110,7 +110,7 @@ const calcNextGeneration = (
     if (neighborCount === 2) {
       nextState.set(key.toString(), 0b1);
     } else {
-      if (self === TileColor.BLACK && neighborCount === 1) {
+      if (self === TileColor.BLACK.valueOf() && neighborCount === 1) {
         nextState.set(key.toString(), 0b1);
       }
     }

@@ -1,6 +1,5 @@
 {
     "jira-plugin.workingProject": "",
-    "eslint.enable": false,
     "jest.coverageFormatter": "GutterFormatter",
     "cSpell.words": [
         "joltage",

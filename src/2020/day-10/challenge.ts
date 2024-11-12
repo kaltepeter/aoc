@@ -40,7 +40,7 @@ const findAdapterListByPossibleCount = (
   adapterHash: IAdapterHash,
   count: number
 ) =>
-  fromPairs(Object.entries(adapterHash).filter(([k, v]) => v.length === count));
+  fromPairs(Object.entries(adapterHash).filter(([_, v]) => v.length === count));
 
 const removeOptionFromAdapterList = (
   adapterHash: IAdapterHash,
@@ -77,10 +77,10 @@ const printDeltas = (adapters: number[]) => {
   console.log(possibleRemovals);
 };
 
-const getCombinations = (adapters: number[]): number => {
+const getCombinations = (adapters: number[]): number | undefined => {
   const deviceJoltage = getBuiltInDeviceJoltage(adapters);
   const aList = [0, ...sortAdapters(adapters), deviceJoltage];
-  const counts = new Array(aList.length);
+  const counts = new Array(aList.length) as number[];
   counts[0] = 1;
 
   for (let i = 1; i < aList.length; i++) {

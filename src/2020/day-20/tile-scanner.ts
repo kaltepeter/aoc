@@ -26,7 +26,11 @@ class TileScanner {
       if (numImages > 0) {
         break;
       }
-      i === 3 ? image.flip() : image.rotate();
+      if (i === 3) {
+        image.flip();
+      } else {
+        image.rotate();
+      }
     }
     return numImages;
   }

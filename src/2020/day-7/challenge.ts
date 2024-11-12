@@ -136,9 +136,7 @@ const getCountsOfBagsThatHoldAColor = (
 
   const found = new Set<IBNode>();
   const foundCount = topBag.children.reduce(
-    (acc: number, c: IBNodeAndCount) => {
-      return acc + findChildrenBags(c, found);
-    },
+    (acc: number, c: IBNodeAndCount) => acc + findChildrenBags(c, found),
     0
   );
   return foundCount;

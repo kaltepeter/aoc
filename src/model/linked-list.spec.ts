@@ -1,5 +1,7 @@
 import { range } from 'ramda';
-import { ItemNotFoundError, LinkedList, ListEmptyError } from './linked-list';
+import { LinkedList } from './linked-list';
+import { ListEmptyError } from './list-empty-error';
+import { ItemNotFoundError } from './item-not-found-error';
 
 describe(`LinkedList`, () => {
   let list: LinkedList<string>;
@@ -14,44 +16,44 @@ describe(`LinkedList`, () => {
 
   describe(`getFirst()`, () => {
     it('should throw if empty', () => {
-      expect(() => list.getFirst()).toThrowError(ListEmptyError());
+      expect(() => list.getFirst()).toThrowError(ListEmptyError);
     });
   });
 
   describe(`findByItem('20')`, () => {
     it('should throw if empty', () => {
-      expect(() => list.findByItem('20')).toThrowError(ListEmptyError());
+      expect(() => list.findByItem('20')).toThrowError(ListEmptyError);
     });
   });
 
   describe(`getLast()`, () => {
     it('should throw if empty', () => {
-      expect(() => list.getLast()).toThrowError(ListEmptyError());
+      expect(() => list.getLast()).toThrowError(ListEmptyError);
     });
   });
 
   describe(`contains()`, () => {
     it('should throw if empty', () => {
-      expect(() => list.contains('40')).toThrowError(ListEmptyError());
+      expect(() => list.contains('40')).toThrowError(ListEmptyError);
     });
   });
 
   describe(`remove()`, () => {
     it('should throw if empty', () => {
-      expect(() => list.remove('40')).toThrowError(ListEmptyError());
+      expect(() => list.remove('40')).toThrowError(ListEmptyError);
     });
   });
 
   describe(`removeFirst()`, () => {
     it('should throw if empty', () => {
-      expect(() => list.removeFirst()).toThrowError(ListEmptyError());
+      expect(() => list.removeFirst()).toThrowError(ListEmptyError);
     });
   });
 
   describe(`insertFirstBefore()`, () => {
     it(`should throw error `, () => {
       expect(() => list.insertBeforeFirst('20', '11')).toThrowError(
-        ItemNotFoundError('20')
+        new ItemNotFoundError('20')
       );
     });
   });
@@ -59,7 +61,7 @@ describe(`LinkedList`, () => {
   describe(`insertFirstAfter()`, () => {
     it(`should throw error `, () => {
       expect(() => list.insertAfterFirst('20', '11')).toThrowError(
-        ItemNotFoundError('20')
+        new ItemNotFoundError('20')
       );
     });
   });
@@ -101,7 +103,7 @@ describe(`LinkedList`, () => {
     ])(
       `insertBeforeFirst(%s, %s)`,
       (searchItem: string, newItem: string, expectedResult: string[]) => {
-        it(`should return ${expectedResult}`, () => {
+        it(`should return ${expectedResult.toString()}`, () => {
           list.insertBeforeFirst(searchItem, newItem);
           expect(list.listContents()).toEqual(expectedResult);
         });
@@ -115,7 +117,7 @@ describe(`LinkedList`, () => {
     ])(
       `insertAfterFirst(%s, %s)`,
       (searchItem: string, newItem: string, expectedResult: string[]) => {
-        it(`should return ${expectedResult}`, () => {
+        it(`should return ${expectedResult.toString()}`, () => {
           list.insertAfterFirst(searchItem, newItem);
           expect(list.listContents()).toEqual(expectedResult);
         });

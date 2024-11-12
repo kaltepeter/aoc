@@ -4,7 +4,7 @@ import { writeToLog } from 'util/debug';
 const LOG_FILE = join(__dirname, 'challenge.log');
 export interface IDockData {
   mask: string;
-  memory: Array<{ loc: string; value: number }>;
+  memory: { loc: string; value: number }[];
 }
 
 const getMask = (m: string, prevVal: bigint): string => {
@@ -28,14 +28,12 @@ const convertToBinaryString = (num: bigint) =>
   num.toString(2).padStart(36, '0');
 
 const getSumOfProgram = (memory: { [key: string]: bigint }): bigint =>
-  Object.values(memory).reduce((acc, v) => {
-    return (acc += v);
-  }, BigInt(0));
+  Object.values(memory).reduce((acc, v) => (acc += v), BigInt(0));
 
-const setBit = (n: bigint, bitIndex: bigint): bigint => {
-  const bitMask = BigInt(1) << bitIndex;
-  return n | bitMask;
-};
+// const setBit = (n: bigint, bitIndex: bigint): bigint => {
+//   const bitMask = BigInt(1) << bitIndex;
+//   return n | bitMask;
+// };
 
 const clearBit = (n: bigint, bitIndex: bigint): bigint => {
   const bitMask = ~(BigInt(1) << bitIndex);
@@ -85,6 +83,7 @@ const getMasksFromMaskString = (mask: string): Set<string> => {
         return +i;
       }
     })
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     .filter(Boolean as any);
   const xPosReversed = xPos.slice().reverse();
   const startM = mask.replace(/X/g, '0');
@@ -125,7 +124,8 @@ const combinations = (n: number) => {
 const programMemoryToString = (programMemory: { [key: string]: bigint }) =>
   JSON.stringify(
     programMemory,
-    (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    (_key, value): string =>
+      typeof value === 'bigint' ? value.toString() : String(value) // return everything else as string  );
   );
 
 const decodeDockDataV2 = (data: IDockData[]) => {
@@ -143,12 +143,10 @@ const decodeDockDataV2 = (data: IDockData[]) => {
         mask.split('').filter((v) => v === 'X').length
       );
       writeToLog(LOG_FILE, `${mask} : #mask, ${combos.length} #combos`);
-      const mList = getMasksFromMaskString(mask);
-      const maskList = Array.from(mList).sort();
 
-      combos.forEach((combo, idx) => {
+      combos.forEach((combo, _idx) => {
         let xPos = 0;
-        const a = mask.split('').map((v, i) => {
+        const a = mask.split('').map((v, _i) => {
           if (v === 'X') {
             return combo[xPos++];
           }

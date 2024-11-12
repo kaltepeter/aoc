@@ -10,8 +10,8 @@ const sampleDataText = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
-const processRules = (ruleList: string): IRule[] => {
-  return ruleList.split('\n').map((r) => {
+const processRules = (ruleList: string): IRule[] =>
+  ruleList.split('\n').map((r) => {
     const [key, v] = r.split(':');
     const valList: RuleRange[] = v
       .split(' or ')
@@ -22,7 +22,6 @@ const processRules = (ruleList: string): IRule[] => {
       [key]: valList,
     };
   });
-};
 
 const processTickets = (tList: string) =>
   tList

@@ -1,19 +1,16 @@
-import { access } from 'fs';
 import { splitEvery } from 'ramda';
 import { LinkedListItem } from './linked-list-item';
-
-export const ListEmptyError = () => new Error('List is empty.');
-export const ItemNotFoundError = (item: any) =>
-  new Error(`Item "${item}" not found.`);
+import { ItemNotFoundError } from './item-not-found-error';
+import { ListEmptyError } from './list-empty-error';
 
 const processChunk = <T>(
   list: T[],
   processFn: (l: T[], v: T) => LinkedList<T>,
   chunkSize = 500
-): Promise<Array<LinkedList<T>>> => {
-  const finalList: Array<LinkedList<T>> = [];
-  return new Promise((resolve, reject) => {
-    function help(subArr: T[]) {
+): Promise<LinkedList<T>[]> => {
+  const finalList: LinkedList<T>[] = [];
+  return new Promise((resolve) => {
+    const help = (subArr: T[]) => {
       if (subArr.length > 0) {
         for (const item of subArr) {
           finalList.push(processFn(subArr, item));
@@ -25,7 +22,7 @@ const processChunk = <T>(
       // "Asynchronous recursion".
       // Schedule next operation asynchronously.
       setImmediate(help.bind(null, list.splice(0, chunkSize)));
-    }
+    };
 
     setImmediate(help.bind(null, list.splice(0, chunkSize)));
   });
@@ -71,7 +68,7 @@ export class LinkedList<T> {
     }
 
     if (!found) {
-      throw ItemNotFoundError(searchItem);
+      throw new ItemNotFoundError(searchItem);
     }
   }
 
@@ -92,7 +89,7 @@ export class LinkedList<T> {
     }
 
     if (!found) {
-      throw ItemNotFoundError(searchItem);
+      throw new ItemNotFoundError(searchItem);
     }
   }
 
@@ -118,7 +115,7 @@ export class LinkedList<T> {
     }
 
     if (!found) {
-      throw ItemNotFoundError(searchItem);
+      throw new ItemNotFoundError(searchItem);
     }
   }
 
@@ -137,7 +134,7 @@ export class LinkedList<T> {
 
   removeFirst(): T | null {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
 
     const rv: LinkedListItem<T> | null = this.head.next;
@@ -152,7 +149,7 @@ export class LinkedList<T> {
 
   remove(searchKey: T): T | null {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
 
     let rv: LinkedListItem<T> | null = null;
@@ -172,7 +169,7 @@ export class LinkedList<T> {
 
   removeFrom(searchKey: T, count: number): T[] {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
 
     const rv: T[] = [];
@@ -195,7 +192,7 @@ export class LinkedList<T> {
 
   contains(searchItem: T): boolean {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
 
     let rv = false;
@@ -215,14 +212,14 @@ export class LinkedList<T> {
 
   getFirst(): LinkedListItem<T> | null {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
     return this.head.next;
   }
 
   getLast(): LinkedListItem<T> | null {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
     let cur: LinkedListItem<T> | null = this.head;
 
@@ -234,7 +231,7 @@ export class LinkedList<T> {
 
   findByItem(searchItem: T): LinkedListItem<T> | null {
     if (this.isEmpty()) {
-      throw ListEmptyError();
+      throw new ListEmptyError();
     }
     let cur: LinkedListItem<T> | null = this.head;
 
@@ -291,7 +288,7 @@ export class LinkedList<T> {
 
     const processedLists = await processChunk<T>(
       list,
-      (l, _: T) =>
+      (l) =>
         l.reduce((acc, v) => {
           acc.insertFirst(v);
           return acc;

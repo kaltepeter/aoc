@@ -35,24 +35,24 @@ const calcDirs = (startDir: Direction, val: number) => {
   return newDir;
 };
 
-const getActionForDirection = (dir: Direction, opposite: boolean = false) => {
-  switch (dir) {
-    case Direction.N:
-      return opposite ? Action.SOUTH : Action.NORTH;
-    case Direction.E:
-      return opposite ? Action.WEST : Action.EAST;
-    case Direction.S:
-      return opposite ? Action.NORTH : Action.SOUTH;
-    case Direction.W:
-      return opposite ? Action.EAST : Action.WEST;
-    default:
-      break;
-  }
-};
+// const getActionForDirection = (dir: Direction, opposite: boolean = false) => {
+//   switch (dir) {
+//     case Direction.N:
+//       return opposite ? Action.SOUTH : Action.NORTH;
+//     case Direction.E:
+//       return opposite ? Action.WEST : Action.EAST;
+//     case Direction.S:
+//       return opposite ? Action.NORTH : Action.SOUTH;
+//     case Direction.W:
+//       return opposite ? Action.EAST : Action.WEST;
+//     default:
+//       break;
+//   }
+// };
 
 export type CHANGE_DIRECTION = Action.LEFT | Action.RIGHT;
 
-export type Instructions = Array<[Action, number]>;
+export type Instructions = [Action, number][];
 
 export interface ITrackPath {
   [Action.NORTH]: number;
@@ -77,26 +77,20 @@ const calcShipPath = (instructions: Instructions) => {
     [Action.FORWARD]: 0,
   };
   let curDirection = START_DIR;
-  let x = 0;
-  let y = 0;
   instructions.forEach(([action, value]) => {
     switch (action) {
       case Action.FORWARD:
         switch (curDirection) {
           case Direction.N:
-            y -= value;
             trackPath[Action.NORTH] -= value;
             break;
           case Direction.S:
-            y += value;
             trackPath[Action.SOUTH] += value;
             break;
           case Direction.E:
-            x += value;
             trackPath[Action.EAST] += value;
             break;
           case Direction.W:
-            x -= value;
             trackPath[Action.WEST] -= value;
             break;
           default:
@@ -105,19 +99,15 @@ const calcShipPath = (instructions: Instructions) => {
         break;
       case Action.NORTH:
         trackPath[action] -= value;
-        y -= value;
         break;
       case Action.SOUTH:
         trackPath[action] += value;
-        y += value;
         break;
       case Action.EAST:
         trackPath[action] += value;
-        x += value;
         break;
       case Action.WEST:
         trackPath[action] -= value;
-        x -= value;
         break;
       case Action.RIGHT:
         curDirection = calcDirs(curDirection, value);

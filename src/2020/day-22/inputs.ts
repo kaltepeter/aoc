@@ -13,7 +13,7 @@ const infiniteGameText = fs
   .readFileSync(path.join(__dirname, 'infinite-game.txt'))
   .toString('utf-8');
 
-const readData = (t: string): Array<[string, number[]]> =>
+const readData = (t: string): [string, number[]][] =>
   t
     .split('\n\n')
     .filter((val: string) => !(val.trim() === ''))

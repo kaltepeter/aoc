@@ -10,21 +10,7 @@ describe(`day 9: Encoding Error`, () => {
   test(`should process numbers`, () => {
     expect(sample).toEqual({
       data: [
-        40,
-        62,
-        55,
-        65,
-        95,
-        102,
-        117,
-        150,
-        182,
-        127,
-        219,
-        299,
-        277,
-        309,
-        576,
+        40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576,
       ],
       preamble: [35, 20, 15, 25, 47],
     });
@@ -71,7 +57,7 @@ describe(`day 9: Encoding Error`, () => {
   ])(
     `getValidNumbers(%i, %p)`,
     (num: number, list: number[], expectedValid: number[]) => {
-      test(`should return ${expectedValid}`, () => {
+      test(`should return ${expectedValid.toString()}`, () => {
         expect(getValidNumbers(num, list).sort()).toEqual([...expectedValid]);
       });
     }

@@ -70,7 +70,7 @@ const validateOutput = (num: number, list: number[]) => {
 
 // cheated cuz math sucks
 const findBusTimes = (data: string) => {
-  const busses: Array<[number, number]> = data
+  const busses: [number, number][] = data
     .split(',')
     .map(
       (bus, offset) =>
@@ -92,12 +92,11 @@ const findBusTimes = (data: string) => {
   return sum;
 };
 
-const getTableOfBusses = ([startTime, t]: string[]) => {
+const getTableOfBusses = ([_startTime, t]: string[]) => {
   const validTimes: number[] = getValidTimes(t);
-  const onlyTimes: number[] = getTimes(t).filter((v) => !Number.isNaN(v));
   const remainders: number[] = new Array(validTimes.length)
     .fill(1)
-    .map((n, idx) => validTimes.length - idx);
+    .map((_n, idx) => validTimes.length - idx);
   // console.log(new Array(validTimes.length).fill(1).map((v, i) => i));
   const res = crt(validTimes, remainders);
   return res - validTimes.length;

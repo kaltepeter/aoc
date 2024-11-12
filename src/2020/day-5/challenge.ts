@@ -50,7 +50,9 @@ const parseSeat = (code: string): ISeat | undefined => {
   ) {
     return { row: curRowRange[0], seat: curSeatRange[0] };
   } else {
-    console.error(`Seat not found. row: ${curRowRange}, seat: ${curSeatRange}`);
+    console.error(
+      `Seat not found. row: ${curRowRange.toString()}, seat: ${curSeatRange.toString()}`
+    );
   }
 };
 
@@ -62,7 +64,8 @@ const calcSeatIdsForListOfSeats = (seats: ISeat[]) =>
 const parseListOfSeats = (listOfSeats: string[]): ISeat[] =>
   listOfSeats.map((seatPath) => parseSeat(seatPath) as ISeat);
 
-const generateSeats = () => new Array(128).fill(new Array(8).fill('.'));
+const generateSeats = () =>
+  new Array<string[]>(128).fill(new Array<string>(8).fill('.'));
 
 const calcAvailableSeatIds = (): number[] =>
   flatten(

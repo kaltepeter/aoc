@@ -4,7 +4,7 @@ import { bufferCount, map, mergeMap } from 'rxjs/operators';
 const fns = {
   add: (x: number, y: number) => x + y,
   multiply: (x: number, y: number) => x * y,
-  exit: (x: number, y: number) => null,
+  exit: () => null,
 };
 
 const getOpFn = (opCode: number) => {
@@ -27,7 +27,7 @@ const getOpFn = (opCode: number) => {
 };
 
 const execOp = (intCode: number[], program: number[]): number | null => {
-  const [opCode, inputPos1, inputPos2, outputPos] = intCode;
+  const [opCode, inputPos1, inputPos2, _rest] = intCode;
   const inputs = [program[inputPos1], program[inputPos2]];
   return getOpFn(opCode)(inputs[0], inputs[1]);
 };
@@ -39,7 +39,7 @@ const execGravityAssistProgram$ = (inputs: number[]): Observable<number[]> => {
     bufferCount(4),
     map((intcode) => {
       if (intcode.length === 4) {
-        const [opCode, input1Pos, input2Pos, outputPos] = intcode;
+        const outputPos = intcode[3];
         const calcOutput = execOp(intcode, output);
         if (calcOutput) {
           output.splice(outputPos, 1, calcOutput);

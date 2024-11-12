@@ -20,7 +20,7 @@ export interface IPassport {
   cid?: string;
 }
 
-const requiredFields: Array<keyof IPassport> = [
+const requiredFields: (keyof IPassport)[] = [
   'byr',
   'iyr',
   'eyr',
@@ -33,7 +33,7 @@ const requiredFields: Array<keyof IPassport> = [
 export const eyeColor = ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'];
 
 const processPassports = (batchFile: string): IPassport[] =>
-  (batchFile
+  batchFile
     .split('\n\n')
     .map(
       (p) =>
@@ -47,11 +47,12 @@ const processPassports = (batchFile: string): IPassport[] =>
             const retVal = v ? v : val;
             return [key, retVal];
           })
-          .filter((pair) => pair.length === 2) as Array<
-          KeyValuePair<string, string | number>
-        >
+          .filter((pair) => pair.length === 2) as KeyValuePair<
+          string,
+          string | number
+        >[]
     )
-    .map((pairs) => fromPairs(pairs)) as unknown) as IPassport[];
+    .map((pairs) => fromPairs(pairs)) as unknown as IPassport[];
 
 const validateHeightInInches = (hgt: number) => gte(hgt, 59) && lte(hgt, 76);
 const validateHeightInCm = (hgt: number) => gte(hgt, 150) && lte(hgt, 193);

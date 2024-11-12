@@ -1,5 +1,6 @@
 import { playGame } from './challenge';
 import { inputs } from './inputs';
+import assert from 'node:assert';
 
 // const startNums = process.argv?.slice(2).map((v) => +v);
 
@@ -7,8 +8,6 @@ import { inputs } from './inputs';
 
 const result = playGame(inputs[0], 30000000);
 
-if (result !== 689) {
-  console.error(`FAILED`);
-}
+assert(result === 689, `expected 689, got ${result}`);
 
 console.log(`result: ${result}`);

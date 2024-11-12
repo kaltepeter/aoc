@@ -16,7 +16,7 @@ describe(`CircularLinkedList`, () => {
   });
 
   describe(`with values`, () => {
-    const expectedBaseOrder = ['3', '8', '9', '1', '2', '5', '4', '6', '7'];
+    // const expectedBaseOrder = ['3', '8', '9', '1', '2', '5', '4', '6', '7'];
     beforeEach(() => {
       '389125467'
         .split('')

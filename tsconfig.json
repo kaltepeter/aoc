@@ -22,6 +22,5 @@
       "testing/*": ["src/testing/*"],
       "model/*": ["src/model/*"]
     }
-  },
-  "exclude": ["src/test-setup.ts", "**/*.spec.ts"]
+  }
 }

@@ -1,4 +1,4 @@
-import { fromPairs, objOf, transpose } from 'ramda';
+import { transpose } from 'ramda';
 import {
   getErrorRate,
   getInvalidTicketValues,
@@ -73,9 +73,7 @@ describe(`Day 16: Ticket Translation`, () => {
 
     test(`getTicketFieldList(sample)`, () => {
       const ticketList = getValidTickets(sample);
-      const rules = processRules(ticketList.rules);
       const fieldValues = transpose(ticketList.nearbyTickets);
-      const list = getTicketFieldList(rules, fieldValues);
       expect(fieldValues.length).toBe(3);
       expect(fieldValues[0].length).toBe(2);
     });

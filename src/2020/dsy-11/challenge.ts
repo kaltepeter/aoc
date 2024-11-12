@@ -13,12 +13,12 @@ export interface ISeatTracker {
 
 export type SeatMap = Seat[][];
 
-const printSeatMap = (seatMap: SeatMap) => {
-  console.log(seatMap.map((r) => r.join('')).join('\n'));
-};
+// const printSeatMap = (seatMap: SeatMap) => {
+//   console.log(seatMap.map((r) => r.join('')).join('\n'));
+// };
 
-const inBounds = (seatMap: SeatMap, row: number, col: number) =>
-  row >= 0 && row < seatMap.length && col >= 0 && col < seatMap[0].length;
+// const inBounds = (seatMap: SeatMap, row: number, col: number) =>
+//   row >= 0 && row < seatMap.length && col >= 0 && col < seatMap[0].length;
 
 const getAdjacentSeats = (
   seatMap: SeatMap,
@@ -196,22 +196,28 @@ const getOccupiedSeats = (seatMap: SeatMap): ISeatTracker => {
   return foundCoords;
 };
 
-const groupSeats = (seat: string) => {
-  if (seat === Seat.OCCUPIED) {
+const groupSeats = (seat: string): Seat => {
+  if (seat === Seat.OCCUPIED.valueOf()) {
     return Seat.OCCUPIED;
-  } else if (seat === Seat.UNOCCUPIED) {
+  } else if (seat === Seat.UNOCCUPIED.valueOf()) {
     return Seat.UNOCCUPIED;
   } else {
     return Seat.FLOOR;
   }
 };
 
-const getSeatCounts = (seatList: string[]): Record<string, number> => {
+const getSeatCounts = (seatList: string[]): Record<Seat, number> => {
   const seatGroups = groupBy((s) => groupSeats(s), seatList);
-  return mapObjIndexed<string[], number, string>(
-    (counts, key, sg) => counts.length,
+  const seatCounts = mapObjIndexed<string[], number, Seat>(
+    (counts) => counts.length,
     seatGroups
   );
+
+  return {
+    [Seat.FLOOR]: seatCounts[Seat.FLOOR] ?? 0,
+    [Seat.UNOCCUPIED]: seatCounts[Seat.UNOCCUPIED] ?? 0,
+    [Seat.OCCUPIED]: seatCounts[Seat.OCCUPIED] ?? 0,
+  };
 };
 
 const changeSeats = (

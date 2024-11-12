@@ -5,7 +5,6 @@ import {
   playCups,
   playCupsPartII,
 } from './challenge';
-import { LinkedList } from '../../model/linked-list';
 
 describe(`Day 23: Crab Cups`, () => {
   it(`should should play cups for sample, 10 moves`, () => {

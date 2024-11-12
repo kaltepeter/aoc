@@ -5,8 +5,6 @@ import {
   calcPocketDimension,
   calcPocketDimensionFast,
   calcPocketDimensionFast4D,
-  countResults,
-  Flags,
   getCurrentCube,
   getLastSetBit,
   getMaskForValue,

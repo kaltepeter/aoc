@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { keys } from 'ramda';
 import { IMonsterMessages } from './challenge';
 
 const text = fs
@@ -45,8 +44,8 @@ const readData = (t: string) =>
 const readData2 = (t: string) =>
   t
     .split('\n')
-    .filter((val: string) => !(val.trim() === ''))
-    .reduce<any>(
+    .filter((val) => !(val.trim() === ''))
+    .reduce(
       (acc, v) => {
         if (v.match(/^\d+:.*/)) {
           const ruleParts = v.split(':');
@@ -62,7 +61,7 @@ const readData2 = (t: string) =>
         }
         return acc;
       },
-      { rules: new Map<number, string>(), messages: [] }
+      { rules: new Map<number, string>(), messages: new Array<string>() }
     );
 
 const inputs = readData2(text);

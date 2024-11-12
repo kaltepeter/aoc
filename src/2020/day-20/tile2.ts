@@ -10,6 +10,13 @@ class Tile {
 
   private _allEdges: string[] = [];
 
+  constructor(readonly id: string, private readonly _data: string[]) {
+    const edgeH = zip(DEFAULT_EDGE_STATE, Array.from(this.allEdges()));
+    edgeH.forEach(([label, edge]) => {
+      this.edgeHash.set(label, edge);
+    });
+  }
+
   get data(): string[] {
     const lookupKey = [this.flipped, this.numRotations].toString();
     if (!this.dataCache.has(lookupKey)) {
@@ -19,13 +26,6 @@ class Tile {
       }
     }
     return this.dataCache.get(lookupKey) || [];
-  }
-
-  constructor(readonly id: string, private readonly _data: string[]) {
-    const edgeH = zip(DEFAULT_EDGE_STATE, Array.from(this.allEdges()));
-    edgeH.forEach(([label, edge]) => {
-      this.edgeHash.set(label, edge);
-    });
   }
 
   allEdges() {
@@ -82,7 +82,11 @@ class Tile {
       if (this.edgeAt(dir) === edge) {
         return true;
       }
-      i === this.NUM_SIDES - 1 ? this.flip() : this.rotate();
+      if (i === this.NUM_SIDES - 1) {
+        this.flip();
+      } else {
+        this.rotate();
+      }
     }
   }
 

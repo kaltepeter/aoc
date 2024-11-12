@@ -1,11 +1,8 @@
 import { of, range } from 'rxjs';
 import {
   bufferCount,
-  flatMap,
   map,
   mergeAll,
-  mergeMap,
-  reduce,
   tap,
   toArray,
   withLatestFrom,
@@ -61,7 +58,7 @@ const getMaxMovement = (d: string[]): number =>
  * @param commands ['D7,'R4','U2','L2']
  * @returns [['D', 7], ['R', 4], ['U', 2], ['L', 2]]
  */
-const getPaths = (commands: string[]): Array<[string, number]> =>
+const getPaths = (commands: string[]): [string, number][] =>
   commands.map((val) => [val[0], +val.slice(1)]);
 
 const setupMatrix = (d: string[]): MatrixMetrics => {
@@ -74,8 +71,8 @@ const setupMatrix = (d: string[]): MatrixMetrics => {
 
   const getMoveDistance = (dirs: string[]) => {
     const dist = [...paths]
-      .filter(([command, _]) => dirs.includes(command))
-      .reduce((acc, [command, distance]) => {
+      .filter(([command]) => dirs.includes(command))
+      .reduce((acc, [_, distance]) => {
         // start = command === dirs[0] ? start + distance : start - distance;
         acc += distance;
         return acc;
@@ -88,9 +85,7 @@ const setupMatrix = (d: string[]): MatrixMetrics => {
     second: StartMetrics,
     size: number,
     buffer: number
-  ) => {
-    return first[0] < second[0] ? size - buffer : buffer;
-  };
+  ) => (first[0] < second[0] ? size - buffer : buffer);
 
   const [xMove] = getMoveDistance(['L', 'R']);
   const [yMove] = getMoveDistance(['U', 'D']);
@@ -130,25 +125,20 @@ const setupMatrix = (d: string[]): MatrixMetrics => {
   // console.log(metrics);
   return metrics;
 };
-// rows of columns (x col, y row)
-let matrix: string[][] = [];
 
 const matrix$ = (m: MatrixMetrics) =>
   range(0, m.gridSize).pipe(
     bufferCount(m.rowSize),
-    map((v) => new Array(m.rowSize).fill('.')),
+    map(() => new Array<string>(m.rowSize).fill('.')),
     toArray(),
     mergeAll(),
-    toArray(),
+    toArray()
     // map(v => {
     //   const startRow = [...v[m.startRowIndex]];
     //   startRow.splice(m.startColIndex, 1, 'o');
     //   v[m.startRowIndex] = [...startRow];
     //   return v;
     // }),
-    tap((finalM) => {
-      matrix = [...finalM];
-    })
   );
 
 const drawU: DrawFn = (dist, r, c, curM) => {
@@ -329,7 +319,7 @@ const execCommand = (commandCode: string, ...args: Parameters<DrawFn>) => {
 };
 
 const calcDirections = (
-  paths: Array<[string, number]>
+  paths: [string, number][]
 ): MatrixMetrics['firstMoves'] => {
   const upIndex = paths.findIndex((path) => path[0].match('U'));
   const downIndex = paths.findIndex((path) => path[0].match('D'));
@@ -344,47 +334,47 @@ const calcDirections = (
   };
 };
 
-const drawWires2$ = (instructions: string[], matrixMetrics: MatrixMetrics) => {
-  const retMatrix: string[][] = [['o']];
-  console.log(matrixMetrics);
-  return of(instructions).pipe(
-    mergeMap((c) => getPaths(c)),
-    reduce(
-      (acc, c) => {
-        const command = c[0];
-        const distance = c[1];
-        console.log('TCL: command, distance', command, distance);
-        const retM = [...acc];
-        let rowCursor = 0;
-        let colCursor = 0;
-        const commandResult = execCommand(
-          command,
-          distance,
-          rowCursor,
-          colCursor,
-          retM
-        );
-        rowCursor = commandResult.rowCursor;
-        colCursor = commandResult.colCursor;
-        acc = commandResult.m;
+// const drawWires2$ = (instructions: string[], matrixMetrics: MatrixMetrics) => {
+//   const retMatrix: string[][] = [['o']];
+//   console.log(matrixMetrics);
+//   return of(instructions).pipe(
+//     mergeMap((c) => getPaths(c)),
+//     reduce(
+//       (acc, c) => {
+//         const command = c[0];
+//         const distance = c[1];
+//         console.log('TCL: command, distance', command, distance);
+//         const retM = [...acc];
+//         let rowCursor = 0;
+//         let colCursor = 0;
+//         const commandResult = execCommand(
+//           command,
+//           distance,
+//           rowCursor,
+//           colCursor,
+//           retM
+//         );
+//         rowCursor = commandResult.rowCursor;
+//         colCursor = commandResult.colCursor;
+//         acc = commandResult.m;
 
-        return acc;
-      },
-      [...retMatrix]
-    ),
-    tap((d) => {
-      console.log(d);
-      // console.log(matrixMetrics);
-      printMatrix(d, 'draw', matrixMetrics);
-    }),
-    // tap(console.log),
-    withLatestFrom(matrix$(matrixMetrics))
-    // map(([ds, m]) => {
-    //   // console.log('TCL: ds', ds);
-    // }),
-    // map(d => retMatrix),
-  );
-};
+//         return acc;
+//       },
+//       [...retMatrix]
+//     ),
+//     tap((d) => {
+//       console.log(d);
+//       // console.log(matrixMetrics);
+//       printMatrix(d, 'draw', matrixMetrics);
+//     }),
+//     // tap(console.log),
+//     withLatestFrom(matrix$(matrixMetrics))
+//     // map(([ds, m]) => {
+//     //   // console.log('TCL: ds', ds);
+//     // }),
+//     // map(d => retMatrix),
+//   );
+// };
 
 const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
   of(instructions).pipe(
@@ -393,7 +383,7 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
     //   return path;
     // }),
     withLatestFrom(matrix$(matrixMetrics)),
-    map(([ds, m]) => {
+    map(([_, m]) => {
       console.log(matrixMetrics);
       const v = [...m];
       const startRow = [...v[matrixMetrics.startY]];
@@ -429,7 +419,7 @@ const drawWires$ = (instructions: string[], matrixMetrics: MatrixMetrics) =>
 
       return [retM, m];
     }),
-    tap(([d, source]) => {
+    tap(([d]) => {
       printMatrix(d, 'draw', matrixMetrics);
       // printMatrix(source, 'draws', matrixMetrics);
     })
@@ -470,15 +460,15 @@ const checkCrossedWires = () => {
   // printMatrix(matrix, 'matrix');
   // });
 
-  drawWires$([...testData], setupMatrix([...testData])).subscribe((d) => {});
+  drawWires$([...testData], setupMatrix([...testData])).subscribe(() => {});
   // drawWires2$([...testData], setupMatrix([...testData])).subscribe(d => {});
 };
 export {
+  calcDirections,
   checkCrossedWires,
+  drawWires$,
+  getMaxMovement,
   matrix$,
   printMatrix,
-  getMaxMovement,
   setupMatrix,
-  drawWires$,
-  calcDirections,
 };

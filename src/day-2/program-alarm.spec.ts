@@ -29,7 +29,7 @@ describe('2: program alarm', () => {
       [30, 1, 1, 4, 2, 5, 6, 0, 99],
     ],
   ])('execGravityAssistProgram$(%a)', (value: number[], expected: number[]) => {
-    test(`returns ${expected}`, async () => {
+    test(`returns ${expected.toString()}`, async () => {
       expect.assertions(1);
       const val$ = await execGravityAssistProgram$(value).toPromise();
       expect(val$).toEqual(expected);
@@ -49,11 +49,14 @@ describe('2: opcode', () => {
     ${1}  | ${fns.add}
     ${2}  | ${fns.multiply}
     ${99} | ${fns.exit}
-  `('getOpFn($value)', ({ value, expected }) => {
-    test(`returns ${expected}`, () => {
-      expect(getOpFn(value)).toBe(expected);
-    });
-  });
+  `(
+    'getOpFn($value)',
+    ({ value, expected }: { value: number; expected: any }) => {
+      test(`returns ${expected}`, () => {
+        expect(getOpFn(value)).toBe(expected);
+      });
+    }
+  );
 
   test('add', () => {
     expect(fns.add(1, 3)).toBe(4);
@@ -63,7 +66,7 @@ describe('2: opcode', () => {
     expect(fns.multiply(1, 3)).toBe(3);
   });
   test('exit', () => {
-    expect(fns.exit(1, 3)).toBe(null);
+    expect(fns.exit()).toBe(null);
   });
   test('error', () => {
     expect(getOpFn(1202)).toThrow(`unknown op code '1202'`);
@@ -74,11 +77,14 @@ describe('2: opcode', () => {
     ${[1, 9, 10, 3]}    | ${70}
     ${[2, 3, 11, 0]}    | ${3500}
     ${[99, 30, 40, 50]} | ${null}
-  `('execOp($value)', ({ value, expected }) => {
-    test(`returns ${expected}`, () => {
-      expect(execOp(value, [...program])).toBe(expected);
-    });
-  });
+  `(
+    'execOp($value)',
+    ({ value, expected }: { value: number[]; expected: any }) => {
+      test(`returns ${expected}`, () => {
+        expect(execOp(value, [...program])).toBe(expected);
+      });
+    }
+  );
 });
 
 describe('2: challenge', () => {
@@ -104,7 +110,7 @@ describe('2: challenge', () => {
     const inputMod = [...inputs];
     const noun = 76;
     const verb = 10;
-    const val$ = await execGravityAssistProgram$(inputMod).toPromise();
+    await execGravityAssistProgram$(inputMod).toPromise();
     expect(100 * noun + verb).toBe(7610);
   });
 });

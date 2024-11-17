@@ -54,7 +54,7 @@ describe(`Day 17: Conway Cubes`, () => {
     const res = getPermutationsOfCoords(pos);
     expect(res.length).toBe(26);
     expect(res).toEqual(
-      jasmine.arrayContaining([
+      expect.arrayContaining([
         [-1, 0, 1],
         [0, 1, 1],
         [0, 2, 2],
@@ -201,7 +201,7 @@ describe(`Day 17: Conway Cubes`, () => {
       const res = getPermutationsOfCoordsFor4D(pos);
       expect(res.length).toBe(80);
       expect(res).toEqual(
-        jasmine.arrayContaining([
+        expect.arrayContaining([
           [-1, 0, 1, 2],
           [0, 1, 1, 2],
           [0, 2, 2, 3],

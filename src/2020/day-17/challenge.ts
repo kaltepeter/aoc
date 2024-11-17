@@ -41,7 +41,7 @@ enum Flags {
 }
 
 const getNeighborsMask = 0b111111111111111111111111110;
-const isEmpty = (v: number) => !(v > Flags.NONE);
+const isEmpty = (v: number) => !(v > Flags.NONE.valueOf());
 const getNeighborCount = (v: number) =>
   (v & getNeighborsMask).toString(2).replace(/0/g, '').trim().length;
 const getLastSetBit = (v: number) => {
@@ -192,7 +192,7 @@ const calcNextGeneration = (
   for (const [key, val] of currentDimension) {
     const self = val & Flags.SELF;
     const neighborCount = getNeighborCount(val);
-    if (self === Flags.SELF) {
+    if (self === Flags.SELF.valueOf()) {
       if (neighborCount !== 2 && neighborCount !== 3) {
         // nextDimension.set(key, 0b0)
       } else {

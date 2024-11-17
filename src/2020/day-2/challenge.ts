@@ -1,5 +1,10 @@
 import { filter } from 'ramda';
-const isValidPw = ([min, max, letter, word]: (string | number)[]): boolean => {
+const isValidPw = ([min, max, letter, word]: [
+  number,
+  number,
+  string,
+  string
+]): boolean => {
   const vals = filter((l) => l === letter, `${word}`.split(''));
   return vals.length >= min && vals.length <= max ? true : false;
 };
@@ -20,7 +25,7 @@ const validPasswords = (validatePasswords: boolean[]): boolean[] =>
   filter((isValid) => isValid === true, validatePasswords);
 
 const processPasswords = (
-  listOfPasswords: (string | number)[][]
+  listOfPasswords: [number, number, string, string][]
 ): boolean[] => {
   const validatePasswords = listOfPasswords.map((pass) => isValidPw(pass));
   return validPasswords(validatePasswords);

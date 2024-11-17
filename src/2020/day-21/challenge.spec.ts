@@ -38,7 +38,7 @@ describe(`Day 21: Allergen Assessment`, () => {
   it(`should get list not in allergen list`, () => {
     const list = getFoodList(sample);
     expect(findIngredientsNotInAllergenList(list)).toEqual(
-      jasmine.arrayContaining(['kfcds', 'nhms', 'sbzzf', 'trh'])
+      expect.arrayContaining(['kfcds', 'nhms', 'sbzzf', 'trh'])
     );
   });
 
@@ -46,7 +46,7 @@ describe(`Day 21: Allergen Assessment`, () => {
     const list = getFoodList(sample);
     const res = processAllergens(list);
     expect(fromPairs(Array.from(res.entries()))).toEqual(
-      jasmine.objectContaining({
+      expect.objectContaining({
         mxmxvkd: 'dairy',
         sqjhc: 'fish',
         fvjkl: 'soy',
@@ -58,7 +58,7 @@ describe(`Day 21: Allergen Assessment`, () => {
     const list = getFoodList(inputs);
     const res = processAllergens(list);
     expect(fromPairs(Array.from(res.entries()))).toEqual(
-      jasmine.objectContaining({
+      expect.objectContaining({
         xpbxbv: 'sesame',
         jtjtrd: 'shellfish',
         fvjkp: 'soy',

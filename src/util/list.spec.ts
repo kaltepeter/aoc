@@ -16,13 +16,13 @@ describe(`util::list`, () => {
   describe(`intersect`, () => {
     it(`intersect(list1, list2)`, () => {
       expect(intersect(list1, list2)).toEqual(
-        jasmine.arrayContaining(['mxmxvkd'])
+        expect.arrayContaining(['mxmxvkd'])
       );
     });
 
     it(`intersect(list1, additionalLists)`, () => {
       expect(intersect(list1, ...additionalLists)).toEqual(
-        jasmine.arrayContaining(['sqjhc'])
+        expect.arrayContaining(['sqjhc'])
       );
     });
   });

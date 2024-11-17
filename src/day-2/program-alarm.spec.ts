@@ -55,7 +55,7 @@ describe('2: opcode', () => {
       test(`returns ${expected}`, () => {
         expect(getOpFn(value)).toBe(expected);
       });
-    }
+    },
   );
 
   test('add', () => {
@@ -83,7 +83,7 @@ describe('2: opcode', () => {
       test(`returns ${expected}`, () => {
         expect(execOp(value, [...program])).toBe(expected);
       });
-    }
+    },
   );
 });
 
@@ -94,7 +94,7 @@ describe('2: challenge', () => {
     inputMod.splice(1, 1, 12);
     inputMod.splice(2, 1, 2);
     const val$ = await execGravityAssistProgram$(inputMod).toPromise();
-    expect(val$[0]).toBe(3765464);
+    expect(val$ && val$[0]).toBe(3765464);
   });
 
   test('1202 program alarm part II', async () => {
@@ -103,7 +103,7 @@ describe('2: challenge', () => {
     inputMod.splice(1, 1, 76);
     inputMod.splice(2, 1, 10);
     const val$ = await execGravityAssistProgram$(inputMod).toPromise();
-    expect(val$[0]).toBe(19690720);
+    expect(val$ && val$[0]).toBe(19690720);
   });
   test('1202 program alarm part II answer', async () => {
     expect.assertions(1);

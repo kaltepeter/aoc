@@ -1,7 +1,4 @@
-import { sample, inputs } from './inputs';
 import {
-  calcNextGeneration,
-  coord,
   Direction,
   flipTiles,
   flipTilesConwayStyle,
@@ -10,8 +7,8 @@ import {
   getPermutationsOfCoords,
   moveTile,
   TileColor,
-  TileState,
 } from './challenge';
+import { inputs, sample } from './inputs';
 
 describe(`Day 24: Lobby Layout`, () => {
   it(`should process data`, () => {

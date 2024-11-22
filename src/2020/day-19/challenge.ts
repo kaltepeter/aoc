@@ -1,4 +1,4 @@
-import { all, curry, equals, fromPairs, map, zip } from 'ramda';
+import { fromPairs } from 'ramda';
 
 export interface IMonsterMessages {
   rules: Map<number, string | number[][]>;
@@ -24,7 +24,7 @@ const createRulesV2 = (rawRules: Map<number, string>) => {
   do {
     for (const [rId, r] of newRules) {
       let rule = r;
-      Object.entries(stringRules).forEach(([k, v]) => {
+      Object.entries(stringRules).forEach(([_k, v]) => {
         rule = rule.replace(/${k}/g, v);
       });
       if (!rule.match(/\d/)) {
@@ -68,4 +68,4 @@ const processRules = (
   return res;
 };
 
-export { processRules, createRulesV2 };
+export { createRulesV2, processRules };

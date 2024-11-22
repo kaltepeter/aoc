@@ -1,5 +1,5 @@
-import { EMPTY, from, Observable, of } from 'rxjs';
-import { expand, filter, map, mergeMap, reduce, tap } from 'rxjs/operators';
+import { EMPTY, from, of } from 'rxjs';
+import { expand, filter, map, mergeMap, reduce } from 'rxjs/operators';
 
 const fuelNeededForMass = (mass: number) => Math.floor(mass / 3) - 2;
 const totalFuelNeededByMass$ = (mass: number) =>
@@ -34,9 +34,8 @@ const example$ = (listOfNumsAndExpectedValues: number[][]) =>
     )
     .subscribe();
 
-const fuelCounterUpper = (masses: number[]) => {
-  return masses.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
-};
+const fuelCounterUpper = (masses: number[]) =>
+  masses.reduce((acc, cur) => (acc += fuelNeededForMass(cur)), 0);
 
 const doubleCheckedFuelCounterUpper$ = (masses: number[]) =>
   from(masses).pipe(

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 const text = fs
   .readFileSync(path.join(__dirname, 'raw-input.txt'))
-  .toString('UTF-8');
+  .toString('utf8');
 
 const inputs = text
   .split(',')

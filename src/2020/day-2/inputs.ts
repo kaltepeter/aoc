@@ -4,7 +4,7 @@ const text = fs
   .readFileSync(path.join(__dirname, 'raw-input.txt'))
   .toString('utf-8');
 
-const inputs: Array<Array<string | number>> = text
+const inputs: [number, number, string, string][] = text
   .split('\n')
   // empty converts to 0 so drop
   .filter((val: string) => !(val.trim() === ''))

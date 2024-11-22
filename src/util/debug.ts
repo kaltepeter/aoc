@@ -1,4 +1,4 @@
-import { existsSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 const writeToLog = (file: string, msg: any) => {
   if (process.env['DEBUG']) {

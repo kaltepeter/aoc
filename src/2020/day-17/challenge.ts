@@ -41,7 +41,7 @@ enum Flags {
 }
 
 const getNeighborsMask = 0b111111111111111111111111110;
-const isEmpty = (v: number) => !(v > Flags.NONE);
+const isEmpty = (v: number) => !(v > Flags.NONE.valueOf());
 const getNeighborCount = (v: number) =>
   (v & getNeighborsMask).toString(2).replace(/0/g, '').trim().length;
 const getLastSetBit = (v: number) => {
@@ -97,7 +97,7 @@ const calcCoordsForActiveCubes = (boards: string[][][]) => {
   boards.forEach((b, zIndex) => {
     b.forEach((row, xIndex) => {
       row.forEach((cube, yIndex) => {
-        if (cube === States.ACTIVE) {
+        if (cube === States.ACTIVE.toString()) {
           activeCubes = [...activeCubes, [xIndex, yIndex, zIndex]];
         }
       });
@@ -112,7 +112,7 @@ const calcCoordsForActiveCubes4D = (boards: string[][][][]): point4d[] => {
     b.forEach((w, wIndex) => {
       w.forEach((row, xIndex) => {
         row.forEach((cube, yIndex) => {
-          if (cube === States.ACTIVE) {
+          if (cube === States.ACTIVE.toString()) {
             activeCubes = [...activeCubes, [xIndex, yIndex, zIndex, wIndex]];
           }
         });
@@ -122,15 +122,13 @@ const calcCoordsForActiveCubes4D = (boards: string[][][][]): point4d[] => {
   return activeCubes;
 };
 
-const printCubeState = (cubeState: string[][][]) => {
-  const printableState = cubeState
-    .map((depth) => {
-      return depth.map((row) => row.join('')).join('\n');
-    })
-    .join('\n\n');
-  console.log(printableState);
-  return printableState;
-};
+// const printCubeState = (cubeState: string[][][]) => {
+//   const printableState = cubeState
+//     .map((depth) => depth.map((row) => row.join('')).join('\n'))
+//     .join('\n\n');
+//   console.log(printableState);
+//   return printableState;
+// };
 
 const runCycle = (activeCubes: coordsList) => {
   const pocketDimension: IPocketDimension = {
@@ -194,7 +192,7 @@ const calcNextGeneration = (
   for (const [key, val] of currentDimension) {
     const self = val & Flags.SELF;
     const neighborCount = getNeighborCount(val);
-    if (self === Flags.SELF) {
+    if (self === Flags.SELF.valueOf()) {
       if (neighborCount !== 2 && neighborCount !== 3) {
         // nextDimension.set(key, 0b0)
       } else {

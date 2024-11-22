@@ -7,7 +7,7 @@ const recursiveGame = (playerHands: number[][]): [number, number[]] => {
   const seen = new Set<string>();
   const [player1Hand, player2Hand] = playerHands;
   while (player1Hand.length > 0 && player2Hand.length > 0) {
-    const state = `${player1Hand}:${player2Hand}`;
+    const state = `${player1Hand.toString()}:${player2Hand.toString()}`;
     if (seen.has(state)) {
       return [1, [...player1Hand]];
     }

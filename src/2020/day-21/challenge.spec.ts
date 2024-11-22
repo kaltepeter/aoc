@@ -8,6 +8,7 @@ import {
   processAllergens,
 } from './challenge';
 import { inputs, sample } from './inputs';
+
 describe(`Day 21: Allergen Assessment`, () => {
   it(`should process data`, () => {
     expect(sample.length).toBe(4);
@@ -36,18 +37,16 @@ describe(`Day 21: Allergen Assessment`, () => {
 
   it(`should get list not in allergen list`, () => {
     const list = getFoodList(sample);
-    const allergenList = getAllergenList(list);
-    expect(findIngredientsNotInAllergenList(list, allergenList)).toEqual(
-      jasmine.arrayContaining(['kfcds', 'nhms', 'sbzzf', 'trh'])
+    expect(findIngredientsNotInAllergenList(list)).toEqual(
+      expect.arrayContaining(['kfcds', 'nhms', 'sbzzf', 'trh'])
     );
   });
 
   it(`processAllergens`, () => {
     const list = getFoodList(sample);
-    const allergenList = getAllergenList(list);
-    const res = processAllergens(list, allergenList);
+    const res = processAllergens(list);
     expect(fromPairs(Array.from(res.entries()))).toEqual(
-      jasmine.objectContaining({
+      expect.objectContaining({
         mxmxvkd: 'dairy',
         sqjhc: 'fish',
         fvjkl: 'soy',
@@ -57,10 +56,9 @@ describe(`Day 21: Allergen Assessment`, () => {
 
   it(`processAllergens for inputs`, () => {
     const list = getFoodList(inputs);
-    const allergenList = getAllergenList(list);
-    const res = processAllergens(list, allergenList);
+    const res = processAllergens(list);
     expect(fromPairs(Array.from(res.entries()))).toEqual(
-      jasmine.objectContaining({
+      expect.objectContaining({
         xpbxbv: 'sesame',
         jtjtrd: 'shellfish',
         fvjkp: 'soy',
@@ -75,15 +73,13 @@ describe(`Day 21: Allergen Assessment`, () => {
 
   it(`countAllergens for sample`, () => {
     const list = getFoodList(sample);
-    const allergenList = getAllergenList(list);
-    const badFoods = findIngredientsNotInAllergenList(list, allergenList);
+    const badFoods = findIngredientsNotInAllergenList(list);
     expect(countAllergens(badFoods, list)).toBe(5);
   });
 
   it(`countAllergens for input`, () => {
     const list = getFoodList(inputs);
-    const allergenList = getAllergenList(list);
-    const badFoods = findIngredientsNotInAllergenList(list, allergenList);
+    const badFoods = findIngredientsNotInAllergenList(list);
     expect(countAllergens(badFoods, list)).toBeGreaterThan(200);
     expect(countAllergens(badFoods, list)).toBeLessThan(2553);
     expect(countAllergens(badFoods, list)).toBeGreaterThan(480);
@@ -93,8 +89,7 @@ describe(`Day 21: Allergen Assessment`, () => {
   describe(`part II`, () => {
     it(`getCanonicalDangerousIngredientList(sample)`, () => {
       const list = getFoodList(sample);
-      const allergenList = getAllergenList(list);
-      const badFoods = processAllergens(list, allergenList);
+      const badFoods = processAllergens(list);
       expect(getCanonicalDangerousIngredientList(badFoods)).toEqual(
         'mxmxvkd,sqjhc,fvjkl'
       );
@@ -102,8 +97,7 @@ describe(`Day 21: Allergen Assessment`, () => {
 
     it(`getCanonicalDangerousIngredientList(inputs)`, () => {
       const list = getFoodList(inputs);
-      const allergenList = getAllergenList(list);
-      const badFoods = processAllergens(list, allergenList);
+      const badFoods = processAllergens(list);
       expect(getCanonicalDangerousIngredientList(badFoods)).toEqual(
         'fntg,gtqfrp,xlvrggj,rlsr,xpbxbv,jtjtrd,fvjkp,zhszc'
       );

@@ -3,13 +3,11 @@ import * as cliProgress from 'cli-progress';
 import { exit } from 'process';
 import { Instruction, Program } from './challenge';
 import { inputs as program } from './inputs';
-// tslint:disable-next-line: no-var-requires
-const PromiseAny = require('promise.any');
-PromiseAny.shim();
+import assert from 'node:assert';
 
 let nops: number[] = [];
 const tasks: Program[] = [];
-const maxProcess = 3;
+const maxProcess = 100;
 
 interface IResultRun {
   acc: number;
@@ -54,7 +52,7 @@ let processes: ChildProcess[] = [];
 
 const defferred = (data: Program): Promise<[number, boolean]> =>
   new Promise((res, rej) => {
-    const compute = fork('run-program.ts', {
+    const compute = fork(__dirname + '/run-program.ts', {
       stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
       detached: true,
     });
@@ -68,11 +66,11 @@ const defferred = (data: Program): Promise<[number, boolean]> =>
       if (sum[1] === true) {
         return res(sum);
       } else {
-        return rej(sum);
+        return rej(new Error(`Failed with sum ${sum.toString()}`));
       }
     });
 
-    compute.on('exit', (code, signal) => {
+    compute.on('exit', (code, _signal) => {
       if (code !== 0) {
         console.error(`Exit code ${code} for ${compute.pid}`);
         exit(1);
@@ -82,9 +80,9 @@ const defferred = (data: Program): Promise<[number, boolean]> =>
 
 const run = async () => {
   let left = [...tasks];
-  const res: Array<{ acc: number; success: boolean }> = [];
+  const res: { acc: number; success: boolean }[] = [];
 
-  async function takeFromQueue(): Promise<IResultRun> {
+  const takeFromQueue = async (): Promise<IResultRun> => {
     if (left.length > 0) {
       const task = left.pop();
       if (task) {
@@ -102,7 +100,7 @@ const run = async () => {
             left = []; // need to short circuit
             return Promise.resolve(r);
           })
-          .catch(([acc, success]) => {
+          .catch(([acc, success]: [number, boolean]) => {
             res.push({
               acc,
               success,
@@ -110,13 +108,13 @@ const run = async () => {
             return takeFromQueue();
           });
       } else {
-        return Promise.reject(`Task is undefined.`);
+        return Promise.reject(new Error(`Task is undefined.`));
       }
     } else {
       const lastItem = res[-1];
       return Promise.resolve(lastItem);
     }
-  }
+  };
 
   const wait = [];
   // kick off initial wait
@@ -128,13 +126,20 @@ const run = async () => {
   try {
     const result = await Promise.any(wait);
     pBar.stop();
+    assert(
+      result.acc === 1033,
+      `Expected 1033, but got ${JSON.stringify(result)}`
+    );
     console.log(`Found result: `, result);
     return result;
   } catch (e) {
-    console.error(`Infinite loop detected. `, e.message);
+    if (e instanceof Error) {
+      console.error(`Infinite loop detected. `, e.message);
+    } else {
+      console.error('Unknown error', e);
+    }
   }
 };
-
 process.addListener('SIGINT', () => {
   processes.forEach((p) => {
     p.kill('SIGINT');
@@ -142,4 +147,6 @@ process.addListener('SIGINT', () => {
   process.exit();
 });
 
-run();
+run().catch((error) => {
+  console.error('Error running the program:', error);
+});

@@ -38,12 +38,12 @@ const playGame = (start: number[], iterationCount: number = 2020): number => {
   return lastTurn;
 };
 
-const testIt = (iterationCount: number) => {
-  let count = 0;
-  for (let i = 6; i < iterationCount; i++) {
-    count = i;
-  }
-  return count;
-};
+// const testIt = (iterationCount: number) => {
+//   let count = 0;
+//   for (let i = 6; i < iterationCount; i++) {
+//     count = i;
+//   }
+//   return count;
+// };
 
 export { playGame };

@@ -103,7 +103,6 @@ dist
 # TernJS port file
 .tern-port
 
-*.js
 *.js.map
 python/2022/day_1/readme.md
 

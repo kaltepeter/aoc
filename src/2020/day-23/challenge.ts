@@ -1,4 +1,4 @@
-import { LinkedList, LinkedListItem } from 'model/index';
+import { LinkedList } from 'model/index';
 import { join } from 'path';
 import { range } from 'ramda';
 import { writeToLog } from 'util/debug';
@@ -49,7 +49,9 @@ const playCups = (cups: string[], maxMoves = 10, returnList = false) => {
 
       writeToLog(
         LOG_FILE,
-        `i: ${i}: nextThree: ${nextThree}, current: ${currentCup.item}, dest: ${destCup}`
+        `i: ${i}: nextThree: ${nextThree.toString()}, current: ${
+          currentCup.item
+        }, dest: ${destCup}`
       );
 
       // place cups
@@ -75,18 +77,18 @@ const playCups = (cups: string[], maxMoves = 10, returnList = false) => {
   }
 };
 
-const printV2List = (list: Map<number, number>, start: number) => {
-  let val = list.get(start);
-  if (!val) {
-    throw new Error(`Val not found.`);
-  }
-  const retVal: number[] = [];
-  do {
-    retVal.push(val);
-    val = list.get(val);
-  } while (val && val !== start);
-  return retVal.join('');
-};
+// const printV2List = (list: Map<number, number>, start: number) => {
+//   let val = list.get(start);
+//   if (!val) {
+//     throw new Error(`Val not found.`);
+//   }
+//   const retVal: number[] = [];
+//   do {
+//     retVal.push(val);
+//     val = list.get(val);
+//   } while (val && val !== start);
+//   return retVal.join('');
+// };
 
 const playCupsPartII = (cups: string[], maxMoves = 10) => {
   const highest =
@@ -132,7 +134,7 @@ const playCupsPartII = (cups: string[], maxMoves = 10) => {
 
     writeToLog(
       LOG_FILE,
-      `i: ${i}: nextThree: ${nextThree}, current: ${currentCup}, dest: ${destCup}`
+      `i: ${i}: nextThree: ${nextThree.toString()}, current: ${currentCup}, dest: ${destCup}`
     );
 
     // place cups
@@ -169,4 +171,4 @@ const getInputForAMillionCups = (cups: string[]) => {
 const calcStarLabels = (labels: number[]) =>
   labels.reduce((acc, v) => (acc *= v), 1);
 
-export { playCups, getInputForAMillionCups, playCupsPartII, calcStarLabels };
+export { calcStarLabels, getInputForAMillionCups, playCups, playCupsPartII };

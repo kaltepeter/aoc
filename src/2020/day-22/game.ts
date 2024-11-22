@@ -7,19 +7,19 @@ export class Game {
   private readonly MAX_ROUNDS = 1000;
   private totalCards = 0;
 
+  constructor(public readonly players: Player[]) {
+    this.totalCards = this.players.reduce(
+      (acc, p) => (acc += p.sortedCards.length),
+      0
+    );
+  }
+
   get rounds() {
     return this._numRounds;
   }
 
   get winner() {
     return this.players.filter((p) => p.sortedCards.length > 0)[0];
-  }
-
-  constructor(public readonly players: Player[]) {
-    this.totalCards = this.players.reduce(
-      (acc, p) => (acc += p.sortedCards.length),
-      0
-    );
   }
 
   playRound() {

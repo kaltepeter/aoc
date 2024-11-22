@@ -1,4 +1,3 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { any, gte, lte, pluck, transpose } from 'ramda';
 import { writeToLog } from 'util/debug';
@@ -16,16 +15,14 @@ export interface ITicketData {
 }
 
 export interface IRuleSet {
-  [key: string]: Array<(value: number) => boolean>;
+  [key: string]: ((value: number) => boolean)[];
 }
 
-const getRangeFunc = (range: RuleRange): ((value: number) => boolean) => {
-  return (value) => {
+const getRangeFunc =
+  (range: RuleRange): ((value: number) => boolean) =>
+  (value) =>
     // console.log(`value: ${value}, r: ${range}`, (gte(value, range[0]) && lte(value,range[1])))
-    return gte(value, range[0]) && lte(value, range[1]);
-  };
-};
-
+    gte(value, range[0]) && lte(value, range[1]);
 const processRules = (rules: IRule[]): IRuleSet => {
   const ruleList = {} as IRuleSet;
   rules.map((r) => {
@@ -93,9 +90,7 @@ const getInvalidTicketValues = (ticketList: ITicketData): number[] => {
     return countTicketVals;
   });
   const invalidVals = Object.values(tVals)
-    .map((v) => {
-      return pluck('invalid', v);
-    })
+    .map((v) => pluck('invalid', v))
     .flat(1)
     .filter((v) => v.size > 0)
     .flatMap((v) => Array.from(v.values()));
@@ -116,6 +111,7 @@ const getValidTickets = (ticketList: ITicketData): ITicketData => {
         return t;
       }
     })
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     .filter<NonNullable<number[]>>(Boolean as any);
 
   return { ...ticketList, nearbyTickets: validTickets };
@@ -143,14 +139,14 @@ const validateColumn = (values: number[], rules: IRuleSet): Set<string> => {
 const getTicketFieldList = (
   rules: IRuleSet,
   ticketFieldValues: number[][]
-): Array<Set<string>> => {
+): Set<string>[] => {
   writeToLog(
     LOG_FILE,
     `process fieldCount: ${ticketFieldValues.length}, itemCount: ${ticketFieldValues[0].length}`
   );
-  const possibleVals = ticketFieldValues.map((cols: number[]) => {
-    return validateColumn(cols, rules);
-  });
+  const possibleVals = ticketFieldValues.map((cols: number[]) =>
+    validateColumn(cols, rules)
+  );
   // console.log("🚀 ~ file: challenge.ts ~ line 162 ~ getTicketFieldList ~ possibleVals", possibleVals.sort((a,b) => a.size - b.size))
   return possibleVals;
 };
@@ -176,14 +172,12 @@ const processTickets = (ticketList: ITicketData): Record<string, number> => {
 const getDepartureFieldsResult = (
   fieldList: Record<string, number>,
   ticketList: ITicketData
-) => {
+) =>
   // console.log(ticketList)
-  return Object.entries(fieldList)
-    .filter(([k, v]) => k.startsWith('departure'))
-    .map(([k, v]) => ticketList.ticket[v])
+  Object.entries(fieldList)
+    .filter(([k, _v]) => k.startsWith('departure'))
+    .map(([_k, v]) => ticketList.ticket[v])
     .reduce((acc, v) => (acc *= v), 1);
-};
-
 export {
   getInvalidTicketValues,
   processRules,

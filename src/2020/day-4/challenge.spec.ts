@@ -12,13 +12,11 @@ const values = fs
   .readFileSync(path.join(__dirname, 'sample-data.txt'))
   .toString('utf-8');
 
-const validPassportsSampleData: Array<
-  [IPassport, boolean]
-> = validPassportsInputs.map((p) => [{ ...p }, true]);
+const validPassportsSampleData: [IPassport, boolean][] =
+  validPassportsInputs.map((p) => [{ ...p }, true]);
 
-const invalidPassportsSampleData: Array<
-  [IPassport, boolean]
-> = invalidPassportsInputs.map((p) => [{ ...p }, false]);
+const invalidPassportsSampleData: [IPassport, boolean][] =
+  invalidPassportsInputs.map((p) => [{ ...p }, false]);
 
 const getValidPassport = () => ({ ...validPassportsInputs[0] });
 

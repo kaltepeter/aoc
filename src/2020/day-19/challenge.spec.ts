@@ -1,4 +1,4 @@
-import { Rules, RuleResult, processRules, createRulesV2 } from './challenge';
+import { processRules, createRulesV2 } from './challenge';
 import { sample, inputs, sample2 } from './inputs';
 
 describe(`Day 19: Monster Messages`, () => {

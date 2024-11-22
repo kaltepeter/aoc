@@ -22,7 +22,7 @@ describe(`day 10: Adapter Array`, () => {
   ])(
     `getRangeOfJoltage(%i, sample)`,
     (num: number, expectedValid: number[]) => {
-      test(`should return ${expectedValid}`, () => {
+      test(`should return ${expectedValid.toString()}`, () => {
         expect(getRangeOfJoltage(num, sample).sort()).toEqual([
           ...expectedValid,
         ]);
@@ -50,7 +50,7 @@ describe(`day 10: Adapter Array`, () => {
       expectedDeltas: { [key: string]: number },
       joltage: number
     ) => {
-      test(`should return ${expectedDeltas}`, () => {
+      test(`should return ${JSON.stringify(expectedDeltas)}`, () => {
         expect(getDeltasOfAdapters(adapters)).toEqual(expectedDeltas);
       });
 
@@ -69,7 +69,7 @@ describe(`day 10: Adapter Array`, () => {
   ])(
     `validateAdapterChain(${JSON.stringify('%j')})`,
     (adapters: number[], expectedValid: number[]) => {
-      test(`should return ${expectedValid}`, () => {
+      test(`should return ${expectedValid.toString()}`, () => {
         expect(validateAdapterChain(adapters)).toEqual([...expectedValid]);
       });
     }

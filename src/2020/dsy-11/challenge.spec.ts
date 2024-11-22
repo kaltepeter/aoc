@@ -33,7 +33,7 @@ describe(`Day 11: Seating System`, () => {
   ])(
     `getAdjacentSeats(%i, %j)`,
     (seatMap: SeatMap, position: number[], expectedSeats: string[]) => {
-      test(`should return ${expectedSeats}`, () => {
+      test(`should return ${expectedSeats.toString()}`, () => {
         const pos = position as [number, number];
         expect(getAdjacentSeats(seatMap, pos)).toEqual(expectedSeats);
       });
@@ -43,6 +43,7 @@ describe(`Day 11: Seating System`, () => {
   test(`getSeatCounts()`, () => {
     const adjSeats = getAdjacentSeats(sample, [1, 3]);
     expect(getSeatCounts(adjSeats)).toEqual({
+      [Seat.OCCUPIED]: 0,
       [Seat.FLOOR]: 2,
       [Seat.UNOCCUPIED]: 6,
     });

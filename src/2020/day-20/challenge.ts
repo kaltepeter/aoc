@@ -2,9 +2,8 @@ import { TileImage } from './tile-image';
 import { TileScanner } from './tile-scanner';
 import { Tile } from './tile2';
 
-const calcResult = (corners: string[]): number => {
-  return corners.map((v) => +v).reduce((acc, v) => (acc *= v), 1);
-};
+const calcResult = (corners: string[]): number =>
+  corners.map((v) => +v).reduce((acc, v) => (acc *= v), 1);
 
 const findRoughness = (tiles: Tile[]) => {
   const monsterData = [

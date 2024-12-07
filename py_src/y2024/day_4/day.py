@@ -1,7 +1,7 @@
 from copy import deepcopy
 import os
 from pathlib import Path
-from typing import Generator, List
+from typing import List
 
 
 base_path = Path(__file__).parent
@@ -47,6 +47,7 @@ def search_word_2d(grid: List[str], row: int, col: int, word: str) -> int:
         
     return count
 
+
 def part_1(grid: InputData) -> int:
     chars = "XMAS"
 
@@ -65,9 +66,41 @@ def part_1(grid: InputData) -> int:
 
     return total
 
+def part_2(grid: InputData) -> int:
+    total = 0
+    chars = "MS"
+    # [(top_left, bottom_right), (top_right, bottom_left)]
+    positions = [((-1, -1), (1, 1)), ((1, -1), (-1, 1))]
 
-def part_2(data: InputData) -> int:
-    return 0
+    for row_index, row in enumerate(grid):
+        # bounding to row 1 and second to last row to find center
+        if row_index < 1 or row_index >= len(grid) - 1:
+            continue
+
+        for col_index, col in enumerate(row):
+            # bounding to col 1 and second to last col to find center
+            if col_index < 1 or col_index >= len(row) - 1:
+                continue
+
+            if col != "A":
+                continue
+
+            letters = []
+            for pos in positions:
+                l = []
+                for p in pos:
+                    if 0 <= row_index + p[1] < len(grid) and 0 <= col_index + p[0] < len(grid[0]):
+                        l.append(grid[row_index + p[1]][col_index + p[0]])
+                
+                if set(l) != set(chars):
+                    break
+
+                letters.append(l)
+
+            if len(letters) == 2:
+                total += 1
+            
+    return total
 
 
 def main():
@@ -79,7 +112,7 @@ def main():
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 2005
 
 
 if __name__ == "__main__":

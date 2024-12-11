@@ -14,6 +14,7 @@ def process_input(file: str) -> InputData:
         for blocks in reader.read().split("\n\n"):
             return list(map(lambda val: val.strip(), blocks.splitlines()))
 
+
 def search_word_2d(grid: List[str], row: int, col: int, word: str) -> int:
     m = len(grid)
     n = len(grid[0])

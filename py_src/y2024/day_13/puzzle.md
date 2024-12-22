@@ -75,3 +75,8 @@ Prize: X=10000000018641, Y=10000000010279
 Now, it is only possible to win a prize on the second and fourth claw machines. Unfortunately, it will take many more than 100 presses to do so.
 
 Using the corrected prize coordinates, figure out how to win as many prizes as possible. What is the fewest tokens you would have to spend to win all possible prizes?
+
+--- Part Two ---
+During the bathroom break, someone notices that these robots seem awfully similar to ones built and used at the North Pole. If they're the same type of robots, they should have a hard-coded Easter egg: very rarely, most of the robots should arrange themselves into a picture of a Christmas tree.
+
+What is the fewest number of seconds that must elapse for the robots to display the Easter egg?

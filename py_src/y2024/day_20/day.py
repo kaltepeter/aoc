@@ -3,15 +3,14 @@ from heapq import heappop, heappush
 import os
 from pathlib import Path
 from typing import List
-from networkx import Graph
-import networkx as nx
-from collections import Counter
+from tqdm import tqdm
 
 base_path = Path(__file__).parent
 
 Coord = tuple[int, int]
 CheatCoords = tuple[Coord, Coord]
-InputData = tuple[Coord, Coord, Graph, set[Coord], int, int]
+Graph = List[List[str]]
+InputData = tuple[Graph, Coord, Coord]
 
 neighbor_coords = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
@@ -20,48 +19,20 @@ def manhattan_distance(a: Coord, b: Coord) -> int:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def process_input(file: str) -> InputData:
-    G = Graph()
-    start = None
-    end = None
-    walls = set()
-    valid_positions = {}
-    
+def process_input(file: str) -> InputData:    
+    graph = []
     with open(file, "r") as reader:
-        map = reader.read().split("\n\n")[0]
-        lines = map.splitlines()
-        max_y, max_x = len(lines), len(lines[0])
-        
-        # Process all positions in one pass
-        for y, line in enumerate(lines):
-            for x, c in enumerate(line):
-                pos = (x, y)
-                
-                if c == "#":
-                    if 0 < x < max_x - 1 and 0 < y < max_y - 1:
-                        walls.add(pos)
-                else:
-                    # Store valid neighbors during initial scan
-                    neighbors = []
-                    for dx, dy in neighbor_coords:
-                        nx, ny = x + dx, y + dy
-                        if 0 <= nx < max_x and 0 <= ny < max_y:
-                            neighbors.append((nx, ny))
-                    valid_positions[pos] = neighbors
-                    G.add_node(pos)
-                    
-                    if c == "S":
-                        start = pos
-                    elif c == "E":
-                        end = pos
+        block = reader.read().split("\n\n")
+        graph = [list(line.strip()) for line in block[0].splitlines()]
 
-    # Add edges in one batch operation
-    for pos, neighbors in valid_positions.items():
-        for neighbor in neighbors:
-            if neighbor in valid_positions:
-                G.add_edge(pos, neighbor)
-
-    return (start, end, G, walls, max_x, max_y)
+    for y, line in enumerate(graph):
+        for x, char in enumerate(line):
+            if char == "S":
+                start = (x, y)
+            if char == "E":
+                end = (x, y)
+      
+    return (graph, start, end)
 
 
 def find_cheats(graph: Graph, walls: set[Coord]) -> set[CheatCoords]:
@@ -102,35 +73,35 @@ def get_neighbors(coord: Coord, graph: Graph) -> list[Coord]:
     x, y = coord
     for dx, dy in neighbor_coords:
         neighbor = (x + dx, y + dy)
-        if neighbor in graph.nodes:
+        if graph[neighbor[1]][neighbor[0]] != "#":
             neighbors.append(neighbor)
 
     return neighbors
 
 
-def get_cheated_grid(graph: Graph, walls: set[Coord], cheat: CheatCoords) -> tuple[Graph, set[Coord]]:
-    cheated_graph = deepcopy(graph)
-    cheated_walls = deepcopy(walls)
-    cheat1, cheat2 = cheat
+# def get_cheated_grid(graph: Graph, walls: set[Coord], cheat: CheatCoords) -> tuple[Graph, set[Coord]]:
+#     cheated_graph = deepcopy(graph)
+#     cheated_walls = deepcopy(walls)
+#     cheat1, cheat2 = cheat
 
-    if cheat1 in cheated_walls:
-        cheated_graph.add_node(cheat1)
-        cheated_walls.remove(cheat1)
-        for neighbor in get_neighbors(cheat1, cheated_graph):
-            cheated_graph.add_edge(cheat1, neighbor)
-            cheated_graph.add_edge(neighbor, cheat1)
+#     if cheat1 in cheated_walls:
+#         cheated_graph.add_node(cheat1)
+#         cheated_walls.remove(cheat1)
+#         for neighbor in get_neighbors(cheat1, cheated_graph):
+#             cheated_graph.add_edge(cheat1, neighbor)
+#             cheated_graph.add_edge(neighbor, cheat1)
 
-    if cheat2 in cheated_walls:
-        cheated_walls.remove(cheat2)
-        cheated_graph.add_node(cheat2)
-        for neighbor in get_neighbors(cheat2, cheated_graph):
-            cheated_graph.add_edge(cheat2, neighbor)
-            cheated_graph.add_edge(neighbor, cheat2)
+#     if cheat2 in cheated_walls:
+#         cheated_walls.remove(cheat2)
+#         cheated_graph.add_node(cheat2)
+#         for neighbor in get_neighbors(cheat2, cheated_graph):
+#             cheated_graph.add_edge(cheat2, neighbor)
+#             cheated_graph.add_edge(neighbor, cheat2)
 
-    return (cheated_graph, cheated_walls)
+#     return (cheated_graph, cheated_walls)
 
 
-def a_star(start: Coord, end: Coord, graph: Graph, walls: set[Coord]) -> int:
+def a_star(start: Coord, end: Coord, graph: Graph) -> List[Coord]:
     frontier = [(0, start)]  # priority queue of (f_score, position)
     came_from = {start: None}
     g_score = {start: 0}     # cost from start to current node
@@ -139,7 +110,12 @@ def a_star(start: Coord, end: Coord, graph: Graph, walls: set[Coord]) -> int:
         _, current = heappop(frontier)
         
         if current == end:
-            return g_score[current]
+            # Reconstruct path
+            path = []
+            while current is not None:
+                path.append(current)
+                current = came_from[current]
+            return path[::-1]
             
         for next_pos in get_neighbors(current, graph):
             tentative_g = g_score[current] + 1
@@ -150,50 +126,93 @@ def a_star(start: Coord, end: Coord, graph: Graph, walls: set[Coord]) -> int:
                 f_score = tentative_g + manhattan_distance(next_pos, end)
                 heappush(frontier, (f_score, next_pos))
     
-    return float('inf')  # No path found
+    return []  # No path found
 
 
-def get_cheats_saving_x_seconds(counts: dict[int, int], seconds_to_save: int) -> int:
-    return sum([count for time, count in counts.items() if time >= seconds_to_save])
+# def get_cheats_saving_x_seconds(counts: dict[int, int], seconds_to_save: int) -> int:
+#     return sum([count for time, count in counts.items() if time >= seconds_to_save])
 
 
-def part_1(data: InputData) -> dict[int, int]:
-    start, end, graph, walls, max_x, max_y = data
-
-    path_time = a_star(start, end, graph, walls)
-    print(f"path_time: {path_time}")
-    cheated_times = []
-
-    cheats = find_cheats(graph, walls)
-    for cheat in cheats:
-        cheated_grid, cheated_walls = get_cheated_grid(graph, walls, cheat)
-        cheated_path_time = a_star(start, end, cheated_grid, cheated_walls)
-        if cheated_path_time < path_time:
-            cheated_times.append(cheated_path_time)
-        # print_grid(cheated_grid, max_x, max_y, cheated_walls, path=None, cheat=cheat)
-        # print(f"cheated_path_time: {cheated_path_time} for cheat {cheat}")
-
-    time_savings = [path_time - cheated_time for cheated_time in cheated_times]
-
-    return Counter(time_savings)
+def is_in_grid(coord: Coord, max_x: int, max_y: int) -> bool:
+    return 0 <= coord[0] < max_x and 0 <= coord[1] < max_y
 
 
-def part_2(data: InputData) -> int:
-    return 0
+def part_1(data: InputData, max_dist: int = 100) -> int:
+    graph, start, end = data
+    rows, cols = len(graph), len(graph[0])
+
+    path = a_star(start, end, graph)
+    path_time = len(path) - 1
+
+    dists = {}
+    for t, coord in enumerate(path):    
+        dists[coord] = path_time - t
+
+    saved = {}
+    for t, coord in enumerate(tqdm(path, ncols=80)):
+        x, y = coord
+        for dx1, dy1 in neighbor_coords:
+            for dx2, dy2 in neighbor_coords:
+                xx, yy = x + dx1 + dx2, y + dy1 + dy2
+                if not is_in_grid((xx, yy), cols, rows) or graph[yy][xx] == "#":
+                    continue
+
+                remaining_time = dists[(xx, yy)]
+                saved[(x, y, xx, yy)] = path_time - (t + remaining_time + 2)
+
+
+    count = 0       
+    for v in saved.values():
+        if v >= max_dist:
+            count += 1
+
+    return count
+
+
+def part_2(data: InputData, max_dist: int = 100) -> int:
+    graph, start, end = data
+    rows, cols = len(graph), len(graph[0])
+
+    path = a_star(start, end, graph)
+    path_time = len(path) - 1
+    max_cheat = 20
+
+    dists = {}
+    for t, coord in enumerate(path):    
+        dists[coord] = path_time - t
+
+    saved = {}
+    for t, coord in enumerate(tqdm(path, ncols=80)):
+        x, y = coord
+        for xx in range(x - max_cheat, x + max_cheat + 1):
+            for yy in range(y - max_cheat, y + max_cheat + 1):
+                time_used = abs(xx - x) + abs(yy - y)
+                if not is_in_grid((xx, yy), cols, rows) or time_used > max_cheat or graph[yy][xx] == "#":
+                    continue
+
+                remaining_time = dists[(xx, yy)]
+                saved[(x, y, xx, yy)] = path_time - (t + remaining_time + time_used)
+
+    count = 0
+    for v in saved.values():
+        if v >= max_dist:
+            count += 1
+    
+    return count
 
 
 def main():
     pi = process_input(os.path.join(base_path, "input.txt"))
 
-    counts_part_1 = part_1(deepcopy(pi))
-    part1_answer = get_cheats_saving_x_seconds(counts_part_1, 100)
+    part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} \n")
-    assert part1_answer == 0
+    assert part1_answer == 1511
 
     part2_answer = part_2(deepcopy(pi))
     print(f"Part II: {part2_answer} \n")
-    assert part2_answer == 0
+    assert part2_answer == 1020507
 
 
 if __name__ == "__main__":
     main()
+

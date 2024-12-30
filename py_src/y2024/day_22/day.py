@@ -3,7 +3,6 @@ from functools import lru_cache
 import os
 from pathlib import Path
 from typing import List
-import numpy as np
 from tqdm import tqdm
 
 

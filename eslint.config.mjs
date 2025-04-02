@@ -22,7 +22,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/dist', 'eslint.config.mjs'],
+    ignores: ['**/dist', 'eslint.config.mjs', 'venv', '**/__pycache__'],
   },
   ...compat.extends(
     'plugin:@typescript-eslint/recommended',

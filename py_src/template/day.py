@@ -1,7 +1,7 @@
 from copy import deepcopy
 import os
 from pathlib import Path
-from typing import Generator, List
+from typing import List
 
 
 base_path = Path(__file__).parent
@@ -9,10 +9,10 @@ base_path = Path(__file__).parent
 InputData = List[str]
 
 
-def process_input(file: str) -> Generator[InputData, None, None]:
+def process_input(file: str) -> InputData:
     with open(file, "r") as reader:
-        for pairs in reader.read().split("\n\n"):
-            yield list(map(lambda val: val.strip(), pairs.splitlines()))
+        block = reader.read().split("\n\n")[0]
+        return block.splitlines()
 
 
 def part_1(data: InputData) -> int:
@@ -24,7 +24,7 @@ def part_2(data: InputData) -> int:
 
 
 def main():
-    pi = next(process_input(os.path.join(base_path, "input.txt")))
+    pi = process_input(os.path.join(base_path, "input.txt"))
 
     part1_answer = part_1(deepcopy(pi))
     print(f"Part I: {part1_answer} \n")

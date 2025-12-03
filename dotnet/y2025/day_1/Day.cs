@@ -40,12 +40,7 @@ public static class Day
 
     foreach (int item in turns)
     {
-      int new_current = current + item;
-      if (new_current < 0) {
-        current = 99;
-      } else if (new_current > 99) {
-        current = 0;
-      }
+      current = (current + item) % 100;
       if (current == 0) {
         count += 1;
 
@@ -69,6 +64,7 @@ public static class Day
     int part1Result = Part1(input);
     Console.WriteLine($"Part I: {part1Result}");
     Debug.Assert(part1Result < 2222);
+    Debug.Assert(part1Result == 1132);
 
     int part2Result = Part2(input);
     Console.WriteLine($"Part II: {part2Result}");

@@ -26,7 +26,6 @@ public class Day1Tests
     {
         var input = Day.ProcessInput(path, "example.txt");
         var result = Day.Part2(input);
-        // Update expected value when Part2 is implemented
-        Assert.Equal(0, result);
+        Assert.Equal(6, result);
     }
 }

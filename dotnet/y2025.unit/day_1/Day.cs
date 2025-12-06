@@ -3,7 +3,7 @@ using y2025.day_1;
 
 public class Day1Tests
 {
-    string path = "../../../../y2025/day_1";
+    string path = "../../../../y2025.unit/day_1";
 
     [Fact]
     public void Test_ProcessInput()

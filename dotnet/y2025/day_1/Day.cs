@@ -50,10 +50,30 @@ public static class Day
     return count;
   }
 
-  public static int Part2(List<int> turns)
+  public static int Part2(int start, List<int> turns)
   {
-    // Part 2 implementation goes here
-    return 0;
+    int current = start;
+    int count = 0;
+
+    foreach (int turn in turns)
+    {
+      var (full_turns, rem) = Math.DivRem(turn, Math.Sign(turn) * 100);
+      count += (int)full_turns;
+
+      if (turn < 0) {
+        if (current != 0 && current + rem <= 0) {
+          count += 1;
+        }
+      } else {
+        if (current + rem >= 100) {
+          count += 1;
+        }
+      }
+
+      current = ((current + turn) % 100 + 100) % 100;
+    }
+
+    return count;
   }
 
   public static void Run()
@@ -66,7 +86,8 @@ public static class Day
     Debug.Assert(part1Result < 2222);
     Debug.Assert(part1Result == 1132);
 
-    int part2Result = Part2(input);
+    int part2Result = Part2(50, input);
     Console.WriteLine($"Part II: {part2Result}");
+    Debug.Assert(part2Result == 6623);
   }
 }

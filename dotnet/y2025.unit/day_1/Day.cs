@@ -22,10 +22,87 @@ public class Day1Tests
     }
 
     [Fact]
+    public void Test_Part2_Large_Rotation()
+    {
+        var result = Day.Part2(50, [1000]);
+        Assert.Equal(10, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Backward_Rotation()
+    {
+        var result = Day.Part2(50, [-68]);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Backward_Rotation_To_Zero()
+    {
+        var result = Day.Part2(0, [-5]);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Forward_Rotation()
+    {
+        var result = Day.Part2(95, [60]);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Forward_Rotation_To_Zero()
+    {
+        var result = Day.Part2(52, [48]);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Forward_End_Zero_Without_Passing_Zero()
+    {
+        var result = Day.Part2(55, [-55]);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Forward_Should_Pass_Zero_Once()
+    {
+        var result = Day.Part2(50, [150]);
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Backward_Should_Pass_Zero_Once()
+    {
+        var result = Day.Part2(50, [-150]);
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Large_Forward_Rotation_Ending_At_Zero()
+    {
+        var result = Day.Part2(50, [250]);
+        Assert.Equal(3, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Large_Backward_Rotation_Ending_At_Zero()
+    {
+        var result = Day.Part2(50, [-250]);
+        Assert.Equal(3, result);
+    }
+
+    [Fact]
+    public void Test_Part2_Ends_On_One_Hundred()
+    {
+        var result = Day.Part2(0, [100]);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
     public void Test_Part2()
     {
         var input = Day.ProcessInput(path, "example.txt");
-        var result = Day.Part2(input);
+        var result = Day.Part2(50, input);
         Assert.Equal(6, result);
     }
 }

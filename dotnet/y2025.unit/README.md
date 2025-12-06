@@ -27,3 +27,23 @@ This will show only:
 - `--filter "FullyQualifiedName~TestName"` - Run specific tests
 - `--list-tests` - List all tests without running them
 
+## Filtering Tests
+
+Class Name
+
+`dotnet test --filter "FullyQualifiedName~Day1Tests"`
+
+Namespace
+
+`dotnet test --filter "FullyQualifiedName~y2025.unit.day_1"`
+
+DisplayName
+
+`dotnet test --filter "DisplayName~Day1"`
+
+
+| Filter   | Example                                                            |
+| -------- | ------------------------------------------------------------------ |
+| Contains | `--filter "FullyQualifiedName~day_1"`                              |
+| Equals   | `--filter "ClassName=Day1Tests"`                                   |
+| Multiple | `--filter "FullyQualifiedName~day_1 \| FullyQualifiedName~day_2"`  | 

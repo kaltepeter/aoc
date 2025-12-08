@@ -1,5 +1,7 @@
 ﻿namespace y2025;
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 class Program
@@ -28,6 +30,7 @@ class Program
       return;
     }
 
+    // Find Run method - handle optional parameters by getting all overloads
     MethodInfo? runMethod = dayType.GetMethod("Run", BindingFlags.Public | BindingFlags.Static);
     if (runMethod == null)
     {
@@ -35,6 +38,25 @@ class Program
       return;
     }
 
-    runMethod.Invoke(null, null);
+    // Get parameter info to check if all parameters are optional
+    var parameters = runMethod.GetParameters();
+    if (parameters.Length > 0)
+    {
+      // Check if all parameters have default values (are optional)
+      bool allOptional = parameters.All(p => p.HasDefaultValue);
+      if (!allOptional)
+      {
+        Console.WriteLine($"Error: Day {dayNumber}.Run() requires parameters but none provided");
+        return;
+      }
+      // Invoke with default values for all optional parameters
+      var defaultValues = parameters.Select(p => p.DefaultValue ?? Type.Missing).ToArray();
+      runMethod.Invoke(null, defaultValues);
+    }
+    else
+    {
+      // No parameters, invoke directly
+      runMethod.Invoke(null, null);
+    }
   }
 }

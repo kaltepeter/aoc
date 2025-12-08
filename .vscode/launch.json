@@ -16,33 +16,29 @@
       "program": "${file}"
     },
     {
-      // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
-      "name": ".NET Core Launch (console)",
+      "name": "y2025 Day Launch",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/Console1/bin/Debug/net9.0/Console1.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/src/Console1",
-      "console": "internalConsole",
-      "stopAtEntry": false
-  },
-  {
-      "name": "Debug Unit Tests (Manual)",
+      "program": "${workspaceFolder}/dotnet/y2025/bin/Debug/net10.0/y2025.dll",
+      "args": ["2"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug (Manual)",
       "type": "coreclr",
       "request": "attach",
       "processId": "${command:pickProcess}",
       "justMyCode": false
   },
-    {
-      "name": "Debug Unit Tests (Automatic)",
-      "type": "coreclr",
-      "request": "attach",
-      "processId": "${input:spawnTestsGetPid}",
-      "justMyCode": false
-  }
   ],
   "inputs": [
+        {
+            "id": "dayNumber",
+            "type": "promptString",
+            "description": "Enter day number",
+            "default": "1"
+        },
         {
             "id": "spawnTestsGetPid",
             "type": "command",

@@ -2,11 +2,22 @@ namespace y2025.util;
 
 public static class Util
 {
-    public static IEnumerable<long> Range(long start, long count)
+    public static IEnumerable<long> Range(long start, long end)
     {
-        for (long i = 0; i < count; i++)
+        if (start <= end)
         {
-            yield return start + i;
+            for (long i = start; i <= end; i++)
+            {
+                yield return i;
+            }
         }
+        else
+        {
+            for (long i = start; i >= end; i--)
+            {
+                yield return i;
+            }
+        }
+
     }
 }

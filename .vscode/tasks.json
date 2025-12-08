@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/dotnet/y2025.unit/y2025.unit.csproj",
+                "${workspaceFolder}/dotnet/y2025/y2025.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/dotnet/y2025.unit/y2025.unit.csproj",
+                "${workspaceFolder}/dotnet/y2025.unit/y2025.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/dotnet/y2025.unit/y2025.unit.csproj"
+                "${workspaceFolder}/dotnet/y2025.unit/y2025.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

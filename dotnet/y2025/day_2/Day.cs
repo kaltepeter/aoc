@@ -2,6 +2,7 @@ using System.Diagnostics;
 
 namespace y2025.day_2;
 using y2025.util;
+using System.Linq;
 
 public static class Day
 {
@@ -17,12 +18,7 @@ public static class Day
                 foreach (var range in ranges)
                 {
                     var parts = range.Split('-');
-                    var start = parts[0];
-                    var end = parts[1];
-                    // var isValid = CheckValidInt(long.Parse(start)) && CheckValidInt(long.Parse(end));
-                    // if (!isValid)
-                    //     throw new InvalidOperationException($"Range {range} is invalid");
-                    result.Add((long.Parse(start), long.Parse(end)));
+                    result.Add((long.Parse(parts[0]), long.Parse(parts[1])));
                 }
             }
         }
@@ -51,7 +47,7 @@ public static class Day
     {
         List<long> invalidNumbers = [];
         foreach (var (start, end) in input) {
-            var numbers = Util.Range(start, end - start + 1)
+            var numbers = Util.Range(start, end)
                 .Where(x => x.ToString().Length % 2 == 0);
             foreach (var number in numbers) {
                 if (IsInvalidNumber(number)) {
@@ -62,15 +58,45 @@ public static class Day
         return invalidNumbers.Sum();
     }
 
-    public static long Part2(List<(long, long)> input)
+    public static bool IsInvalidNumberPart2(long number)
     {
-        return 0;
+        var strValue = number.ToString();
+        var uniqueChars = new HashSet<char>(strValue);
+        if (uniqueChars.Count == 1 && strValue.Length > 1) {
+            return true;
+        }
+
+        for (int patternLength = 1; patternLength <= strValue.Length / 2; patternLength++) {
+            if (strValue.Length % patternLength == 0 && patternLength > 1) {
+                var parts = strValue.Chunk(patternLength).Select(chunk => new string(chunk));
+                var firstPart = parts.First();
+                var remainingParts = parts.Skip(1);
+                if (remainingParts.All(part => part == firstPart)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public static void Run()
+    public static long Part2(List<(long, long)> input)
     {
-        // Path is relative to workspace root
-        List<(long, long)> input = ProcessInput("dotnet/y2025/day_2", "input.txt");
+        List<long> invalidNumbers = [];
+        var invalidSet = new HashSet<long>();
+        foreach (var (start, end) in input) {
+            var numbers = Util.Range(start, end);
+            foreach (var number in numbers) {
+                if (IsInvalidNumberPart2(number)) {
+                    invalidSet.Add(number);
+                }
+            }
+        }
+        return invalidSet.Sum();
+    }
+
+    public static void Run(string inputPath = "dotnet/y2025/day_2", string inputFilename = "input.txt")
+    {
+        List<(long, long)> input = ProcessInput(inputPath, inputFilename);
 
         long part1Result = Part1(input);
         Console.WriteLine($"Part I: {part1Result}");
@@ -80,5 +106,8 @@ public static class Day
 
         long part2Result = Part2(input);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result < 48631959042);
+        Debug.Assert(part2Result > 18803488789);
+        Debug.Assert(part2Result == 48631958998);
     }
 }

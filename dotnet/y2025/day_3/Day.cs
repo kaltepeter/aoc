@@ -50,7 +50,6 @@ public static class Day
     {
         long totalJoltage = 0;
         foreach (var bank in input) {
-            HashSet<int> bank_joltage = [];
             var top_two_joltage = GetHighestTwoJoltage(bank);
             totalJoltage += long.Parse(string.Join("", top_two_joltage));
         }
@@ -60,25 +59,28 @@ public static class Day
      public static List<int> GetHighestJoltageByNumBatteries(List<int> bank, int numBatteries = 2)
     {
         var found = new List<int>();
-        var rightBound = bank.Count - numBatteries + 1;
-        var leftBank = bank.ToList()[..rightBound];
-        var max = leftBank.Max();
-        var maxIndex = bank.IndexOf(max);
-        if (maxIndex < rightBound) {
-            found.Add(max);
-        }
-        
-        var max_found = bank[maxIndex + 1];
+        var remainingBatteries = numBatteries;
+        var currentIndex = 0;
+        var curList = bank.ToList();
 
-        for (int i = maxIndex + 1; i < bank.Count; i++) {
-            if (bank[i] >= max_found) {
-                max_found = bank[i];
+        for (int i = currentIndex; i < curList.Count; i++) {
+            if (found.Count == numBatteries) {
+                break;
             }
+            var nextMax = curList[i];
+            var nextMaxIndex = i;
+            for (int j = i + 1; j < curList.Count; j++) {
+                var rightBound = curList.Count - remainingBatteries;
+                if (curList[j] > nextMax && j <= rightBound) {
+                    nextMax = curList[j];
+                    nextMaxIndex = j;
+                }
+            }
+            found.Add(nextMax);
+            remainingBatteries -= 1;
+            i = nextMaxIndex;
         }
-        found.Add(max_found);
     
-        Debug.WriteLine(JsonSerializer.Serialize(bank));
-        Debug.WriteLine(JsonSerializer.Serialize(found));
         return found;
     }
 
@@ -86,13 +88,9 @@ public static class Day
     {
         long totalJoltage = 0;
         foreach (var bank in input) {
-            Debug.WriteLine($"Bank: {string.Join(", ", bank)}");
-            HashSet<int> bank_joltage = [];
-            var top_two_joltage = GetHighestJoltageByNumBatteries(bank, 12);
-            Debug.WriteLine($"Top Two Joltage: {string.Join(", ", top_two_joltage)}");
-            totalJoltage += long.Parse(string.Join("", top_two_joltage));
+            var topJoltages = GetHighestJoltageByNumBatteries(bank, 12);
+            totalJoltage += long.Parse(string.Join("", topJoltages));
         }
-        Debug.WriteLine($"Total Joltage: {totalJoltage}");
         return totalJoltage;
     }
 
@@ -106,5 +104,6 @@ public static class Day
 
         long part2Result = Part2(input);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result == 170418192256861);
     }
 }

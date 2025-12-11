@@ -74,6 +74,17 @@ public class Day3Tests
         Assert.Equal(new List<int> { 9, 1 }, result);
     }
 
+    [Theory]
+    [InlineData(new int[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1 }, new int[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1 })]
+    [InlineData(new int[] { 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9 }, new int[] { 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9 })]
+    [InlineData(new int[] { 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 7, 8 }, new int[] { 4, 3, 4, 2, 3, 4, 2, 3, 4, 2, 7, 8 })]
+    [InlineData(new int[] { 8, 1, 8, 1, 8, 1, 9, 1, 1, 1, 1, 2, 1, 1, 1 }, new int[] { 8, 8, 8, 9, 1, 1, 1, 1, 2, 1, 1, 1 })]
+    public void Test_GetHighestJoltageByNumBatteries(int[] bank, int[] expected_results)
+    {
+        var result = Day.GetHighestJoltageByNumBatteries(bank.ToList(), 12);
+        Assert.Equal(expected_results.ToList(), result);
+    }
+
 
     [Fact]
     public void Test_Part2()

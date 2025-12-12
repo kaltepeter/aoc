@@ -14,12 +14,7 @@ public class Day4Tests
         Assert.Equal("..@@.@@@@.", result[0]);
     }
 
-//     public static IEnumerable<object[]> Test_GetNeighborPositionsData() {
-//        yield return new object[] { (0, 0), new List<char> { '.', '@', '@' } };
-//    }
-
     [Theory]
-    // [MemberData(nameof(Test_GetNeighborPositionsData))]
     [InlineData(new object[] {0, 0}, 2)]
     [InlineData(new object[] {9, 9}, 2)]
     [InlineData(new object[] {4, 4}, 8)]
@@ -39,12 +34,26 @@ public class Day4Tests
         Assert.Equal(13, result);
     }
 
+    public static IEnumerable<object[]> Test_RemoveRollsData() {
+       yield return new object[] { new List<(int, int)> { (0, 2), (0, 3), (0, 5), (0, 6), (0, 8) }, "..xx.xx@x.", 0 };
+       yield return new object[] { new List<(int, int)> { (1, 0) }, "x@@.@.@.@@", 1 };
+   }
+
+    [Theory]
+    [MemberData(nameof(Test_RemoveRollsData))]
+    public void Test_RemoveRolls(List<(int, int)> rollsToRemove, string expectedRow, int expectedRowIndex)
+    {
+        var input = Day.ProcessInput(inputPath, "example.txt");
+        var result = Day.RemoveRolls(input, rollsToRemove);
+        Assert.Equal(expectedRow, result[expectedRowIndex]);
+    }
+
     [Fact]
     public void Test_Part2()
     {
         var input = Day.ProcessInput(inputPath, "example.txt");
         var result = Day.Part2(input);
-        Assert.Equal(0, result);
+        Assert.Equal(43, result);
     }
 
 }

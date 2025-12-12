@@ -51,7 +51,6 @@ public static class Day
                     continue;
                 }
                 var neighbors = GetNeighborPaperRolls(input, (rowIndex, colIndex));
-                Debug.WriteLine($"row: {rowIndex}, col: {colIndex}, cell: {col}, neighbors: {string.Join(",", neighbors)}");
                 if (neighbors.Count < 4)
                 {
                     count += 1;
@@ -61,9 +60,50 @@ public static class Day
         return count;
     }
 
+    public static List<string> RemoveRolls(List<string> input, List<(int, int)> rollsToRemove)
+    {
+        List<string> newInput = input.ToList();
+        foreach (var (x, y) in rollsToRemove) {
+            var newRow = newInput[x].ToCharArray();
+            newRow[y] = 'x';
+            newInput[x] = new string(newRow);
+        }
+        return newInput;
+    }
+
     public static int Part2(List<string> input)
     {
-        return 0;
+        bool hasRollsToRemove = true;
+        List<string> newInput = input.ToList();
+        List<(int, int)> rollsToRemove = [];
+
+        while (hasRollsToRemove) {
+            List<(int, int)> newRollsToRemove = [];
+
+            foreach (var (row, rowIndex) in newInput.Select((value, rowIndex) => (value, rowIndex)))
+            {
+                foreach (var (col, colIndex) in row.Select((value, colIndex) => (value, colIndex)))
+                {
+                    if (col != '@') {
+                        continue;
+                    }
+                    var neighbors = GetNeighborPaperRolls(newInput, (rowIndex, colIndex));
+                    if (neighbors.Count < 4)
+                    {
+                        newRollsToRemove.Add((rowIndex, colIndex));
+                    }
+                }
+            }
+            if (newRollsToRemove.Count == 0) {
+                hasRollsToRemove = false;
+                break;
+            }
+            rollsToRemove.AddRange(newRollsToRemove);
+            newInput = RemoveRolls(newInput, newRollsToRemove);
+            // Console.WriteLine(string.Join("\n", newInput));
+        }
+
+        return rollsToRemove.Count;
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_4", string inputFilename = "input.txt")
@@ -76,5 +116,6 @@ public static class Day
 
         long part2Result = Part2(input);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result == 9182);
     }
 }

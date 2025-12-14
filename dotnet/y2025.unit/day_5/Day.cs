@@ -5,6 +5,15 @@ public class Day5Tests
 {
     string inputPath = "../../../../y2025.unit/day_5";
 
+    private (long, long) rangeLimits = (0, 0);
+
+    public Day5Tests()
+    {
+        var (ranges, ids) = Day.ProcessInput(inputPath, "example.txt");
+        var (_, limits) = Day.GetStats(ranges, ids);
+        rangeLimits = limits;
+    }
+
     [Fact]
     public void Test_ProcessInput()
     {
@@ -19,7 +28,8 @@ public class Day5Tests
     public void Test_Part1()
     {
         var input = Day.ProcessInput(inputPath, "example.txt");
-        var result = Day.Part1(input);
+
+        var result = Day.Part1(input, rangeLimits);
         Assert.Equal(3, result);
     }
 
@@ -27,8 +37,8 @@ public class Day5Tests
     [Fact]
     public void Test_Part2()
     {
-        var input = Day.ProcessInput(inputPath, "example.txt");
-        var result = Day.Part2(input);
-        Assert.Equal(0, result);
+        var (ranges, _) = Day.ProcessInput(inputPath, "example.txt");
+        var result = Day.Part2(ranges, rangeLimits);
+        Assert.Equal(14, result);
     }
 }

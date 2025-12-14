@@ -50,11 +50,10 @@ public static class Day
         return ((minId, maxId), (lowestInRanges, highestInRanges));
     }
 
-    public static long Part1((List<(long, long)>, List<long>) input)
+    public static long Part1((List<(long, long)>, List<long>) input, (long, long) rangeLimits)
     {
         int count = 0;
         var (ranges, ids) = input;
-        var (_, rangeLimits) = GetStats(ranges, ids);
         var (lowestInRanges, highestInRanges) = rangeLimits;
         foreach (var id in ids) {
             if (id < lowestInRanges || id > highestInRanges) {
@@ -72,20 +71,49 @@ public static class Day
         return count;
     }
 
-    public static long Part2((List<(long, long)>, List<long>) input)
+    public static long Part2(List<(long, long)> ranges, (long, long) rangeLimits)
     {
-        return 0;
+        List<(long, long)> foundRanges = [];
+        foreach (var (lower, upper) in ranges.OrderBy(r => r.Item1).ThenBy(r => r.Item2 - r.Item1)) {
+            if (foundRanges.Count == 0) {
+                foundRanges.Add((lower, upper));
+            } else {
+                bool found = false;
+                foreach (var (foundLower, foundUpper) in foundRanges.ToList()) {
+                    if (lower >= foundLower && lower <= foundUpper) {
+                        if (upper <= foundUpper) {
+                            // found range is contained within the current range
+                            found = true;
+                            break;
+                        } else {
+                            // found range overlaps with the current range
+                            foundRanges.Remove((foundLower, foundUpper));
+                            foundRanges.Add((foundLower, upper));
+                            found = true;
+                            break;
+                        }
+                    } 
+                }
+                if (!found) {
+                    foundRanges.Add((lower, upper));
+                }
+            }
+        }
+        // Console.WriteLine($"found ranges: {foundRanges.Count}");
+        return foundRanges.Select(r => r.Item2 - r.Item1 + 1).Sum();
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_5", string inputFilename = "input.txt")
     {
-        var input = ProcessInput(inputPath, inputFilename);
+        var (ranges, ids) = ProcessInput(inputPath, inputFilename);
+        var (_, rangeLimits) = GetStats(ranges, ids);
 
-        long part1Result = Part1(input);
+        long part1Result = Part1((ranges, ids), rangeLimits);
         Console.WriteLine($"Part I: {part1Result}");
         Debug.Assert(part1Result == 520);
 
-        long part2Result = Part2(input);
+        long part2Result = Part2(ranges, rangeLimits);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result == 347338785050515);
     }
 }

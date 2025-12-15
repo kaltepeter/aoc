@@ -20,4 +20,13 @@ public static class Util
         }
 
     }
+
+    public static IEnumerable<string> ReadLines(StreamReader reader)
+    {
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            yield return line;
+        }
+    }
 }

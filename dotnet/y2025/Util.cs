@@ -1,3 +1,6 @@
+using System.Data;
+using Microsoft.VisualBasic.FileIO;
+
 namespace y2025.util;
 
 public static class Util

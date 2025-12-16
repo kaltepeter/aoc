@@ -48,7 +48,7 @@ public class Day7Tests
     {
         var input = Day.ProcessInput(inputPath, "example.txt");
 
-        var result = Day.Part1(input);
+        var (result, _) = Day.Part1(input);
         Assert.Equal(21, result);
     }
 
@@ -58,7 +58,7 @@ public class Day7Tests
     {
         var input = Day.ProcessInput(inputPath, "example.txt");
         var result = Day.Part2(input);
-        Assert.Equal(0, result);
+        Assert.Equal(40, result);
     }
 
     [Fact]

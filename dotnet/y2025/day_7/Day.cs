@@ -60,13 +60,14 @@ public static class Day
     public static int CountBeams(BeamTracker beams)
     {
         int count = 0;
-        foreach (var (x, rows) in beams) {
+        foreach (var (x, rows) in beams)
+        {
             count += rows.Count();
         }
         return count;
     }
 
-    public static long Part1(Result input)
+    public static (int, List<Position>) Part1(Result input)
     {
         Position start = (x: input[0].IndexOf('S'), y: 0);
         BeamTracker beams = new()
@@ -97,27 +98,62 @@ public static class Day
                 }
             }
         }
-        Debug.WriteLine($"beams: {JsonSerializer.Serialize(beams)}");
-        PrintMap(beams, map);
+        // PrintMap(beams, map);
 
-        return splitters.Count();
+        return (splitters.Count(), splitters);
+    }
+
+
+    public static long GetTimelineCount(Result map, int x, int y, Dictionary<(int x, int y), long> cache)
+    {
+        var key = (x, y);
+        if (cache.TryGetValue(key, out long cached))
+        {
+            return cached;
+        }
+
+        char c = map[y][x];
+        long result = 0;
+
+        if (y >= map.Count - 1)
+        {
+            result = 1;
+        } 
+        else if (c == ' ' || c == 'S')
+        {
+            result = GetTimelineCount(map, x, y + 1, cache);
+        }
+        else if (c == '^')
+        {
+            long leftCount = GetTimelineCount(map, x - 1, y, cache);
+            long rightCount = GetTimelineCount(map, x + 1, y, cache);
+            result = leftCount + rightCount;
+        }
+
+        return cache[key] = result;
     }
 
     public static long Part2(Result input)
     {
-        return 0;
+        var map = input.ToList();
+        Position start = (x: input[0].IndexOf('S'), y: 0);
+        var cache = new Dictionary<(int x, int y), long>();
+
+        return GetTimelineCount(map, start.x, start.y, cache);
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_7", string inputFilename = "input.txt")
     {
         var input = ProcessInput(inputPath, inputFilename);
 
-        long part1Result = Part1(input);
-        Console.WriteLine($"Part I: {part1Result}");
-        Debug.Assert(part1Result < 1688);
-        Debug.Assert(part1Result == 1581);
+        var (splitterCount, _) = Part1(input);
+        Console.WriteLine($"Part I: {splitterCount}");
+        Debug.Assert(splitterCount < 1688);
+        Debug.Assert(splitterCount == 1581);
 
-        long part2Result = Part2(input);
+        var part2Result = Part2(input);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result > 3160);
+        Debug.Assert(part2Result == 73007003089792);
     }
 }

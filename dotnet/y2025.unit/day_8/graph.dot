@@ -1,0 +1,32 @@
+graph UnionFind {
+  "162,817,812" [shape=circle, style=filled, fillcolor="#78E2E3"];
+  "346,949,466" [shape=circle, style=filled, fillcolor="#96F7AC"];
+  "425,690,689" [shape=circle, style=filled, fillcolor="#A3CFCF"];
+  "431,825,988" [shape=circle, style=filled, fillcolor="#A4E4FF"];
+  "216,146,977" [shape=circle, style=filled, fillcolor="#8178FD"];
+  "352,342,300" [shape=circle, style=filled, fillcolor="#979792"];
+  "466,668,158" [shape=circle, style=filled, fillcolor="#A9CB7C"];
+  "117,168,530" [shape=circle, style=filled, fillcolor="#707CB7"];
+  "52,470,668" [shape=circle, style=filled, fillcolor="#66ACCC"];
+  "542,29,236" [shape=circle, style=filled, fillcolor="#B66688"];
+  "57,618,57" [shape=circle, style=filled, fillcolor="#66C36C"];
+  "592,479,940" [shape=circle, style=filled, fillcolor="#BEADF7"];
+  "739,650,466" [shape=circle, style=filled, fillcolor="#D6C8AC"];
+  "805,96,715" [shape=circle, style=filled, fillcolor="#E170D3"];
+  "862,61,35" [shape=circle, style=filled, fillcolor="#EB6A68"];
+  "906,360,560" [shape=circle, style=filled, fillcolor="#F29ABB"];
+  "984,92,344" [shape=circle, style=filled, fillcolor="#FF7099"];
+  "819,987,18" [shape=circle, style=filled, fillcolor="#E4FD66"];
+  "941,993,340" [shape=circle, style=filled, fillcolor="#F7FF99"];
+  "970,615,88" [shape=circle, style=filled, fillcolor="#FCC370"];
+
+  "805,96,715" -- "906,360,560";
+  "162,817,812" -- "431,825,988";
+  "805,96,715" -- "739,650,466";
+  "52,470,668" -- "117,168,530";
+  "162,817,812" -- "346,949,466";
+  "819,987,18" -- "941,993,340";
+  "805,96,715" -- "862,61,35";
+  "805,96,715" -- "984,92,344";
+  "162,817,812" -- "425,690,689";
+}

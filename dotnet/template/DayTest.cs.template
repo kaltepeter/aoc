@@ -3,32 +3,33 @@ using y{YEAR}.day_{DAY};
 using static y{YEAR}.day_{DAY}.Day;
 
 public class Day{DAY}Tests
-{{
+{
     string inputPath = "../../../../y{YEAR}.unit/day_{DAY}";
 
     [Fact]
     public void Test_ProcessInput()
-    {{
+    {
         // Path relative to workspace root - tests run from bin directory, so go up to workspace root
         var results = Day.ProcessInput(inputPath, "example.txt");
         Assert.Equal(4, results.Count);
         
-    }}
+    }
+    
     [Fact]
     public void Test_Part1()
-    {{
+    {
         var input = Day.ProcessInput(inputPath, "example.txt");
 
         var result = Day.Part1(input);
         Assert.Equal(0, result);
-    }}
+    }
 
 
     [Fact]
     public void Test_Part2()
-    {{
+    {
         var input = Day.ProcessInput(inputPath, "example.txt");
         var result = Day.Part2(input);
         Assert.Equal(0, result);
-    }}
-}}
+    }
+}

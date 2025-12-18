@@ -269,3 +269,5 @@ cython_debug/
 output.txt
 
 .DS_Store
+
+dotnet/y2025/**/graph.png

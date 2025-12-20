@@ -1,3 +1,5 @@
+using Shared;
+
 class RenderNetwork
 {
     public string ToGraphvizDot(UnionFind<Point> uf)

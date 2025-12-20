@@ -4,11 +4,12 @@ namespace y2025.day_8;
 
 using System.Data;
 using System.Linq;
+using Shared;
 using y2025.util;
 
-using Result = List<Point>;
+using Result = List<Shared.Point>;
 using PuzzleResult = long;
-using DistanceTracker = Dictionary<Point, Dictionary<Point, double>>;
+using DistanceTracker = Dictionary<Shared.Point, Dictionary<Shared.Point, double>>;
 
 public static class Day
 {

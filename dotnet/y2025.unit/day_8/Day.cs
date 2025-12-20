@@ -2,9 +2,10 @@ namespace y2025.unit.day_8;
 using y2025.day_8;
 using static y2025.day_8.Day;
 
-using Result = List<Point>;
+using Shared;
+using Result = List<Shared.Point>;
 using PuzzleResult = long;
-using DistanceTracker = Dictionary<Point, Dictionary<Point, double>>;
+using DistanceTracker = Dictionary<Shared.Point, Dictionary<Shared.Point, double>>;
 
 public class Day8Tests
 {

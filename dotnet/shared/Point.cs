@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+namespace Shared;
+
 [JsonConverter(typeof(PointJsonConverter))]
 public struct Point : IEquatable<Point>, IComparable<Point>
 {

@@ -1,9 +1,13 @@
 # C# / .NET
 
+## Dependencies
+
+<!-- - `brew install libbdplus` -->
+
 ## Running
 
 ```bash
-dotnet run --project dotnet/y2025 -- 1 
+dotnet run --project dotnet/y2025 -- 1
 ```
 
 ## Testing

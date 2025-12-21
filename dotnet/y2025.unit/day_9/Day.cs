@@ -62,8 +62,8 @@ public class Day9Tests
     public void Test_Part2()
     {
         var input = Day.ProcessInput(inputPath, "example.txt");
-        var result = Day.Part2(input);
-        Assert.Equal(0, result);
+        var result = Day.Part2_SimpleShape(input);
+        Assert.Equal(24, result);
     }
 
     [Fact]

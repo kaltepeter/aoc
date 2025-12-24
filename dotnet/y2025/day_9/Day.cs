@@ -172,10 +172,14 @@ public static class Day
 
         var areas = pointsToCheck
             .SelectMany((point1, i) => pointsToCheck.Skip(i + 1).Select((point2) => (point1, point2)))
-            .Select(pair => (p1: pair.point1, p2: pair.point2, dist: GetManhattanDistance(pair.point1, pair.point2), area: GetArea(pair.point1, pair.point2)))
+            .Select(pair => (p1: pair.point1, p2: pair.point2, area: GetArea(pair.point1, pair.point2)))
             .OrderByDescending(a => a.area);
 
-        var (_, _, dist, area) = areas.First();
+        var (p1, p2, area) = areas.First();
+
+        DrawSimplePolygon("part1-polygon", pointsToCheck, [
+            (p1, new System.Drawing.Point(p1.X, p2.Y), p2, new System.Drawing.Point(p2.X, p1.Y))
+        ], 250);
 
         return area;
     }
@@ -301,8 +305,8 @@ public static class Day
         var leftCorner = sortedCorners.First();
         var rightCorner = sortedCorners.Last();
         return pointsToCheck
-            // .SelectMany((point1, i) => pointsToCheck.Skip(i + 1).Select((point2) => (point1, point2)))
-            .Select((point1, i) => (point1, point2: rightCorner))
+            .SelectMany((point1, i) => pointsToCheck.Skip(i + 1).Select((point2) => (point1, point2)))
+            // .Select((point1, i) => (point1, point2: rightCorner))
             // .Where(pair => pair.point1.X != pair.point2.X && pair.point1.Y != pair.point2.Y)
             .Where(pair => IsDiagonal(pair.point1, pair.point2))
             .Where(pair => pair.point1.X >= leftCorner.X && pair.point2.X <= rightCorner.X)
@@ -369,10 +373,7 @@ public static class Day
         var decompressedP1 = DecompressPoint(p1, xReverse, yReverse);
         var decompressedP2 = DecompressPoint(p2, xReverse, yReverse);
 
-        // DrawPolygon("bottom-polygon", bottomHalf, [], [
-        //     (p1, new System.Drawing.Point(p1.X, p2.Y), p2, new System.Drawing.Point(p2.X, p1.Y))
-        // ], []);
-        DrawSimplePolygon("bottom-polygon-compressed", pointsToCheck, [
+        DrawSimplePolygon("polygon-compressed", pointsToCheck, [
             (p1, new System.Drawing.Point(p1.X, p2.Y), p2, new System.Drawing.Point(p2.X, p1.Y))
         ]);
 
@@ -500,15 +501,15 @@ public static class Day
             fontSize);
     }
 
-    public static void DrawSimplePolygon(string documentName, Result input, Rectangles rectangles)
+    public static void DrawSimplePolygon(string documentName, Result input, Rectangles rectangles, double lineWidth = .25)
     {
         var (minX, maxX, minY, maxY) = GetBounds(input);
         string documentPath = Path.Combine(Directory.GetCurrentDirectory(), "dotnet", "y2025", "day_9", $"{documentName}.svg");
-        Page page = new Page(maxX - minX + 10, maxY - minY + 10);
+        Page page = new Page(maxX - minX + (10 * lineWidth), maxY - minY + (10 * lineWidth));
+        // page.Crop(new VectSharp.Rectangle(minX - (20 * lineWidth), minY - (10 * lineWidth), maxX - minX + (20 * lineWidth) * 2, maxY - minY + (20 * lineWidth) * 2));
 
         VectSharp.Graphics graphics = page.Graphics;
         var start = input.First();
-        double lineWidth = .25;
         VectSharp.FontFamily family = VectSharp.FontFamily.ResolveFontFamily(VectSharp.FontFamily.StandardFontFamilies.Helvetica);
         VectSharp.Font font = new VectSharp.Font(family, lineWidth);
 
@@ -566,7 +567,6 @@ public static class Day
 
     public static void DrawPolygon(string documentName, Result input, List<System.Drawing.Point> corners, Rectangles rectangles, List<(System.Drawing.Point, System.Drawing.Point)> lines)
     {
-        int padding = 5;
         string documentPath = Path.Combine(Directory.GetCurrentDirectory(), "dotnet", "y2025", "day_9", $"{documentName}.svg");
         // var normalizedPoints = input.Select(point => new System.Drawing.Point(point.X - minX, point.Y - minY)).ToList();
         var normalizedPoints = input.ToList();
@@ -577,11 +577,14 @@ public static class Day
             return;
         }
 
-        Page page = new Page(maxX - minX + padding * 2, maxY - minY + padding * 2);
+        double lineWidth = 250;
+        int padding = (int)(lineWidth * 10);
+
+
+        Page page = new Page(maxX - minX + padding , maxY - minY + padding);
         page.Crop(new VectSharp.Rectangle(minX - padding, minY - padding, maxX - minX + padding * 2, maxY - minY + padding * 2));
         VectSharp.Graphics graphics = page.Graphics;
 
-        double lineWidth = 400;
         var start = normalizedPoints.First();
 
         GraphicsPath full = new GraphicsPath();

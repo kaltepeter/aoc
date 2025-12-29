@@ -27,22 +27,12 @@ public struct Button
     public static int CalculateButtonMask(List<int> button, int length)
     {
         int mask = 0b0;
-        int max = button.Max();
         button.ForEach(i =>
         {
-            if (i == 0)
-            {
-                mask |= 1 << (length - 1);
-            }
-            else
-            {
-                mask |= 1 << (length - 1 - i);
-            }
+            mask |= 1 << (length - 1 - i);
         });
         return mask;
     }
-
-
 }
 
 public struct Result
@@ -53,27 +43,15 @@ public struct Result
 
     public int LowestClicks { get; set; }
 
-    public Dictionary<int, List<int>> PositionFrequency { get; set; }
-
     public override string ToString()
     {
         const int padding = 14;
         var stringBuilder = new StringBuilder();
         stringBuilder.Append($"{Convert.ToString(GetLights(), 2).PadLeft(Pattern.Length, '0'),padding} {Pattern,padding}\t");
         stringBuilder.Append("Pos: ".PadLeft(2) + $"{string.Join(",", GetLightPositions()),padding}\t");
-        stringBuilder.Append("Counts: ".PadLeft(2) + $"{Buttons.Count,2} / {FilteredButtons().Count,2},\t");
+        // stringBuilder.Append("Counts: ".PadLeft(2) + $"{Buttons.Count,2} / {FilteredButtons().Count,2},\t");
         // stringBuilder.Append($"Lowest: {LowestClicks,2}");
         stringBuilder.Append($"Joltages: ({Joltages.Values.Count, 2}), min: {Joltages.Values.Min(), 2}, max: {Joltages.Values.Max(), 2}");
-        return stringBuilder.ToString();
-    }
-
-    public string ToIntString()
-    {
-        var stringBuilder = new StringBuilder();
-        var light = GetLights();
-        stringBuilder.Append($"{light,4}\t");
-        var buttonValues = FilteredButtons().Select(button => light ^ button.Mask);
-        stringBuilder.Append($"{string.Join(",", buttonValues),4}\t");
         return stringBuilder.ToString();
     }
 
@@ -85,12 +63,6 @@ public struct Result
     public List<int> GetLightPositions()
     {
         return Pattern.Select((c, i) => (c == '#' ? i : -1)).Where(i => i != -1).ToList().OrderBy(i => i).ToList();
-    }
-
-    public List<Button> FilteredButtons()
-    {
-        var joltagePositions = Joltages.Keys.ToHashSet();
-        return Buttons.Where(buttonList => buttonList.Positions.ToHashSet().Intersect(joltagePositions).Count() > 0).ToList();
     }
 
     public Matrix<double> ToAugmentedMatrix() {
@@ -169,13 +141,6 @@ public static class Day
         return results;
     }
 
-    public static int ClickButton(int light, Button button)
-    {
-        var mask = button.Mask;
-        var val = light ^ mask;
-        return val;
-    }
-
     public static int Part1(List<Result> input)
     {
         List<Result> results = input.ToList();
@@ -221,11 +186,6 @@ public static class Day
         }
         // results.ForEach(result => Debug.WriteLine(result.ToString()));
         return results.Select(result => result.LowestClicks).Sum();
-    }
-
-    public static bool IsJoltagesFound(Joltage targetJoltages, Joltage joltages) {
-        return joltages.Count == targetJoltages.Count &&
-                    joltages.All(kvp => targetJoltages.TryGetValue(kvp.Key, out var val) && val == kvp.Value);
     }
 
     public static void PrintMatrix(double[,] matrix, string label = "Matrix") {
@@ -302,28 +262,6 @@ public static class Day
         return (matrix, independentVariables, dependentVariables);
     }
 
-    public static (int lowerBound, int upperBound) GetBoundsForIndependentVar(
-        Matrix<double> matrix, int freeCol, int pivotRowCount
-    ) {
-        var lower = 0;
-        var upper = int.MaxValue;
-        int lastCol = matrix.ColumnCount - 1;
-
-        for (int row = 0; row < pivotRowCount; row++) {
-            double coeff = matrix[row, freeCol];
-            double constant = matrix[row, lastCol];
-
-            if (coeff > 0) {
-                upper = Math.Min(upper, (int)Math.Floor(constant / coeff));
-            } else if (coeff < 0) {
-                lower = Math.Max(lower, (int)Math.Ceiling(-constant / Math.Abs(coeff)));
-            }
-
-        }
-
-        return (lower, upper);
-    }
-
     public static double[] ComputeDependentVariables(
         Matrix<double> matrix, 
         List<int> dependentCols, 
@@ -350,7 +288,7 @@ public static class Day
         Matrix<double> matrix,
         List<int> independentCols,
         List<int> dependentCols,
-        int maxBound,
+        // int maxBound,
         int independentVarIndex,                      // which free var we're assigning
         int[] currentAssignment               // partial assignment so far
     ) {
@@ -373,12 +311,16 @@ public static class Day
         }
         
         // var (lower, upper) = GetBoundsForIndependentVar(matrix, independentCols[independentVarIndex], dependentCols.Count);
+        var maxBound = matrix.Column(matrix.ColumnCount - 1)
+                .Select(value => Math.Abs((int)Math.Round(value)))
+                .Max();
+            
         var (lower, upper) = (0, maxBound);
         int best = int.MaxValue;
 
         for (int value = lower; value <= upper; value++) {
             currentAssignment[independentVarIndex] = value;
-            var result = FindMinClicks(matrix, independentCols, dependentCols, maxBound, independentVarIndex + 1, currentAssignment);
+            var result = FindMinClicks(matrix, independentCols, dependentCols, independentVarIndex + 1, currentAssignment);
             best = Math.Min(best, result);
         }
 
@@ -393,13 +335,18 @@ public static class Day
             var result = results[i];
             var matrix = result.ToAugmentedMatrix();
             var (transformedMatrix, independentVariables, dependentVariables) = GaussianEliminationRREF(matrix);
+
+            // grid has no free variables, unique solution 
+            if (independentVariables.Count == 0) {
+                result.LowestClicks = (int)Math.Round(transformedMatrix.Column(transformedMatrix.ColumnCount - 1).Sum());
+                results[i] = result;
+                continue;
+            }
+            
             var assignment = new int[independentVariables.Count];
-            var maxBound = transformedMatrix.Column(transformedMatrix.ColumnCount - 1)
-                .Select(value => Math.Abs((int)Math.Round(value)))
-                .Max();
-            var lowestClicks = FindMinClicks(transformedMatrix, independentVariables, dependentVariables, maxBound, 0, assignment);
+            var lowestClicks = FindMinClicks(transformedMatrix, independentVariables, dependentVariables,0, assignment);
             if (lowestClicks == int.MaxValue) {
-                Console.WriteLine($"No solution found for result {i} with max bound {maxBound}, pattern {result.Pattern}");
+                Console.WriteLine($"No solution found for result {i}, pattern {result.Pattern}");
                 throw new Exception("No solution found");
             }
             if (lowestClicks == 0) {
@@ -409,100 +356,6 @@ public static class Day
             results[i] = result;
         }
         return results.Select(result => result.LowestClicks).Sum();
-    }
-
-    public static (Joltage joltages, int clicks) ClickButton(
-        Joltage targetJoltages, 
-        Joltage joltages, 
-        List<Button> buttonsInCommon, 
-        Button button) 
-    {
-        var newJoltages = new Joltage(joltages);
-        var maxClicks = targetJoltages
-            .Where(kvp => 
-                button.Positions.Contains(kvp.Key))
-            .Min(kvp => kvp.Value);
-
-        foreach (var position in button.Positions) {
-            if (newJoltages[position] + maxClicks > targetJoltages[position]) {
-                return (joltages, 0);
-            }
-            newJoltages[position] += maxClicks;
-        }
-        
-        return (newJoltages, maxClicks);
-    }
-
-    public static int Part2_Original(List<Result> input)
-    {
-        List<Result> results = input.ToList();
-
-        // build position frequency dictionary
-        for (int i = 0; i < results.Count; i++) {
-            var result = results[i];
-            result.PositionFrequency = result.Buttons.SelectMany(button => button.Positions)
-                .GroupBy(position => position)
-                .GroupBy(group => group.Count(), group => group.Key)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            // Debug.WriteLine(JsonSerializer.Serialize(result.PositionFrequency));
-            results[i] = result;
-        }
-
-
-        // process results
-        for (int i = 0; i < input.Count; i++)
-        {
-            var result = results[i];
-
-            var nextPositions = result.PositionFrequency.OrderBy(kvp => kvp.Key).ToList();
-            var positionsToCheck = new Queue<KeyValuePair<int, List<int>>>(nextPositions);
-
-            Joltage joltages = new Joltage(result.Joltages.ToDictionary(kvp => kvp.Key, _ => 0));
-
-            while (positionsToCheck.Count > 0) {
-                bool isFound = IsJoltagesFound(result.Joltages, joltages);
-
-                if (isFound) {
-                    break;
-                }
-
-                var (frequency, positions) = positionsToCheck.Dequeue();
-                var sortedButtons = result.Buttons
-                    .Select<Button, (Button button, HashSet<int> intersection)>(button => 
-                        (button, button.Positions.ToHashSet().Intersect(positions).ToHashSet()) )
-                    .Where(pair =>
-                        pair.intersection.Count > 0)
-                    .OrderByDescending(pair => pair.intersection.Count)
-                    .ToList();
-
-                var completedPositions = new HashSet<int>();
-                foreach (var pair in sortedButtons) {
-                    var (button, _) = pair;
-                    if (completedPositions.Overlaps(button.Positions)) {
-                        continue;
-                    }
-
-                    completedPositions.UnionWith(button.Positions);
-
-                    var buttonsInCommon = result.Buttons
-                        .Where(b => 
-                            b.Positions.ToHashSet().Intersect(button.Positions).Count() > 0 &&
-                            b.Positions.ToHashSet() != button.Positions.ToHashSet()
-                        ).ToList();
-                    var (newJoltages, clicks) = ClickButton(result.Joltages, joltages, buttonsInCommon, button);
-                    result.LowestClicks = Math.Min(result.LowestClicks, clicks);
-                    results[i] = result;
-                    joltages = newJoltages;
-                    isFound = IsJoltagesFound(result.Joltages, joltages);
-                    if (isFound) {
-                        break;
-                    }
-                }
-            }
-        }
-
-       return results.Select(result => result.LowestClicks).Sum();
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_10", string inputFilename = "input.txt")

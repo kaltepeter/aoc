@@ -10,6 +10,13 @@ using y2025.util;
 
 using Result = Dictionary<string, List<string>>;
 
+public enum RequiredSeen {
+    None, 
+    DAC,
+    FFT,
+    ALL
+}
+
 public static class Day
 {
     public static Result ProcessInput(string path, string filename)
@@ -52,9 +59,38 @@ public static class Day
         return count;
     }
 
+    public static long ExplorePaths(Result input, Dictionary<(string, RequiredSeen), long> memo, string node, RequiredSeen requiredSeen) {
+        if (node == "out") {
+            if (requiredSeen == RequiredSeen.ALL) {
+                return 1;
+            }
+            return 0;
+        }
+
+        if (memo.ContainsKey((node, requiredSeen))) {
+            return memo[(node, requiredSeen)];
+        }
+
+        if (node == "dac") {
+            requiredSeen |= RequiredSeen.DAC;
+        }
+        if (node == "fft") {
+            requiredSeen |= RequiredSeen.FFT;
+        }
+
+        long count = 0;
+        foreach (var nextNode in input[node]) {
+            count += ExplorePaths(input, memo, nextNode, requiredSeen);
+        }
+        
+        return memo[(node, requiredSeen)] = count;
+    }
+
     public static long Part2(Result input)
     {
-       return 0;
+        Dictionary<(string, RequiredSeen), long> memo = new();
+        var result = ExplorePaths(input, memo, "svr", RequiredSeen.None);
+        return result;
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_11", string inputFilename = "input.txt")
@@ -67,5 +103,9 @@ public static class Day
 
         long part2Result = Part2(input);
         Console.WriteLine($"Part II: {part2Result}");
+        Debug.Assert(part2Result < 52278330597728296);
+        Debug.Assert(part2Result < 1110803659982690);
+        Debug.Assert(part2Result > 9055);
+        Debug.Assert(part2Result == 502447498690860);
     }
 }

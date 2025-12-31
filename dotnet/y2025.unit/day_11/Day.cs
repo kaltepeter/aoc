@@ -27,14 +27,32 @@ public class Day11Tests
         var result = Day.Part1(input);
         Assert.Equal(5, result);
     }
+ 
+    [Fact]
+    public void Test_RequiredSeen()
+    {
+        Assert.Equal(0, (int)RequiredSeen.None);
+        Assert.Equal(1, (int)RequiredSeen.DAC);
+        Assert.Equal(2, (int)RequiredSeen.FFT);
+        Assert.Equal(3, (int)RequiredSeen.ALL);
+    }
+
+    [Fact]
+    public void Test_RequiredSeen_TestCombo()
+    {
+        RequiredSeen requiredSeen = RequiredSeen.None;
+        requiredSeen |= RequiredSeen.DAC;
+        requiredSeen |= RequiredSeen.FFT;
+        Assert.Equal(RequiredSeen.ALL, requiredSeen);
+    }
 
 
     [Fact]
     public void Test_Part2()
     {
-        var input = Day.ProcessInput(inputPath, "example.txt");
+        var input = Day.ProcessInput(inputPath, "example2.txt");
         var result = Day.Part2(input);
-        Assert.Equal(0, result);
+        Assert.Equal(2, result);
     }
 
     [Fact]

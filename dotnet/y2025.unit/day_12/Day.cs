@@ -61,7 +61,6 @@ public class Day12Tests
         Assert.Equal(2, result);
     }
 
-    
 
     [Fact]
     public void Debug_Day12_Run()

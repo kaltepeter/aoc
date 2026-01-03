@@ -126,9 +126,8 @@ public static class Day
         return count;
     }
 
-    public static long Part1_Checkerboard(Result input)
-    {
-        int count = 0;
+    public static List<Region> GetRegionsToPack(Result input) {
+        var regionsToPack = new List<Region>();
         foreach (var region in input.Regions) {
             int regionSplit = region.matrix.ColumnCount / 2;
             var (darkCount, lightCount) = (region.matrix.ColumnCount - regionSplit, regionSplit);
@@ -154,10 +153,15 @@ public static class Day
             if (darkShapeSpace <= targetDarkCount && lightShapeSpace <= targetLightCount && 
                 lightShapeSpace <= targetDarkCount && darkShapeSpace <= targetLightCount
             ) {
-                count += 1;
+                regionsToPack.Add(region);
             }
         }
-        return count;
+        return regionsToPack;
+    }
+
+    public static long Part1_Checkerboard(Result input)
+    {
+        return GetRegionsToPack(input).Count;
     }
 
     public static void Run(string inputPath = "dotnet/y2025/day_12", string inputFilename = "input.txt")
@@ -168,8 +172,8 @@ public static class Day
         Console.WriteLine($"Part I: {part1Result}");
         Debug.Assert(part1Result == 414);
 
-        long part2Result = Part1_Checkerboard(input);
-        Console.WriteLine($"Part II: {part2Result}");
-        Debug.Assert(part1Result == 414);
+        long coloringResult = Part1_Checkerboard(input);
+        Console.WriteLine($"Part II: {coloringResult}");
+        Debug.Assert(coloringResult == 414);
     }
 }

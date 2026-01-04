@@ -14,6 +14,39 @@
       "mode": "debug",
       "cwd": "${workspaceRoot}/go",
       "program": "${file}"
-    }
+    },
+    {
+      "name": "y2025 Day Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/dotnet/y2025/bin/Debug/net10.0/y2025.dll",
+      "args": ["2"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug (Manual)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}",
+      "justMyCode": false
+  },
+  ],
+  "inputs": [
+        {
+            "id": "dayNumber",
+            "type": "promptString",
+            "description": "Enter day number",
+            "default": "1"
+        },
+        {
+            "id": "spawnTestsGetPid",
+            "type": "command",
+            "command": "shellCommand.execute",
+            "args": {
+                "useFirstResult": true,
+                "command": "pwsh -NoProfile -Command \"$env:VSTEST_HOST_DEBUG='1'; $dotnet = Start-Process dotnet -PassThru -WindowStyle Hidden -ArgumentList 'test','test/Unit/Unit.csproj','--configuration','Debug','--no-build'; $processId = $null; for($i=0; $i -lt 50 -and -not $processId; $i++){ $t = Get-Process -Name testhost -ErrorAction SilentlyContinue; if($t){ $processId = $t.Id; break }; Start-Sleep -Milliseconds 100; }; $processId\""
+            }
+        }
     ]
 }

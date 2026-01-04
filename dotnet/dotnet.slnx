@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="shared.unit/shared.unit.csproj" />
+  <Project Path="shared/shared.csproj" />
+  <Project Path="y2025.unit/y2025.unit.csproj" />
+  <Project Path="y2025/y2025.csproj" />
+</Solution>

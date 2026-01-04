@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "golang.go",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "anysphere.csharp"
     ]
 }
